@@ -1,3 +1,4 @@
+import { Compiler } from "./Compiler";
 import { Subroutine } from "./Subroutine";
 
 export class CallStatement {
@@ -5,12 +6,12 @@ export class CallStatement {
     private statement: string[];
     private curSubs: Subroutine[] = [];
     private tags: string[] = [];
-    private returnsPointer: boolean;
+    public returnsPointer: boolean;
 
-    public constructor(loc: number, statement: string[], subs: Subroutine[]) {
+    public constructor(loc: number, statement: string[]) {
         this.loc = loc;
         this.statement = statement;
-        subs.forEach(sub => this.curSubs.push(sub));
+        Compiler.Subroutines.forEach(sub => this.curSubs.push(sub));
         this.returnsPointer = statement.lastIndexOf(")") >= statement.lastIndexOf(".");
     }
 

@@ -1,5 +1,7 @@
 import * as fs from "fs";
-import { Tokenizer } from "./Compiler";
+
+import { Compiler } from "./Compiler";
+import { Tokenizer } from "./Tokenizer";
 
 let sourceFile: string = "main.ns";
 if (process.argv.length > 2) {
@@ -18,3 +20,7 @@ console.log("\nSource NuStack:");
 console.log(fileBuffer.toString("utf8"));
 console.log("\nTokens:");
 console.log(JSON.stringify(Tokenizer.Tokens));
+
+let tokens: string[] = Tokenizer.Tokens;
+
+Compiler.Compile(tokens);
