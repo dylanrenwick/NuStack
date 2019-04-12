@@ -123,6 +123,33 @@ export class Compiler {
             loop.name += "_" + oBrace;
             oBrace = this.tokens.shift();
         }
+
+        if (type === "while") {
+            let test: Arg = null;
+            if (arg2.mode === 0 && op === "<=") {
+                arg2.val++;
+                op = "<";
+            }
+            if (arg1.mode === 0 && op === "<=") {
+                arg1.val--;
+                op = "<";
+            }
+            if (arg2.mode === 0 && op === ">=") {
+                arg2.val--;
+                op = ">";
+            }
+            if (arg1.mode === 0 && op === ">=") {
+                arg1.val++;
+                op = ">";
+            }
+        }
+
+        ROM.push(new Command("MOV", [
+            new Arg() {
+                tag: "end" + loop,
+                tagoffset: 0
+            };
+        ], "begin" + loop));
     }
 
     private static compileDef(): void {
