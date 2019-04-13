@@ -1,7 +1,6 @@
-import * as sum from "hash-sum";
+import { sum } from "./HashSum";
 
 export class HashMap<K, V> {
-
     private innerContainer: { [hash: string]: V };
 
     public constructor() {
