@@ -2,11 +2,11 @@ import { IASTNode } from "./IASTNode";
 import { SubroutineASTNode } from "./SubroutineASTNode";
 
 export class ProgramASTNode implements IASTNode {
-    private mainSub: SubroutineASTNode;
+	private mainSub: SubroutineASTNode;
 
-    public get childNodes(): SubroutineASTNode { return this.mainSub; }
+	public get childNodes(): SubroutineASTNode { return this.mainSub; }
 
-    public constructor(subroutine: SubroutineASTNode) {
-        this.mainSub = subroutine;
-    }
+	public constructor(subroutine: SubroutineASTNode) {
+		this.mainSub = subroutine;
+	}
 }

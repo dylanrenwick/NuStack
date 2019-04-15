@@ -30,7 +30,9 @@
         "no-console": false,
         "arrow-parens": [true, "ban-single-arg-parens"],
         "radix": false,
-        "trailing-comma": false
+        "trailing-comma": false,
+        "no-bitwise": false,
+        "indent": [true, "tabs", 4]
     },
     "rulesDirectory": []
 }

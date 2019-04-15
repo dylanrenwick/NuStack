@@ -1,9 +1,9 @@
 import { ProgramASTNode } from "./ProgramASTNode";
 
 export class AbstractSyntaxTree {
-    private root: ProgramASTNode;
+	public root: ProgramASTNode;
 
-    public constructor(rootNode: ProgramASTNode) {
-        this.root = rootNode;
-    }
+	public constructor(rootNode: ProgramASTNode) {
+		this.root = rootNode;
+	}
 }
