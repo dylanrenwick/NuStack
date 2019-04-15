@@ -1,10 +1,10 @@
 import { AbstractSyntaxTree } from "./AST/AbstractSyntaxTree";
 import { ConstantASTNode } from "./AST/ConstantASTNode";
 import { ExpressionASTNode } from "./AST/ExpressionASTNode";
+import { OperationASTNode, OperationType } from "./AST/OperationASTNode";
 import { ReturnStatementASTNode } from "./AST/ReturnStatementASTNode";
 import { StatementASTNode } from "./AST/StatementASTNode";
 import { SubroutineASTNode } from "./AST/SubroutineASTNode";
-import { OperationASTNode, OperationType } from "./AST/OperationASTNode";
 
 export class AssemblyGenerator {
     public static generate(ast: AbstractSyntaxTree): string {
