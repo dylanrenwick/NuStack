@@ -13,6 +13,6 @@ if (process.argv.length > 3) {
 }
 let code: string = fileBuffer.toString("utf8");
 
-NuStack.compile(code);
+let asm: string = NuStack.compile(code);
 
-// writeFileSync(outFile, asm);
+writeFileSync(outFile, asm);

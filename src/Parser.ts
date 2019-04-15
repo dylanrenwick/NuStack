@@ -1,6 +1,7 @@
 import { AbstractSyntaxTree } from "./AST/AbstractSyntaxTree";
 import { ConstantASTNode } from "./AST/ConstantASTNode";
 import { ExpressionASTNode } from "./AST/ExpressionASTNode";
+import { OperationASTNode, OperationType } from "./AST/OperationASTNode";
 import { ProgramASTNode } from "./AST/ProgramASTNode";
 import { ReturnStatementASTNode } from "./AST/ReturnStatementASTNode";
 import { StatementASTNode } from "./AST/StatementASTNode";
@@ -104,7 +105,26 @@ export class Parser {
         throw new Error("Unknown expression token");
     }
 
-    private static parseMonaticOperator(tokens: Token[], opTok: Token): OperationASTNode {
+    private static parseMonadicOperator(tokens: Token[], opTok: Token): OperationASTNode {
+        let opType: OperationType;
 
+        switch (opTok.tokenType) {
+            case TokenType.Negation:
+                opType = OperationType.Negation;
+                break;
+            case TokenType.BitwiseNOT:
+                opType = OperationType.BitwiseNOT;
+                break;
+            case TokenType.LogicalNOT:
+                opType = OperationType.LogicalNOT;
+                break;
+            default:
+                throw new Error("Unknown operation type: " + opTok.tokenType);
+        }
+
+        return new OperationASTNode(
+            opType,
+            this.parseExpression(tokens)
+        );
     }
 }

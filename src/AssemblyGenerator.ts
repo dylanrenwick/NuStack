@@ -4,6 +4,7 @@ import { ExpressionASTNode } from "./AST/ExpressionASTNode";
 import { ReturnStatementASTNode } from "./AST/ReturnStatementASTNode";
 import { StatementASTNode } from "./AST/StatementASTNode";
 import { SubroutineASTNode } from "./AST/SubroutineASTNode";
+import { OperationASTNode, OperationType } from "./AST/OperationASTNode";
 
 export class AssemblyGenerator {
     public static generate(ast: AbstractSyntaxTree): string {
@@ -44,12 +45,42 @@ export class AssemblyGenerator {
     private static generateExpression(expr: ExpressionASTNode): string {
         if (expr instanceof ConstantASTNode) {
             return this.generateConstant(expr);
+        } else if (expr instanceof OperationASTNode) {
+            return this.generateOperation(expr);
         }
 
         throw new Error("Unknown AST node");
     }
 
     private static generateConstant(expr: ConstantASTNode): string {
-        return "movl " + expr.expressionValue + "d, eax\n";
+        return "mov eax, " + expr.expressionValue + "d\n";
+    }
+
+    private static generateOperation(op: OperationASTNode): string {
+        if (op.expressionValue !== null) {
+            return this.generateConstant(new ConstantASTNode(
+                op.expressionValue
+            ));
+        }
+
+        let asm: string = "";
+
+        switch (op.operation) {
+            case OperationType.Negation:
+                asm += this.generateExpression(op.childNodes);
+                asm += "neg eax\n";
+                break;
+            case OperationType.BitwiseNOT:
+                asm += this.generateExpression(op.childNodes);
+                asm += "not eax\n";
+                break;
+            case OperationType.LogicalNOT:
+                asm += this.generateExpression(op.childNodes);
+                asm += "cmp eax, 0\n";
+                asm += "xor eax, eax\n";
+                asm += "setz al\n";
+        }
+
+        return asm;
     }
 }
