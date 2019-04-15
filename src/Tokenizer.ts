@@ -10,6 +10,9 @@ export class Tokenizer {
 	private static readonly separators: string[] = [
 		" ", "\t", "\n", "\r",
 	];
+	private static readonly operators: string[] = [
+		"-", "~", "!",
+	];
 
 	public static tokenize(code: string): Token[] {
 		let tokens: Token[] = [];
@@ -17,7 +20,7 @@ export class Tokenizer {
 		let curToken: string = "";
 
 		for (let char of code) {
-			if (this.singletons.includes(char)) {
+			if (this.singletons.includes(char) || this.operators.includes(char)) {
 				if (curToken.length > 0) {
 					tokens.push(this.tokenFromString(curToken));
 					curToken = "";
@@ -68,6 +71,9 @@ export class Tokenizer {
 			case "(": return new Token(TokenType.OpenParen);
 			case ")": return new Token(TokenType.CloseParen);
 			case ";": return new Token(TokenType.Semicolon);
+			case "-": return new Token(TokenType.Negation);
+			case "~": return new Token(TokenType.BitwiseNOT);
+			case "!": return new Token(TokenType.LogicalNOT);
 		}
 
 		if (/^[0-9]+$/.test(token)) {

@@ -34,6 +34,12 @@ export class Token  {
 				return "}";
 			case TokenType.Semicolon:
 				return ";";
+			case TokenType.Negation:
+				return "-";
+			case TokenType.BitwiseNOT:
+				return "~";
+			case TokenType.LogicalNOT:
+				return "!";
 			default:
 				return ""; // this.tokenType.toString();
 		}
@@ -49,4 +55,7 @@ export enum TokenType {
 	CloseBrace,
 	Semicolon,
 	Integer,
+	Negation,
+	BitwiseNOT,
+	LogicalNOT,
 }
