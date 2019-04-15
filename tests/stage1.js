@@ -7,7 +7,7 @@ function getInput(i) {
 }
 
 function getOutput(i) {
-    return `main:\nmovl ${i}d, eax\nret`;
+    return `main:\nmov eax, ${i}d\nret`;
 }
 
 for (let i = 0; i < 1000; i++) {
