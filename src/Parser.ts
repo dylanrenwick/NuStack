@@ -8,6 +8,8 @@ import { SubroutineASTNode } from "./AST/SubroutineASTNode";
 import { Token, TokenType } from "./Token";
 
 export class Parser {
+	private static readonly INT_MAX_VALUE: number = 2 ** 31;
+
 	public static parse(tokens: Token[]): AbstractSyntaxTree {
 		return new AbstractSyntaxTree(
 			new ProgramASTNode(
@@ -80,6 +82,10 @@ export class Parser {
 		let tok: Token = tokens.shift();
 		if (tok.tokenType !== TokenType.Integer) {
 			throw new Error("Expected integer but found " + tok.toString());
+		}
+
+		if (tok.tokenValue >= this.INT_MAX_VALUE) {
+			throw new Error("" + tok.tokenValue + " is larger than " + this.INT_MAX_VALUE);
 		}
 
 		let expr: ExpressionASTNode = new ConstantASTNode(tok.tokenValue);
