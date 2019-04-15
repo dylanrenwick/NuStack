@@ -6,50 +6,50 @@ import { StatementASTNode } from "./AST/StatementASTNode";
 import { SubroutineASTNode } from "./AST/SubroutineASTNode";
 
 export class AssemblyGenerator {
-	public static generate(ast: AbstractSyntaxTree): string {
-		let asm: string = "";
+    public static generate(ast: AbstractSyntaxTree): string {
+        let asm: string = "";
 
-		asm += this.generateSubroutine(ast.root.childNodes);
+        asm += this.generateSubroutine(ast.root.childNodes);
 
-		return asm;
-	}
+        return asm;
+    }
 
-	private static generateSubroutine(sub: SubroutineASTNode): string {
-		let asm: string = "";
+    private static generateSubroutine(sub: SubroutineASTNode): string {
+        let asm: string = "";
 
-		asm += sub.name + ":\n";
+        asm += sub.name + ":\n";
 
-		for (let statement of sub.childNodes) {
-			asm += this.generateStatement(statement);
-		}
+        for (let statement of sub.childNodes) {
+            asm += this.generateStatement(statement);
+        }
 
-		return asm;
-	}
+        return asm;
+    }
 
-	private static generateStatement(statement: StatementASTNode): string {
-		if (statement instanceof ReturnStatementASTNode) {
-			return this.generateReturn(statement);
-		}
+    private static generateStatement(statement: StatementASTNode): string {
+        if (statement instanceof ReturnStatementASTNode) {
+            return this.generateReturn(statement);
+        }
 
-		throw new Error("Unknown AST node");
-	}
+        throw new Error("Unknown AST node");
+    }
 
-	private static generateReturn(statement: ReturnStatementASTNode): string {
-		return ((statement.childNodes !== null)
-			? this.generateExpression(statement.childNodes)
-			: "")
-			+ "ret\n";
-	}
+    private static generateReturn(statement: ReturnStatementASTNode): string {
+        return ((statement.childNodes !== null)
+            ? this.generateExpression(statement.childNodes)
+            : "")
+            + "ret\n";
+    }
 
-	private static generateExpression(expr: ExpressionASTNode): string {
-		if (expr instanceof ConstantASTNode) {
-			return this.generateConstant(expr);
-		}
+    private static generateExpression(expr: ExpressionASTNode): string {
+        if (expr instanceof ConstantASTNode) {
+            return this.generateConstant(expr);
+        }
 
-		throw new Error("Unknown AST node");
-	}
+        throw new Error("Unknown AST node");
+    }
 
-	private static generateConstant(expr: ConstantASTNode): string {
-		return "movl " + expr.expressionValue + "d, eax\n";
-	}
+    private static generateConstant(expr: ConstantASTNode): string {
+        return "movl " + expr.expressionValue + "d, eax\n";
+    }
 }

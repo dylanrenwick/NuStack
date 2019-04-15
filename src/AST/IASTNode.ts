@@ -1,3 +1,3 @@
 export interface IASTNode {
-	childNodes: IASTNode[] | IASTNode;
+    childNodes: IASTNode[] | IASTNode;
 }

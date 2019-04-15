@@ -32,7 +32,7 @@
         "radix": false,
         "trailing-comma": false,
         "no-bitwise": false,
-        "indent": [true, "tabs", 4]
+        "indent": [true, "spaces", 4]
     },
     "rulesDirectory": []
 }
