@@ -8,7 +8,7 @@ export class OperationASTNode extends ExpressionASTNode {
     public get operation(): OperationType { return this.opType; }
     public get childNodes(): ExpressionASTNode { return this.operand; }
     public get expressionValue(): any {
-        /*if (this.operand instanceof ConstantASTNode) {
+        if (this.operand instanceof ConstantASTNode) {
             switch (this.opType) {
                 case OperationType.Negation:
                     return -this.operand.expressionValue;
@@ -19,7 +19,7 @@ export class OperationASTNode extends ExpressionASTNode {
                         ? 1
                         : 0;
             }
-        }*/
+        }
 
         return null;
     }
