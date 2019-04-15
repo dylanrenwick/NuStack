@@ -8,7 +8,7 @@ export class Tokenizer {
 		"(", ")", "{", "}", ";",
 	];
 	private static readonly separators: string[] = [
-		" ", "\t", "\n",
+		" ", "\t", "\n", "\r",
 	];
 
 	public static tokenize(code: string): Token[] {
@@ -29,7 +29,7 @@ export class Tokenizer {
 			}
 
 			if (/[0-9]/.test(char)) {
-				if (/^[0-9]$/.test(curToken)) {
+				if (/^[0-9]+$/.test(curToken)) {
 					curToken += char;
 				} else {
 					if (curToken.length > 0) {
