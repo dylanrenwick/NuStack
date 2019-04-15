@@ -28,7 +28,9 @@
         "prefer-const": false,
         "curly": [true, "ignore-same-line"],
         "no-console": false,
-        "arrow-parens": [true, "ban-single-arg-parens"]
+        "arrow-parens": [true, "ban-single-arg-parens"],
+        "radix": false,
+        "trailing-comma": false
     },
     "rulesDirectory": []
 }
