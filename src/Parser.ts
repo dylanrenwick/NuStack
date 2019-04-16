@@ -1,7 +1,9 @@
 import { AbstractSyntaxTree } from "./AST/AbstractSyntaxTree";
 import { ConstantASTNode } from "./AST/ConstantASTNode";
+import { DiadicASTNode } from "./AST/DiadicASTNode";
 import { ExpressionASTNode } from "./AST/ExpressionASTNode";
-import { OperationASTNode, OperationType } from "./AST/OperationASTNode";
+import { MonadicASTNode } from "./AST/MonadicASTNode";
+import { OperationType } from "./AST/OperationASTNode";
 import { ProgramASTNode } from "./AST/ProgramASTNode";
 import { ReturnStatementASTNode } from "./AST/ReturnStatementASTNode";
 import { StatementASTNode } from "./AST/StatementASTNode";
@@ -13,6 +15,16 @@ export class Parser {
 
     private static monadicOperators: TokenType[] = [
         TokenType.Negation, TokenType.BitwiseNOT, TokenType.LogicalNOT,
+    ];
+    private static diadicOperators: TokenType[] = [
+        TokenType.Addition, TokenType.Subtraction, TokenType.Multiplication, TokenType.Division
+    ];
+
+    private static exprOperators: TokenType[] = [
+        TokenType.Addition, TokenType.Subtraction
+    ];
+    private static termOperators: TokenType[] = [
+        TokenType.Multiplication, TokenType.Division
     ];
 
     public static parse(tokens: Token[]): AbstractSyntaxTree {
@@ -91,40 +103,67 @@ export class Parser {
     }
 
     private static parseExpression(tokens: Token[]): ExpressionASTNode {
-        let tok: Token = tokens.shift();
-        if (tok.tokenType === TokenType.Integer) {
-            if (tok.tokenValue >= this.INT_MAX_VALUE) {
-                throw new Error("" + tok.tokenValue + " is larger than " + this.INT_MAX_VALUE);
-            }
+        let term: ExpressionASTNode = this.parseTerm(tokens);
+        let next: Token = tokens[0];
+        while (this.exprOperators.includes(next.tokenType)) {
+            let op: OperationType = this.parseOpType(tokens.shift());
+            let nextTerm: ExpressionASTNode = this.parseTerm(tokens);
+            term = new DiadicASTNode(
+                op, term, nextTerm
+            );
 
-            return new ConstantASTNode(tok.tokenValue);
-        } else if (this.monadicOperators.includes(tok.tokenType)) {
-            return this.parseMonadicOperator(tokens, tok);
+            next = tokens[0];
         }
 
-        throw new Error("Unknown expression token");
+        return term;
     }
 
-    private static parseMonadicOperator(tokens: Token[], opTok: Token): OperationASTNode {
-        let opType: OperationType;
+    private static parseTerm(tokens: Token[]): ExpressionASTNode {
+        let factor: ExpressionASTNode = this.parseFactor(tokens);
+        let next: Token = tokens[0];
+        while (this.termOperators.includes(next.tokenType)) {
+            let op: OperationType = this.parseOpType(tokens.shift());
+            let nextFactor: ExpressionASTNode = this.parseFactor(tokens);
+            factor = new DiadicASTNode(
+                op, factor, nextFactor
+            );
 
-        switch (opTok.tokenType) {
-            case TokenType.Negation:
-                opType = OperationType.Negation;
-                break;
-            case TokenType.BitwiseNOT:
-                opType = OperationType.BitwiseNOT;
-                break;
-            case TokenType.LogicalNOT:
-                opType = OperationType.LogicalNOT;
-                break;
-            default:
-                throw new Error("Unknown operation type: " + opTok.tokenType);
+            next = tokens[0];
         }
 
-        return new OperationASTNode(
-            opType,
-            this.parseExpression(tokens)
-        );
+        return factor;
+    }
+
+    private static parseFactor(tokens: Token[]): ExpressionASTNode {
+        let next: Token = tokens.shift();
+
+        if (next.tokenType === TokenType.OpenParen) {
+            let expr: ExpressionASTNode = this.parseExpression(tokens);
+            if (tokens.shift().tokenType !== TokenType.CloseParen) {
+                throw new Error("Expected close paren but got " + next.tokenType);
+            }
+            return expr;
+        } else if (this.monadicOperators.includes(next.tokenType)) {
+            let op: OperationType = this.parseOpType(next);
+            let factor: ExpressionASTNode = this.parseFactor(tokens);
+            return new MonadicASTNode(op, factor);
+        } else if (next.tokenType === TokenType.Integer) {
+            return new ConstantASTNode(next.tokenValue);
+        } else {
+            throw new Error("Invalid factor: " + next.tokenType);
+        }
+    }
+
+    private static parseOpType(tok: Token): OperationType {
+        switch (tok.tokenType) {
+            case TokenType.Negation: return OperationType.Negation;
+            case TokenType.BitwiseNOT: return OperationType.BitwiseNOT;
+            case TokenType.LogicalNOT: return OperationType.LogicalNOT;
+            case TokenType.Addition: return OperationType.Addition;
+            case TokenType.Subtraction: return OperationType.Subtraction;
+            case TokenType.Multiplication: return OperationType.Multiplication;
+            case TokenType.Division: return OperationType.Division;
+            default: throw new Error("Invalid operator: " + tok.tokenType);
+        }
     }
 }

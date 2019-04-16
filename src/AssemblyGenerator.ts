@@ -49,7 +49,7 @@ export class AssemblyGenerator {
             return this.generateOperation(expr);
         }
 
-        throw new Error("Unknown AST node");
+        throw new Error("Unknown AST node: " + JSON.stringify(expr));
     }
 
     private static generateConstant(expr: ConstantASTNode): string {
@@ -67,18 +67,42 @@ export class AssemblyGenerator {
 
         switch (op.operation) {
             case OperationType.Negation:
-                asm += this.generateExpression(op.childNodes);
+                asm += this.generateExpression(op.childNodes[0]);
                 asm += "neg eax\n";
                 break;
             case OperationType.BitwiseNOT:
-                asm += this.generateExpression(op.childNodes);
+                asm += this.generateExpression(op.childNodes[0]);
                 asm += "not eax\n";
                 break;
             case OperationType.LogicalNOT:
-                asm += this.generateExpression(op.childNodes);
+                asm += this.generateExpression(op.childNodes[0]);
                 asm += "cmp eax, 0\n";
                 asm += "xor eax, eax\n";
                 asm += "setz al\n";
+                break;
+            case OperationType.Addition:
+            case OperationType.Subtraction:
+            case OperationType.Division:
+            case OperationType.Multiplication:
+                asm += this.generateExpression(op.childNodes[0]);
+                asm += "push eax\n";
+                asm += this.generateExpression(op.childNodes[1]);
+                asm += "pop ecx\n";
+                switch (op.operation) {
+                    case OperationType.Addition:
+                        asm += "add eax, ecx\n";
+                        break;
+                    case OperationType.Subtraction:
+                        asm += "sub eax, ecx\n";
+                        break;
+                    case OperationType.Multiplication:
+                        asm += "mul ecx\n";
+                        break;
+                    case OperationType.Division:
+                        asm += "xor edx, edx\n";
+                        asm += "div ecx\n";
+                        break;
+                }
         }
 
         return asm;

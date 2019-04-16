@@ -40,6 +40,14 @@ export class Token  {
                 return "~";
             case TokenType.LogicalNOT:
                 return "!";
+            case TokenType.Addition:
+                return "+";
+            case TokenType.Subtraction:
+                return "-";
+            case TokenType.Multiplication:
+                return "*";
+            case TokenType.Division:
+                return "/";
             default:
                 return ""; // this.tokenType.toString();
         }
@@ -58,4 +66,8 @@ export enum TokenType {
     Negation,
     BitwiseNOT,
     LogicalNOT,
+    Addition,
+    Subtraction,
+    Multiplication,
+    Division,
 }

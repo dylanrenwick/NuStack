@@ -11,7 +11,7 @@ export class Tokenizer {
         " ", "\t", "\n", "\r",
     ];
     private static readonly operators: string[] = [
-        "-", "~", "!",
+        "~", "!", "+", "-", "/", "*",
     ];
 
     public static tokenize(code: string): Token[] {
@@ -74,6 +74,10 @@ export class Tokenizer {
             case "-": return new Token(TokenType.Negation);
             case "~": return new Token(TokenType.BitwiseNOT);
             case "!": return new Token(TokenType.LogicalNOT);
+            case "+": return new Token(TokenType.Addition);
+            case "-": return new Token(TokenType.Subtraction);
+            case "*": return new Token(TokenType.Multiplication);
+            case "/": return new Token(TokenType.Division);
         }
 
         if (/^[0-9]+$/.test(token)) {
