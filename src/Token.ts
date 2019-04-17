@@ -48,6 +48,22 @@ export class Token  {
                 return "*";
             case TokenType.Division:
                 return "/";
+            case TokenType.MoreThan:
+                return ">";
+            case TokenType.LessThan:
+                return "<";
+            case TokenType.Equal:
+                return "==";
+            case TokenType.NotEqual:
+                return "!=";
+            case TokenType.MoreThanEqual:
+                return ">=";
+            case TokenType.LessThanEqual:
+                return "<=";
+            case TokenType.LogicalOR:
+                return "||";
+            case TokenType.LogicalAND:
+                return "&&";
             default:
                 return ""; // this.tokenType.toString();
         }
@@ -70,4 +86,12 @@ export enum TokenType {
     Subtraction,
     Multiplication,
     Division,
+    MoreThan,
+    LessThan,
+    Equal,
+    NotEqual,
+    MoreThanEqual,
+    LessThanEqual,
+    LogicalOR,
+    LogicalAND
 }

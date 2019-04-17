@@ -11,7 +11,10 @@ export class Tokenizer {
         " ", "\t", "\n", "\r",
     ];
     private static readonly operators: string[] = [
-        "~", "!", "+", "-", "/", "*",
+        "~", "!", "+", "-", "/", "*", ">", "<",
+    ];
+    private static readonly twoCharOperators: string[] = [
+        "==", "!=", "<=", ">=", "&&", "||",
     ];
 
     public static tokenize(code: string): Token[] {
@@ -20,6 +23,26 @@ export class Tokenizer {
         let curToken: string = "";
 
         for (let char of code) {
+            if (this.twoCharOperators.includes(curToken + char)) {
+                tokens.push(this.tokenFromString(curToken + char));
+                curToken = "";
+                continue;
+            }
+
+            if (this.twoCharOperators.map(x => x[0]).includes(char)) {
+                if (curToken.length > 0) {
+                    if (curToken === "=" && char === "=") {
+                        curToken += char;
+                    }
+
+                    tokens.push(this.tokenFromString(curToken));
+                    curToken = "";
+                }
+
+                curToken += char;
+                continue;
+            }
+
             if (this.singletons.includes(char) || this.operators.includes(char)) {
                 if (curToken.length > 0) {
                     tokens.push(this.tokenFromString(curToken));
@@ -78,6 +101,14 @@ export class Tokenizer {
             case "-": return new Token(TokenType.Subtraction);
             case "*": return new Token(TokenType.Multiplication);
             case "/": return new Token(TokenType.Division);
+            case ">": return new Token(TokenType.MoreThan);
+            case "<": return new Token(TokenType.LessThan);
+            case "==": return new Token(TokenType.Equal);
+            case "!=": return new Token(TokenType.NotEqual);
+            case ">=": return new Token(TokenType.MoreThanEqual);
+            case "<=": return new Token(TokenType.LessThanEqual);
+            case "||": return new Token(TokenType.LogicalOR);
+            case "&&": return new Token(TokenType.LogicalAND);
         }
 
         if (/^[0-9]+$/.test(token)) {
