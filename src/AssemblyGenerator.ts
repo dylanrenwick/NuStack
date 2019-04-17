@@ -7,6 +7,28 @@ import { StatementASTNode } from "./AST/StatementASTNode";
 import { SubroutineASTNode } from "./AST/SubroutineASTNode";
 
 export class AssemblyGenerator {
+    private static complexOps: OperationType[] = [
+        OperationType.LogicalOR, OperationType.LogicalAND
+    ];
+
+    private static diadicOps: OperationType[] = [
+        OperationType.Equal, OperationType.NotEqual,
+        OperationType.MoreThanEqual, OperationType.LessThanEqual,
+        OperationType.MoreThan, OperationType.LessThan,
+        OperationType.Addition, OperationType.Subtraction,
+        OperationType.Multiplication, OperationType.Division
+    ];
+
+    private static comparisons: OperationType[] = [
+        OperationType.Equal, OperationType.NotEqual,
+        OperationType.MoreThanEqual, OperationType.LessThanEqual,
+        OperationType.MoreThan, OperationType.LessThan
+    ];
+
+    private static labelCount: number = 1;
+
+    private static get label(): string { return "_util_label" + this.labelCount++; }
+
     public static generate(ast: AbstractSyntaxTree): string {
         let asm: string = "";
 
@@ -19,6 +41,8 @@ export class AssemblyGenerator {
         let asm: string = "";
 
         asm += sub.name + ":\n";
+        asm += "push ebp\n";
+        asm += "mov ebp, esp\n";
 
         for (let statement of sub.childNodes) {
             asm += this.generateStatement(statement);
@@ -39,6 +63,8 @@ export class AssemblyGenerator {
         return ((statement.childNodes !== null)
             ? this.generateExpression(statement.childNodes)
             : "")
+            + "mov esp, ebp\n"
+            + "pop ebp\n"
             + "ret\n";
     }
 
@@ -80,29 +106,83 @@ export class AssemblyGenerator {
                 asm += "xor eax, eax\n";
                 asm += "setz al\n";
                 break;
-            case OperationType.Addition:
-            case OperationType.Subtraction:
-            case OperationType.Division:
-            case OperationType.Multiplication:
-                asm += this.generateExpression(op.childNodes[0]);
-                asm += "push eax\n";
-                asm += this.generateExpression(op.childNodes[1]);
-                asm += "pop ecx\n";
+        }
+
+        if (this.diadicOps.includes(op.operation)) {
+            asm += this.generateExpression(op.childNodes[0]);
+            asm += "push eax\n";
+            asm += this.generateExpression(op.childNodes[1]);
+            asm += "pop ecx\n";
+            switch (op.operation) {
+                case OperationType.Addition:
+                    asm += "add eax, ecx\n";
+                    break;
+                case OperationType.Subtraction:
+                    asm += "sub eax, ecx\n";
+                    break;
+                case OperationType.Multiplication:
+                    asm += "mul ecx\n";
+                    break;
+                case OperationType.Division:
+                    asm += "xor edx, edx\n";
+                    asm += "div ecx\n";
+                    break;
+            }
+
+            if (this.comparisons.includes(op.operation)) {
+                asm += "cmp eax, ecx\n";
+                asm += "xor eax, eax\n";
                 switch (op.operation) {
-                    case OperationType.Addition:
-                        asm += "add eax, ecx\n";
+                    case OperationType.MoreThan:
+                        asm += "setg al\n";
                         break;
-                    case OperationType.Subtraction:
-                        asm += "sub eax, ecx\n";
+                    case OperationType.LessThan:
+                        asm += "setl al\n";
                         break;
-                    case OperationType.Multiplication:
-                        asm += "mul ecx\n";
+                    case OperationType.Equal:
+                        asm += "setz al\n";
                         break;
-                    case OperationType.Division:
-                        asm += "xor edx, edx\n";
-                        asm += "div ecx\n";
+                    case OperationType.NotEqual:
+                        asm += "setnz al\n";
+                        break;
+                    case OperationType.MoreThanEqual:
+                        asm += "setge al\n";
+                        break;
+                    case OperationType.LessThanEqual:
+                        asm += "setle al\n";
                         break;
                 }
+            }
+        }
+
+        if (this.complexOps.includes(op.operation)) {
+            let clauseLabel = this.label;
+            let endLabel = this.label;
+
+            if (op.operation === OperationType.LogicalOR) {
+                asm += this.generateExpression(op.childNodes[0]);
+                asm += "cmp eax, 0\n";
+                asm += "je " + clauseLabel + "\n";
+                asm += "mov eax, 1d\n";
+                asm += "jmp " + endLabel + "\n";
+                asm += clauseLabel + ":\n";
+                asm += this.generateExpression(op.childNodes[1]);
+                asm += "cmp eax, 0\n";
+                asm += "xor eax, eax\n";
+                asm += "setne al\n";
+                asm += endLabel + ":\n";
+            } else if (op.operation === OperationType.LogicalAND) {
+                asm += this.generateExpression(op.childNodes[0]);
+                asm += "cmp eax, 0\n";
+                asm += "jne " + clauseLabel + "\n";
+                asm += "jmp " + endLabel + "\n";
+                asm += clauseLabel + ":\n";
+                asm += this.generateExpression(op.childNodes[1]);
+                asm += "cmp eax, 0\n";
+                asm += "xor eax, eax\n";
+                asm += "setne al\n";
+                asm += endLabel + ":\n";
+            }
         }
 
         return asm;
