@@ -21,4 +21,12 @@ export enum OperationType {
     Subtraction,
     Multiplication,
     Division,
+    MoreThan,
+    LessThan,
+    Equal,
+    NotEqual,
+    MoreThanEqual,
+    LessThanEqual,
+    LogicalOR,
+    LogicalAND
 }
