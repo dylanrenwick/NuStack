@@ -20,11 +20,13 @@ export class Parser {
         TokenType.Addition, TokenType.Subtraction, TokenType.Multiplication, TokenType.Division
     ];
 
-    private static exprOperators: TokenType[] = [
-        TokenType.Addition, TokenType.Subtraction
-    ];
-    private static termOperators: TokenType[] = [
-        TokenType.Multiplication, TokenType.Division
+    private static exprOperators: TokenType[][] = [
+        [TokenType.LogicalOR], [TokenType.LogicalAND],
+        [TokenType.Equal, TokenType.NotEqual],
+        [TokenType.LessThan, TokenType.LessThanEqual,
+         TokenType.MoreThan, TokenType.MoreThanEqual],
+        [TokenType.Addition, TokenType.Subtraction],
+        [TokenType.Multiplication, TokenType.Division]
     ];
 
     public static parse(tokens: Token[]): AbstractSyntaxTree {
@@ -102,12 +104,16 @@ export class Parser {
         return statement;
     }
 
-    private static parseExpression(tokens: Token[]): ExpressionASTNode {
-        let term: ExpressionASTNode = this.parseTerm(tokens);
+    private static parseExpression(tokens: Token[], operatorsIndex: number = 0): ExpressionASTNode {
+        let term: ExpressionASTNode = operatorsIndex === this.exprOperators.length - 1
+            ? this.parseFactor(tokens)
+            : this.parseExpression(tokens, operatorsIndex + 1);
         let next: Token = tokens[0];
-        while (this.exprOperators.includes(next.tokenType)) {
+        while (this.exprOperators[operatorsIndex].includes(next.tokenType)) {
             let op: OperationType = this.parseOpType(tokens.shift());
-            let nextTerm: ExpressionASTNode = this.parseTerm(tokens);
+            let nextTerm: ExpressionASTNode = operatorsIndex === this.exprOperators.length - 1
+                ? this.parseFactor(tokens)
+                : this.parseExpression(tokens, operatorsIndex + 1);
             term = new DiadicASTNode(
                 op, term, nextTerm
             );
@@ -116,22 +122,6 @@ export class Parser {
         }
 
         return term;
-    }
-
-    private static parseTerm(tokens: Token[]): ExpressionASTNode {
-        let factor: ExpressionASTNode = this.parseFactor(tokens);
-        let next: Token = tokens[0];
-        while (this.termOperators.includes(next.tokenType)) {
-            let op: OperationType = this.parseOpType(tokens.shift());
-            let nextFactor: ExpressionASTNode = this.parseFactor(tokens);
-            factor = new DiadicASTNode(
-                op, factor, nextFactor
-            );
-
-            next = tokens[0];
-        }
-
-        return factor;
     }
 
     private static parseFactor(tokens: Token[]): ExpressionASTNode {
@@ -163,6 +153,14 @@ export class Parser {
             case TokenType.Subtraction: return OperationType.Subtraction;
             case TokenType.Multiplication: return OperationType.Multiplication;
             case TokenType.Division: return OperationType.Division;
+            case TokenType.MoreThan: return OperationType.MoreThan;
+            case TokenType.LessThan: return OperationType.LessThan;
+            case TokenType.Equal: return OperationType.Equal;
+            case TokenType.NotEqual: return OperationType.NotEqual;
+            case TokenType.MoreThanEqual: return OperationType.MoreThanEqual;
+            case TokenType.LessThanEqual: return OperationType.LessThanEqual;
+            case TokenType.LogicalOR: return OperationType.LogicalOR;
+            case TokenType.LogicalAND: return OperationType.LogicalAND;
             default: throw new Error("Invalid operator: " + tok.tokenType);
         }
     }
