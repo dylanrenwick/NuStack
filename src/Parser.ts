@@ -1,5 +1,6 @@
 import { AbstractSyntaxTree } from "./AST/AbstractSyntaxTree";
 import { ConstantASTNode } from "./AST/ConstantASTNode";
+import { DeclarationASTNode } from "./AST/DeclarationASTNode";
 import { DiadicASTNode } from "./AST/DiadicASTNode";
 import { ExpressionASTNode } from "./AST/ExpressionASTNode";
 import { MonadicASTNode } from "./AST/MonadicASTNode";
@@ -8,6 +9,8 @@ import { ProgramASTNode } from "./AST/ProgramASTNode";
 import { ReturnStatementASTNode } from "./AST/ReturnStatementASTNode";
 import { StatementASTNode } from "./AST/StatementASTNode";
 import { SubroutineASTNode } from "./AST/SubroutineASTNode";
+import { Declaration } from "./Declaration";
+import { HashMap } from "./HashMap";
 import { Token, TokenType } from "./Token";
 
 export class Parser {
@@ -19,6 +22,7 @@ export class Parser {
     private static diadicOperators: TokenType[] = [
         TokenType.Addition, TokenType.Subtraction, TokenType.Multiplication, TokenType.Division
     ];
+    private static variables: HashMap<string, Declaration> = new HashMap<string, Declaration>();
 
     private static exprOperators: TokenType[][] = [
         [TokenType.LogicalOR], [TokenType.LogicalAND],
@@ -87,14 +91,19 @@ export class Parser {
 
     private static parseStatement(tokens: Token[]): StatementASTNode {
         let tok: Token = tokens.shift();
-        if (tok.tokenType !== TokenType.Keyword ||
-            tok.tokenValue !== "return") {
+        if (tok.tokenType !== TokenType.Keyword) {
             throw new Error("Expected 'return' but found " + tok.toString());
         }
 
-        let statement: StatementASTNode = new ReturnStatementASTNode(
-            this.parseExpression(tokens)
-        );
+        let statement: StatementASTNode;
+
+        if (tok.tokenValue === "return") {
+            statement = new ReturnStatementASTNode(
+                this.parseExpression(tokens)
+            );
+        } else {
+            statement = this.parseDeclaration(tokens, tok);
+        }
 
         tok = tokens.shift();
         if (tok.tokenType !== TokenType.Semicolon) {
@@ -102,6 +111,18 @@ export class Parser {
         }
 
         return statement;
+    }
+
+    private static parseDeclaration(tokens: Token[], tok: Token): DeclarationASTNode {
+        let type: string = tok.tokenValue;
+        tok = tokens.shift();
+        if (tok.tokenType !== TokenType.Identifier) {
+            throw new Error("Expected identifier but found " + tok.toString());
+        }
+        let name = tok.tokenValue;
+        let declaration = new Declaration(name, type);
+
+        return new DeclarationASTNode(declaration);
     }
 
     private static parseExpression(tokens: Token[], operatorsIndex: number = 0): ExpressionASTNode {
