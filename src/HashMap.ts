@@ -16,4 +16,10 @@ export class HashMap<K, V> {
         let hash = sum(key);
         return this.innerContainer[hash];
     }
+
+    public Has(key: K): boolean {
+        let hash = sum(key);
+        return this.innerContainer[hash] !== undefined
+            && this.innerContainer[hash] !== null;
+    }
 }
