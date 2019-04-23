@@ -37,10 +37,6 @@ export class Tokenizer {
 
             if (this.twoCharOperators.map(x => x[0]).includes(char)) {
                 if (curToken.length > 0) {
-                    if (curToken === "=" && char === "=") {
-                        curToken += char;
-                    }
-
                     tokens.push(this.tokenFromString(line, col - curToken.length, curToken));
                     curToken = "";
                 }
