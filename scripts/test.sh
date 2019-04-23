@@ -1,4 +1,4 @@
-npm clean
-npm build
-npm lint
-npm test
+npm run clean
+npm run build
+npm run lint
+npm run test
