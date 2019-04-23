@@ -7,9 +7,9 @@ describe("Tokenizer.tokenFromString()", function() {
         let tokens = {
             "int": {tokenType: 0, tokenValue: "int", column: 1, row: 1},
             "main": {tokenType: 1, tokenValue: "main", column: 1, row: 1},
-            "(": {tokenType: 2, tokenValue: undefined, column: 1, row: 1},
-            ")": {tokenType: 3, tokenValue: undefined, column: 1, row: 1},
-            ";": {tokenType: 6, tokenValue: undefined, column: 1, row: 1},
+            "(": {tokenType: 2, column: 1, row: 1},
+            ")": {tokenType: 3, column: 1, row: 1},
+            ";": {tokenType: 6, column: 1, row: 1},
             "17": {tokenType: 7, tokenValue: 17, column: 1, row: 1}
         };
 
