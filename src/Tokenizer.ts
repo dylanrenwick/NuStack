@@ -23,13 +23,14 @@ export class Tokenizer {
         let curToken: string = "";
 
         let line = 1;
-        let col = 0;
+        let col = 1;
 
         for (let char of code) {
             col++;
 
             if (this.twoCharOperators.includes(curToken + char)) {
-                tokens.push(this.tokenFromString(line, col, curToken + char));
+                curToken += char;
+                tokens.push(this.tokenFromString(line, col - curToken.length, curToken));
                 curToken = "";
                 continue;
             }
@@ -40,7 +41,7 @@ export class Tokenizer {
                         curToken += char;
                     }
 
-                    tokens.push(this.tokenFromString(line, col, curToken));
+                    tokens.push(this.tokenFromString(line, col - curToken.length, curToken));
                     curToken = "";
                 }
 
@@ -50,11 +51,11 @@ export class Tokenizer {
 
             if (this.singletons.includes(char) || this.operators.includes(char)) {
                 if (curToken.length > 0) {
-                    tokens.push(this.tokenFromString(line, col, curToken));
+                    tokens.push(this.tokenFromString(line, col - curToken.length - 1, curToken));
                     curToken = "";
                 }
 
-                tokens.push(this.tokenFromString(line, col, char));
+                tokens.push(this.tokenFromString(line, col - 1, char));
 
                 continue;
             }
@@ -64,7 +65,7 @@ export class Tokenizer {
                     curToken += char;
                 } else {
                     if (curToken.length > 0) {
-                        tokens.push(this.tokenFromString(line, col, curToken));
+                        tokens.push(this.tokenFromString(line, col - curToken.length - 1, curToken));
                     }
 
                     curToken = char;
@@ -75,13 +76,13 @@ export class Tokenizer {
 
             if (this.separators.includes(char)) {
                 if (curToken.length > 0) {
-                    tokens.push(this.tokenFromString(line, col, curToken));
+                    tokens.push(this.tokenFromString(line, col - curToken.length - 1, curToken));
                     curToken = "";
                 }
 
                 if (char === "\n") {
                     line++;
-                    col = 0;
+                    col = 1;
                 }
 
                 continue;
@@ -90,7 +91,7 @@ export class Tokenizer {
             if (/[a-zA-Z_]/.test(char)) {
                 curToken += char;
             } else {
-                throw new Error("Unknown character: " + char + " at line: " + line + ", col: " + col);
+                throw new Error("Unknown character: " + char + " at line: " + line + ", col: " + (col - 1));
             }
         }
 
