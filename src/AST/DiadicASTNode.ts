@@ -8,10 +8,8 @@ export class DiadicASTNode extends OperationASTNode {
 
     public get childNodes(): ExpressionASTNode[] { return [this.leftOperand, this.rightOperand]; }
     public get expressionValue(): any {
-        if ((this.leftOperand instanceof ConstantASTNode
-             || this.leftOperand.expressionValue !== null)
-            && (this.rightOperand instanceof ConstantASTNode
-             || this.rightOperand.expressionValue !== null)) {
+        if (this.leftOperand.expressionValue !== null
+            && this.rightOperand.expressionValue !== null) {
             switch (this.opType) {
                 case OperationType.Addition:
                     return this.leftOperand.expressionValue + this.rightOperand.expressionValue;
