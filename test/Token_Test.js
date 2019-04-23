@@ -3,6 +3,20 @@ const _Token = require("../bin/Token");
 const Token = _Token.Token;
 const TokenType = _Token.TokenType;
 
+function forTokenTypes(callback, exceptValueTypes = false) {
+    let valueTypes = [
+        TokenType.Keyword, TokenType.Identifier, TokenType.Integer
+    ];
+
+    for (let type in TokenType) {
+        if (/^[0-9]+$/.test(type)) continue;
+
+        if (exceptValueTypes && valueTypes.includes(TokenType[type])) continue;
+
+        callback(TokenType[type]);
+    }
+}
+
 describe("Token.constructor()", function() {
     it("should correctly assign row and column values", function() {
         for (let i = 0; i < 5; i++) {
@@ -15,9 +29,9 @@ describe("Token.constructor()", function() {
     });
 
     it("should correctly assign tokenType", function() {
-        for (let i = 0; i < 10; i++) {
+        forTokenTypes(function(i) {
             expect(new Token(1, 1, i).tokenType).to.equal(i);
-        }
+        });
     });
 
     it("should correctly assign a value", function() {
@@ -80,6 +94,12 @@ describe("Token.toString()", function() {
     it("should return an empty string when tokenType is invalid", function() {
         expect(new Token(1, 1, -1).toString()).to.equal("");
     });
+
+    it("should ignore given value when of a singleton tokenType", function() {
+        forTokenTypes(function(type) {
+            expect(new Token(1, 1, type, "not right").toString()).to.not.equal("not right");
+        }, true);
+    })
 });
 
 describe("Token.hasValue", function() {
@@ -90,35 +110,15 @@ describe("Token.hasValue", function() {
     });
 
     it("should return false for value-less tokenTypes", function() {
-        let types = [
-            TokenType.OpenParen, TokenType.CloseParen, TokenType.OpenBrace,
-            TokenType.CloseBrace, TokenType.Semicolon, TokenType.BitwiseNOT,
-            TokenType.LogicalNOT, TokenType.Addition, TokenType.Negation,
-            TokenType.Multiplication, TokenType.Division, TokenType.MoreThan,
-            TokenType.LessThan, TokenType.Equal, TokenType.NotEqual,
-            TokenType.MoreThanEqual, TokenType.LessThanEqual,TokenType.LogicalOR,
-            TokenType.LogicalAND
-        ];
-
-        for (let type of types) {
+        forTokenTypes(function(type) {
             expect(new Token(1, 1, type).hasValue).to.be.false;
-        }
+        }, true);
     });
 
     it("should ignore given values for value-less tokenTypes", function() {
-        let types = [
-            TokenType.OpenParen, TokenType.CloseParen, TokenType.OpenBrace,
-            TokenType.CloseBrace, TokenType.Semicolon, TokenType.BitwiseNOT,
-            TokenType.LogicalNOT, TokenType.Addition, TokenType.Negation,
-            TokenType.Multiplication, TokenType.Division, TokenType.MoreThan,
-            TokenType.LessThan, TokenType.Equal, TokenType.NotEqual,
-            TokenType.MoreThanEqual, TokenType.LessThanEqual,TokenType.LogicalOR,
-            TokenType.LogicalAND
-        ];
-
-        for (let type of types) {
+        forTokenTypes(function(type) {
             expect(new Token(1, 1, type, "this is a value").hasValue).to.be.false;
-        }
+        }, true);
     })
 
     it("should return false for value tokenTypes that were not given a value", function() {
