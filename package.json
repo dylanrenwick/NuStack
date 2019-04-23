@@ -4,7 +4,7 @@
   "description": "",
   "main": "bin/index.js",
   "scripts": {
-    "test": "npm run build && nyc mocha --recursive",
+    "test": "npm run build && nyc mocha --recursive --extension ts -r ts-node/register test/",
     "run": "npm run build && node bin/index.js",
     "build": "npm run clean && tsc",
     "clean": "rm -rf bin/ && rm -rf coverage/"
@@ -32,6 +32,7 @@
     "chai": "^4.2.0",
     "mocha": "^6.1.4",
     "nyc": "^14.0.0",
+    "ts-node": "^8.1.0",
     "tslint": "^5.15.0",
     "typescript": "^3.4.3"
   },
