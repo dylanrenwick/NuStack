@@ -1,5 +1,6 @@
 const expect = require('chai').expect;
 const Tokenizer = require("../bin/Tokenizer").Tokenizer;
+const TokenType = require("../bin/Token").TokenType;
 
 describe("Tokenizer.tokenFromString()", function() {
     it("should correctly tokenize a variety of valid tokens", function() {
@@ -89,6 +90,55 @@ describe("Tokenizer.tokenize()", function() {
 }`;
 
         expect(Tokenizer.tokenize(program)).to.deep.equal(expected);
+    });
+
+    it("should correctly tokenize every valid token", function() {
+        let tokenStrings = {
+            "int": TokenType.Keyword,
+            "return": TokenType.Keyword,
+            "main": TokenType.Identifier,
+            "myVar": TokenType.Identifier,
+            "7": TokenType.Integer,
+            "4": TokenType.Integer,
+            "15": TokenType.Integer,
+            "4892": TokenType.Integer,
+            "(": TokenType.OpenParen,
+            ")": TokenType.CloseParen,
+            "{": TokenType.OpenBrace,
+            "}": TokenType.CloseBrace,
+            ";": TokenType.Semicolon,
+            "~": TokenType.BitwiseNOT,
+            "!": TokenType.LogicalNOT,
+            "+": TokenType.Addition,
+            "-": TokenType.Negation,
+            "*": TokenType.Multiplication,
+            "/": TokenType.Division,
+            ">": TokenType.MoreThan,
+            "<": TokenType.LessThan,
+            "==": TokenType.Equal,
+            "!=": TokenType.NotEqual,
+            ">=": TokenType.MoreThanEqual,
+            "<=": TokenType.LessThanEqual,
+            "||": TokenType.LogicalOR,
+            "&&": TokenType.LogicalAND
+        };
+
+        for (let token in tokenStrings) {
+            expect(Tokenizer.tokenize(token)).to.satisfy(function(x) {
+                return x[0].tokenType === tokenStrings[token];
+            });
+        }
+    });
+
+    it("should handle poorly formatted code", function() {
+        let codes = [
+            "int main(){return234;}",
+            "143==921"
+        ];
+
+        for (let code of codes) {
+            expect(Tokenizer.tokenize.bind(Tokenizer, code)).to.not.throw();
+        }
     });
 
     it("should error on invalid tokens", function() {
