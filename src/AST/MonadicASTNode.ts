@@ -1,4 +1,3 @@
-import { ConstantASTNode } from "./ConstantASTNode";
 import { ExpressionASTNode } from "./ExpressionASTNode";
 import { OperationASTNode, OperationType } from "./OperationASTNode";
 
