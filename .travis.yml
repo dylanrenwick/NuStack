@@ -2,3 +2,7 @@ language: node_js
 cache: npm
 node_js:
  - "10.15.3"
+scripts:
+ - "npm build"
+ - "npm lint"
+ - "npm test"
