@@ -2,6 +2,9 @@ export class Token  {
     public tokenType: TokenType;
     public tokenValue: any;
 
+    public column: number;
+    public row: number;
+
     public get hasValue(): boolean {
         switch (this.tokenType) {
             case TokenType.Keyword:
@@ -13,7 +16,9 @@ export class Token  {
         }
     }
 
-    public constructor(type: TokenType, value?: any) {
+    public constructor(col: number, row: number, type: TokenType, value?: any) {
+        this.column = col;
+        this.row = row;
         this.tokenType = type;
         if (!value !== undefined) this.tokenValue = value;
     }
