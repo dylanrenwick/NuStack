@@ -1,3 +1,4 @@
 node_modules/
 bin/
 *.code-workspace
+.nyc_output/
