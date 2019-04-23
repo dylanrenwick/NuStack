@@ -4,7 +4,10 @@
   "description": "",
   "main": "bin/index.js",
   "scripts": {
-    "test": "rm -rf bin/ && tsc -b ./ && nyc mocha"
+    "test": "npm run build && nyc mocha",
+    "run": "npm run build && node bin/index.js",
+    "build": "npm run clean && tsc",
+    "clean": "rm -rf bin/ && rm -rf coverage/"
   },
   "author": "",
   "license": "ISC",
