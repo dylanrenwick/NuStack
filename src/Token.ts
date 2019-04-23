@@ -20,7 +20,7 @@ export class Token  {
         this.column = col;
         this.row = row;
         this.tokenType = type;
-        if (!value !== undefined) this.tokenValue = value;
+        if (value !== undefined) this.tokenValue = value;
     }
 
     public toString(): string {
