@@ -4,7 +4,7 @@
   "description": "",
   "main": "bin/index.js",
   "scripts": {
-    "test": "npm run build && nyc mocha",
+    "test": "npm run build && nyc mocha --recursive",
     "run": "npm run build && node bin/index.js",
     "build": "npm run clean && tsc",
     "clean": "rm -rf bin/ && rm -rf coverage/"
