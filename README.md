@@ -18,6 +18,8 @@ run - performs a build, then runs the compiler.
       Note: this will not pass any file names, so the compiler will fall back to default input/output files
 test - performs a build, then runs nyc mocha. This runs all unit tests and performs code coverage analysis on them
        Note: this will create the coverage/ directory containing a html report of the coverage
+       Note: this will require you to have both nyc and mocha installed globally
+           npm i -g nyc mocha
 ```
 Currently [TravisCI](https://travis-ci.com/dylanrenwick/NuStack) is configured to execute `npm ci`, followed by `npm test`.  
 This will set up the development environment, build the application, and execute all unit tests.
