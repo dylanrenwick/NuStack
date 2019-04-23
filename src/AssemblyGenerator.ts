@@ -1,5 +1,7 @@
+import { Allocator } from "./Allocator";
 import { AbstractSyntaxTree } from "./AST/AbstractSyntaxTree";
 import { ConstantASTNode } from "./AST/ConstantASTNode";
+import { DeclarationASTNode } from "./AST/DeclarationASTNode";
 import { ExpressionASTNode } from "./AST/ExpressionASTNode";
 import { OperationASTNode, OperationType } from "./AST/OperationASTNode";
 import { ReturnStatementASTNode } from "./AST/ReturnStatementASTNode";
@@ -54,6 +56,8 @@ export class AssemblyGenerator {
     private static generateStatement(statement: StatementASTNode): string {
         if (statement instanceof ReturnStatementASTNode) {
             return this.generateReturn(statement);
+        } else if (statement instanceof DeclarationASTNode) {
+            // return this.generateDeclaration(statement);
         }
 
         throw new Error("Unknown AST node");
@@ -83,12 +87,6 @@ export class AssemblyGenerator {
     }
 
     private static generateOperation(op: OperationASTNode): string {
-        if (op.expressionValue !== null) {
-            return this.generateConstant(new ConstantASTNode(
-                op.expressionValue
-            ));
-        }
-
         let asm: string = "";
 
         switch (op.operation) {

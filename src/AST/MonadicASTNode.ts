@@ -7,7 +7,8 @@ export class MonadicASTNode extends OperationASTNode {
 
     public get childNodes(): ExpressionASTNode[] { return [this.operand]; }
     public get expressionValue(): any {
-        if (this.operand instanceof ConstantASTNode) {
+        if (this.operand instanceof ConstantASTNode
+            || this.operand.expressionValue !== null) {
             switch (this.opType) {
                 case OperationType.Negation:
                     return -this.operand.expressionValue;
