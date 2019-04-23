@@ -2,7 +2,7 @@ const expect = require('chai').expect;
 const ProgramASTNode = require("../../bin/AST/ProgramASTNode").ProgramASTNode;
 const SubroutineASTNode = require("../../bin/AST/SubroutineASTNode").SubroutineASTNode;
 
-describe("ProgramASTNode", function() {
+describe("ProgramASTNode:", function() {
     describe("ProgramASTNode.constructor()", function() {
         it("should correctly assign its given argument to mainSub", function() {
             expect(new ProgramASTNode().mainSub).to.equal(undefined);
