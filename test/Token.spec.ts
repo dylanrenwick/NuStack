@@ -1,41 +1,40 @@
-const expect = require('chai').expect;
-const _Token = require("../bin/Token");
-const Token = _Token.Token;
-const TokenType = _Token.TokenType;
+import { expect } from "chai";
+import { Token, TokenType } from "../src/Token";
 
-function forTokenTypes(callback, exceptValueTypes = false) {
+function forTokenTypes(callback: (type: TokenType) => void, exceptValueTypes: boolean = false) {
     let valueTypes = [
         TokenType.Keyword, TokenType.Identifier, TokenType.Integer
     ];
 
     for (let type in TokenType) {
-        if (/^[0-9]+$/.test(type)) continue;
+        if (!/^[0-9]+$/.test(type)) continue;
 
-        if (exceptValueTypes && valueTypes.includes(TokenType[type])) continue;
+        if (exceptValueTypes && valueTypes.includes(parseInt(type))) continue;
 
-        callback(TokenType[type]);
+        callback(parseInt(type));
     }
 }
 
-describe("Token:", function() {
-    describe("Token.constructor()", function() {
-        it("should correctly assign row and column values", function() {
+describe("Token:", () => {
+    describe("Token.constructor()", () => {
+        it("should correctly assign row and column values", () => {
             for (let i = 0; i < 5; i++) {
-                let line = Math.floor(Math.random() * 15000), col = Math.floor(Math.random() * 15000);
+                let line = Math.floor(Math.random() * 15000);
+                let col = Math.floor(Math.random() * 15000);
                 let token = new Token(col, line, TokenType.Semicolon);
-                expect(token).to.satisfy(function(x) {
+                expect(token).to.satisfy((x: Token) => {
                     return (x.column === col && x.row === line);
                 });
             }
         });
 
-        it("should correctly assign tokenType", function() {
-            forTokenTypes(function(i) {
+        it("should correctly assign tokenType", () => {
+            forTokenTypes((i: TokenType) => {
                 expect(new Token(1, 1, i).tokenType).to.equal(i);
             });
         });
 
-        it("should correctly assign a value", function() {
+        it("should correctly assign a value", () => {
             let values = [
                 8, "hi", 13948, "67", "no", 23.5, true,
                 0, "", false, null // falsey values
@@ -47,15 +46,15 @@ describe("Token:", function() {
             }
         });
 
-        it("shouldn't assign a value if none is given", function() {
+        it("shouldn't assign a value if none is given", () => {
             expect(new Token(1, 1, TokenType.Keyword).tokenValue).to.equal(undefined);
             expect(new Token(1, 1, TokenType.Keyword, undefined).tokenValue).to.equal(undefined);
         });
     });
 
-    describe("Token.toString()", function() {
-        it("should correctly return the token used to create it", function() {
-            let tokenStrings = {
+    describe("Token.toString()", () => {
+        it("should correctly return the token used to create it", () => {
+            let tokenStrings: { [key: string]: TokenType } = {
                 "int": TokenType.Keyword,
                 "return": TokenType.Keyword,
                 "main": TokenType.Identifier,
@@ -82,47 +81,48 @@ describe("Token:", function() {
                 ">=": TokenType.MoreThanEqual,
                 "<=": TokenType.LessThanEqual,
                 "||": TokenType.LogicalOR,
-                "&&": TokenType.LogicalAND
+                "&&": TokenType.LogicalAND,
             };
 
             for (let token in tokenStrings) {
-                expect(new Token(1, 1, tokenStrings[token], token)).to.satisfy(function(x) {
+                if (!tokenStrings.hasOwnProperty(token)) continue;
+                expect(new Token(1, 1, tokenStrings[token], token)).to.satisfy((x: TokenType) => {
                     return x.toString() === token;
                 });
             }
         });
 
-        it("should return an empty string when tokenType is invalid", function() {
+        it("should return an empty string when tokenType is invalid", () => {
             expect(new Token(1, 1, -1).toString()).to.equal("");
         });
 
-        it("should ignore given value when of a singleton tokenType", function() {
-            forTokenTypes(function(type) {
+        it("should ignore given value when of a singleton tokenType", () => {
+            forTokenTypes((type: TokenType) => {
                 expect(new Token(1, 1, type, "not right").toString()).to.not.equal("not right");
             }, true);
         });
     });
 
-    describe("Token.hasValue", function() {
-        it("should return true if the Token has a value", function() {
+    describe("Token.hasValue", () => {
+        it("should return true if the Token has a value", () => {
             expect(new Token(1, 1, TokenType.Identifier, "test").hasValue).to.be.true;
             expect(new Token(1, 1, TokenType.Keyword, "return").hasValue).to.be.true;
             expect(new Token(1, 1, TokenType.Integer, 42).hasValue).to.be.true;
         });
 
-        it("should return false for value-less tokenTypes", function() {
-            forTokenTypes(function(type) {
+        it("should return false for value-less tokenTypes", () => {
+            forTokenTypes((type: TokenType) => {
                 expect(new Token(1, 1, type).hasValue).to.be.false;
             }, true);
         });
 
-        it("should ignore given values for value-less tokenTypes", function() {
-            forTokenTypes(function(type) {
+        it("should ignore given values for value-less tokenTypes", () => {
+            forTokenTypes((type: TokenType) => {
                 expect(new Token(1, 1, type, "this is a value").hasValue).to.be.false;
             }, true);
         });
 
-        it("should return false for value tokenTypes that were not given a value", function() {
+        it("should return false for value tokenTypes that were not given a value", () => {
             expect(new Token(1, 1, TokenType.Identifier).hasValue).to.be.false;
             expect(new Token(1, 1, TokenType.Keyword).hasValue).to.be.false;
             expect(new Token(1, 1, TokenType.Integer).hasValue).to.be.false;
