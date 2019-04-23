@@ -18,7 +18,24 @@ describe("Token.constructor()", function() {
         for (let i = 0; i < 10; i++) {
             expect(new Token(1, 1, i).tokenType).to.equal(i);
         }
-    })
+    });
+
+    it("should correctly assign a value", function() {
+        let values = [
+            8, "hi", 13948, "67", "no", 23.5, true,
+            0, "", false, null // falsey values
+        ];
+
+        for (let val of values) {
+            let tokType = Math.floor(Math.random() * 10);
+            expect(new Token(1, 1, tokType, val).tokenValue).to.equal(val);
+        }
+    });
+
+    it("shouldn't assign a value if none is given", function() {
+        expect(new Token(1, 1, TokenType.Keyword).tokenValue).to.equal(undefined);
+        expect(new Token(1, 1, TokenType.Keyword, undefined).tokenValue).to.equal(undefined);
+    });
 });
 
 describe("Token.toString()", function() {
