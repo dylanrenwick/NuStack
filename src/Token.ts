@@ -38,7 +38,6 @@ export class Token  {
             case TokenType.BitwiseNOT: return "~";
             case TokenType.LogicalNOT: return "!";
             case TokenType.Addition: return "+";
-            case TokenType.Subtraction: return "-";
             case TokenType.Multiplication: return "*";
             case TokenType.Division: return "/";
             case TokenType.MoreThan: return ">";
@@ -67,7 +66,6 @@ export enum TokenType {
     BitwiseNOT,
     LogicalNOT,
     Addition,
-    Subtraction,
     Multiplication,
     Division,
     MoreThan,

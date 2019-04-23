@@ -95,6 +95,11 @@ export class Tokenizer {
             }
         }
 
+        if (curToken.length > 0) {
+            tokens.push(this.tokenFromString(line, col - curToken.length - 1, curToken));
+            curToken = "";
+        }
+
         return tokens;
     }
 
@@ -109,7 +114,6 @@ export class Tokenizer {
             case "~": return new Token(col, line, TokenType.BitwiseNOT);
             case "!": return new Token(col, line, TokenType.LogicalNOT);
             case "+": return new Token(col, line, TokenType.Addition);
-            case "-": return new Token(col, line, TokenType.Subtraction);
             case "*": return new Token(col, line, TokenType.Multiplication);
             case "/": return new Token(col, line, TokenType.Division);
             case ">": return new Token(col, line, TokenType.MoreThan);

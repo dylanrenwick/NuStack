@@ -20,7 +20,7 @@ export class Parser {
         TokenType.Negation, TokenType.BitwiseNOT, TokenType.LogicalNOT,
     ];
     private static diadicOperators: TokenType[] = [
-        TokenType.Addition, TokenType.Subtraction, TokenType.Multiplication, TokenType.Division
+        TokenType.Addition, TokenType.Negation, TokenType.Multiplication, TokenType.Division
     ];
     private static variables: HashMap<string, Declaration> = new HashMap<string, Declaration>();
 
@@ -29,7 +29,7 @@ export class Parser {
         [TokenType.Equal, TokenType.NotEqual],
         [TokenType.LessThan, TokenType.LessThanEqual,
          TokenType.MoreThan, TokenType.MoreThanEqual],
-        [TokenType.Addition, TokenType.Subtraction],
+        [TokenType.Addition, TokenType.Negation],
         [TokenType.Multiplication, TokenType.Division]
     ];
 
@@ -171,7 +171,6 @@ export class Parser {
             case TokenType.BitwiseNOT: return OperationType.BitwiseNOT;
             case TokenType.LogicalNOT: return OperationType.LogicalNOT;
             case TokenType.Addition: return OperationType.Addition;
-            case TokenType.Subtraction: return OperationType.Subtraction;
             case TokenType.Multiplication: return OperationType.Multiplication;
             case TokenType.Division: return OperationType.Division;
             case TokenType.MoreThan: return OperationType.MoreThan;
