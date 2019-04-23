@@ -1,5 +1,6 @@
 import { AssemblyGenerator } from "./AssemblyGenerator";
 import { AbstractSyntaxTree } from "./AST/AbstractSyntaxTree";
+import { ASTSimplifier } from "./AST/ASTSimplifier";
 import { Parser } from "./Parser";
 import { Token } from "./Token";
 import { Tokenizer } from "./Tokenizer";
@@ -16,6 +17,9 @@ export class NuStack {
         this.log(JSON.stringify(tokens.map(tok => tok.toString())));
         let ast: AbstractSyntaxTree = Parser.parse(tokens);
         this.log("\nAST:");
+        this.log(JSON.stringify(ast, null, 2));
+        ast = ASTSimplifier.SimplifyTree(ast);
+        this.log("\nSimplified AST:");
         this.log(JSON.stringify(ast, null, 2));
         let asm: string = AssemblyGenerator.generate(ast);
         this.log("\nNASM:");
