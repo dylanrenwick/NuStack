@@ -59,8 +59,6 @@ describe("OperationASTNode", () => {
                 if (typeof(expected) === "boolean") expected = expected ? 1 : 0;
                 if (Number.isNaN(expected)) expected = null;
 
-                console.log(type, a, b, expected);
-
                 expect(OperationASTNode.applyOperator(type, [a, b])).to.equal(expected);
             });
         });
