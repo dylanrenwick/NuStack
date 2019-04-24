@@ -58,12 +58,12 @@ describe("Parser", () => {
         });
 
         it("should throw an error when given a tokenType that has no corresponding operation", () => {
-            expect(Parser["parseOpType"].bind(Parser, new Token(1, 1, TokenType.Identifier)))
-                .to.throw("Invalid operator: 1");
-            expect(Parser["parseOpType"].bind(Parser, new Token(1, 1, TokenType.Keyword)))
-                .to.throw("Invalid operator: 0");
+            expect(Parser["parseOpType"].bind(Parser, new Token(1, 1, TokenType.Identifier, "bad")))
+                .to.throw("Invalid operator: bad");
+            expect(Parser["parseOpType"].bind(Parser, new Token(1, 1, TokenType.Keyword, "bad")))
+                .to.throw("Invalid operator: bad");
             expect(Parser["parseOpType"].bind(Parser, new Token(1, 1, TokenType.Semicolon)))
-                .to.throw("Invalid operator: 6");
+                .to.throw("Invalid operator: ;");
         });
     });
 
@@ -82,19 +82,19 @@ describe("Parser", () => {
 
         it("should throw an error when given an invalid factor", () => {
             expect(Parser["parseFactor"].bind(Parser, [new Token(1, 1, TokenType.Semicolon)]))
-                .to.throw("Invalid factor: 6");
-            expect(Parser["parseFactor"].bind(Parser, [new Token(1, 1, TokenType.Identifier)]))
-                .to.throw("Invalid factor: 1");
+                .to.throw("Invalid factor: ;");
+            expect(Parser["parseFactor"].bind(Parser, [new Token(1, 1, TokenType.Identifier, "bad")]))
+                .to.throw("Invalid factor: bad");
             expect(Parser["parseFactor"].bind(Parser, [new Token(1, 1, TokenType.OpenBrace)]))
-                .to.throw("Invalid factor: 4");
+                .to.throw("Invalid factor: {");
             expect(Parser["parseFactor"].bind(Parser, [new Token(1, 1, TokenType.Multiplication)]))
-                .to.throw("Invalid factor: 12");
+                .to.throw("Invalid factor: *");
         });
 
         it("should throw an error when given mis-matched parens", () => {
             expect(Parser["parseFactor"].bind(Parser,
                 parenWrap(generateExpression().concat([new Token(1, 1, TokenType.Semicolon)]))
-            )).to.throw("Expected close paren but got 6");
+            )).to.throw("Expected close paren but got ;");
         });
     });
 
