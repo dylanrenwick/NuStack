@@ -15,7 +15,7 @@ export class ASTSimplifier {
     private static simplifySubroutine(sub: SubroutineASTNode): SubroutineASTNode {
         return new SubroutineASTNode(
             sub.name, sub.returnType,
-            sub.childNodes.map(this.simplifyStatement)
+            sub.childNodes.map(x => this.simplifyStatement(x))
         );
     }
 
