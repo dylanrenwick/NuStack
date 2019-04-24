@@ -30,7 +30,7 @@ export enum OperationType {
     LogicalAND
 }
 
-export function applyOperator(op: OperationType, operands: number[]): number {
+export function applyOperator(op: OperationType, operands: number[]): any {
     switch (op) {
         case OperationType.Negation: return -operands[0];
         case OperationType.BitwiseNOT: return ~operands[0];
@@ -45,6 +45,6 @@ export function applyOperator(op: OperationType, operands: number[]): number {
         case OperationType.NotEqual: return operands[0] !== operands[1];
         case OperationType.LessThanEqual: return operands[0] <= operands[1];
         case OperationType.MoreThanEqual: return operands[0] >= operands[1];
-        default: return null
+        default: return null;
     }
 }
