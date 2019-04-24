@@ -30,21 +30,28 @@ export enum OperationType {
     LogicalAND
 }
 
-export function applyOperator(op: OperationType, operands: number[]): any {
+export function applyOperator(op: OperationType, operands: number[]): number {
+    let ret = null;
     switch (op) {
-        case OperationType.Negation: return -operands[0];
-        case OperationType.BitwiseNOT: return ~operands[0];
-        case OperationType.LogicalNOT: return operands[0] === 0 ? 0 : 1;
-        case OperationType.Addition: return operands[0] + operands[1];
-        case OperationType.Subtraction: return operands[0] - operands[1];
-        case OperationType.Multiplication: return operands[0] * operands[1];
-        case OperationType.Division: return operands[0] / operands[1];
-        case OperationType.LessThan: return operands[0] < operands[1];
-        case OperationType.MoreThan: return operands[0] > operands[1];
-        case OperationType.Equal: return operands[0] === operands[1];
-        case OperationType.NotEqual: return operands[0] !== operands[1];
-        case OperationType.LessThanEqual: return operands[0] <= operands[1];
-        case OperationType.MoreThanEqual: return operands[0] >= operands[1];
-        default: return null;
+        case OperationType.Negation: ret = -operands[0]; break;
+        case OperationType.BitwiseNOT: ret = ~operands[0]; break;
+        case OperationType.LogicalNOT: ret = operands[0] === 0 ? 0 : 1; break;
+        case OperationType.Addition: ret = operands[0] + operands[1]; break;
+        case OperationType.Subtraction: ret = operands[0] - operands[1]; break;
+        case OperationType.Multiplication: ret = operands[0] * operands[1]; break;
+        case OperationType.Division: ret = operands[0] / operands[1]; break;
+        case OperationType.LessThan: ret = operands[0] < operands[1]; break;
+        case OperationType.MoreThan: ret = operands[0] > operands[1]; break;
+        case OperationType.Equal: ret = operands[0] === operands[1]; break;
+        case OperationType.NotEqual: ret = operands[0] !== operands[1]; break;
+        case OperationType.MoreThanEqual: ret = operands[0] >= operands[1]; break;
+        case OperationType.LessThanEqual: ret = operands[0] <= operands[1]; break;
+        case OperationType.LogicalOR: ret = operands[0] | operands[1]; break;
+        case OperationType.LogicalAND: ret = operands[0] & operands[1]; break;
     }
+
+    if (typeof(ret) === "boolean") ret = ret ? 1 : 0;
+    if (Number.isNaN(ret)) ret = 0;
+
+    return ret;
 }
