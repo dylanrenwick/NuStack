@@ -6,6 +6,8 @@ import { MonadicASTNode } from "../src/AST/MonadicASTNode";
 import { OperationType } from "../src/AST/OperationASTNode";
 import { Parser } from "../src/Parser";
 import { Token, TokenType } from "../src/Token";
+import { StatementASTNode } from "../src/AST/StatementASTNode";
+import { ReturnStatementASTNode } from "../src/AST/ReturnStatementASTNode";
 
 function parenWrap(toks: Token[]): Token[] {
     return [new Token(1, 1, TokenType.OpenParen)]
@@ -34,6 +36,14 @@ function generateExpression(opType: TokenType = TokenType.Addition): Token[] {
     ];
 }
 
+function generateReturn(expression?: Token[]) {
+    if (!expression) expression = generateExpression();
+
+    return [new Token(1, 1, TokenType.Keyword, "return")]
+        .concat(expression)
+        .concat(new Token(1, 1, TokenType.Semicolon));
+}
+
 describe("Parser", () => {
     describe("Parser.parseOpType()", () => {
         it("should return the corresponding opType when given an operation token", () => {
@@ -48,9 +58,12 @@ describe("Parser", () => {
         });
 
         it("should throw an error when given a tokenType that has no corresponding operation", () => {
-            expect(Parser["parseOpType"].bind(Parser, new Token(1, 1, TokenType.Identifier))).to.throw();
-            expect(Parser["parseOpType"].bind(Parser, new Token(1, 1, TokenType.Keyword))).to.throw();
-            expect(Parser["parseOpType"].bind(Parser, new Token(1, 1, TokenType.Semicolon))).to.throw();
+            expect(Parser["parseOpType"].bind(Parser, new Token(1, 1, TokenType.Identifier)))
+                .to.throw("Invalid operator: 1");
+            expect(Parser["parseOpType"].bind(Parser, new Token(1, 1, TokenType.Keyword)))
+                .to.throw("Invalid operator: 0");
+            expect(Parser["parseOpType"].bind(Parser, new Token(1, 1, TokenType.Semicolon)))
+                .to.throw("Invalid operator: 6");
         });
     });
 
@@ -68,16 +81,20 @@ describe("Parser", () => {
         });
 
         it("should throw an error when given an invalid factor", () => {
-            expect(Parser["parseFactor"].bind(Parser, [new Token(1, 1, TokenType.Semicolon)])).to.throw();
-            expect(Parser["parseFactor"].bind(Parser, [new Token(1, 1, TokenType.Identifier)])).to.throw();
-            expect(Parser["parseFactor"].bind(Parser, [new Token(1, 1, TokenType.OpenBrace)])).to.throw();
-            expect(Parser["parseFactor"].bind(Parser, [new Token(1, 1, TokenType.Multiplication)])).to.throw();
+            expect(Parser["parseFactor"].bind(Parser, [new Token(1, 1, TokenType.Semicolon)]))
+                .to.throw("Invalid factor: 6");
+            expect(Parser["parseFactor"].bind(Parser, [new Token(1, 1, TokenType.Identifier)]))
+                .to.throw("Invalid factor: 1");
+            expect(Parser["parseFactor"].bind(Parser, [new Token(1, 1, TokenType.OpenBrace)]))
+                .to.throw("Invalid factor: 4");
+            expect(Parser["parseFactor"].bind(Parser, [new Token(1, 1, TokenType.Multiplication)]))
+                .to.throw("Invalid factor: 12");
         });
 
         it("should throw an error when given mis-matched parens", () => {
             expect(Parser["parseFactor"].bind(Parser,
                 parenWrap(generateExpression().concat([new Token(1, 1, TokenType.Semicolon)]))
-            )).to.throw();
+            )).to.throw("Expected close paren but got 6");
         });
     });
 
@@ -103,6 +120,31 @@ describe("Parser", () => {
             let expr: ExpressionASTNode = Parser["parseExpression"](tokens);
             expect(expr).to.be.an.instanceof(DiadicASTNode);
             expect((expr as DiadicASTNode).childNodes[1]).to.be.an.instanceof(MonadicASTNode);
+        });
+    });
+
+    describe("Parser.parseStatement()", () => {
+        it("should correctly parse a valid statement", () => {
+            let statement = Parser["parseStatement"](generateReturn(generateConstant()));
+            expect(statement).to.be.an.instanceof(ReturnStatementASTNode);
+            expect(statement.childNodes).to.be.an.instanceof(ConstantASTNode);
+            statement = Parser["parseStatement"](generateReturn(generateFactor()));
+            expect(statement).to.be.an.instanceof(ReturnStatementASTNode);
+            expect(statement.childNodes).to.be.an.instanceof(MonadicASTNode);
+            statement = Parser["parseStatement"](generateReturn(generateExpression()));
+            expect(statement).to.be.an.instanceof(ReturnStatementASTNode);
+            expect(statement.childNodes).to.be.an.instanceof(DiadicASTNode);
+        });
+
+        it("should throw an error if the statement does not end in a semicolon", () => {
+            let toks = generateReturn(generateConstant()).slice(0, 2);
+            let bind = Parser["parseStatement"].bind(Parser, toks);
+            expect(bind).to.throw("Expected ';' but found <EOF>");
+            toks = generateReturn(generateConstant()).slice(0, 2).concat([
+                new Token(1, 1, TokenType.Keyword, "int")
+            ]);
+            bind = Parser["parseStatement"].bind(Parser, toks);
+            expect(bind).to.throw("Expected ';' but found int");
         });
     });
 });
