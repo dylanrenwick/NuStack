@@ -130,7 +130,7 @@ export class Parser {
             ? this.parseFactor(tokens)
             : this.parseExpression(tokens, operatorsIndex + 1);
         let next: Token = tokens[0];
-        while (this.exprOperators[operatorsIndex].includes(next.tokenType)) {
+        while (next && this.exprOperators[operatorsIndex].includes(next.tokenType)) {
             let op: OperationType = this.parseOpType(tokens.shift());
             let nextTerm: ExpressionASTNode = operatorsIndex === this.exprOperators.length - 1
                 ? this.parseFactor(tokens)
@@ -146,6 +146,7 @@ export class Parser {
     }
 
     private static parseFactor(tokens: Token[]): ExpressionASTNode {
+
         let next: Token = tokens.shift();
 
         if (next.tokenType === TokenType.OpenParen) {
