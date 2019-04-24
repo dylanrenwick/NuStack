@@ -10,6 +10,32 @@ export abstract class OperationASTNode extends ExpressionASTNode {
         super();
         this.opType = type;
     }
+
+    public static applyOperator(op: OperationType, operands: number[]): number {
+        let ret = null;
+        switch (op) {
+            case OperationType.Negation: ret = -operands[0]; break;
+            case OperationType.BitwiseNOT: ret = ~operands[0]; break;
+            case OperationType.LogicalNOT: ret = operands[0] === 0 ? 0 : 1; break;
+            case OperationType.Addition: ret = operands[0] + operands[1]; break;
+            case OperationType.Subtraction: ret = operands[0] - operands[1]; break;
+            case OperationType.Multiplication: ret = operands[0] * operands[1]; break;
+            case OperationType.Division: ret = operands[0] / operands[1]; break;
+            case OperationType.LessThan: ret = operands[0] < operands[1]; break;
+            case OperationType.MoreThan: ret = operands[0] > operands[1]; break;
+            case OperationType.Equal: ret = operands[0] === operands[1]; break;
+            case OperationType.NotEqual: ret = operands[0] !== operands[1]; break;
+            case OperationType.MoreThanEqual: ret = operands[0] >= operands[1]; break;
+            case OperationType.LessThanEqual: ret = operands[0] <= operands[1]; break;
+            case OperationType.LogicalOR: ret = operands[0] | operands[1]; break;
+            case OperationType.LogicalAND: ret = operands[0] & operands[1]; break;
+        }
+
+        if (typeof(ret) === "boolean") ret = ret ? 1 : 0;
+        if (Number.isNaN(ret)) ret = 0;
+
+        return ret;
+    }
 }
 
 export enum OperationType {
@@ -28,30 +54,4 @@ export enum OperationType {
     LessThanEqual,
     LogicalOR,
     LogicalAND
-}
-
-export function applyOperator(op: OperationType, operands: number[]): number {
-    let ret = null;
-    switch (op) {
-        case OperationType.Negation: ret = -operands[0]; break;
-        case OperationType.BitwiseNOT: ret = ~operands[0]; break;
-        case OperationType.LogicalNOT: ret = operands[0] === 0 ? 0 : 1; break;
-        case OperationType.Addition: ret = operands[0] + operands[1]; break;
-        case OperationType.Subtraction: ret = operands[0] - operands[1]; break;
-        case OperationType.Multiplication: ret = operands[0] * operands[1]; break;
-        case OperationType.Division: ret = operands[0] / operands[1]; break;
-        case OperationType.LessThan: ret = operands[0] < operands[1]; break;
-        case OperationType.MoreThan: ret = operands[0] > operands[1]; break;
-        case OperationType.Equal: ret = operands[0] === operands[1]; break;
-        case OperationType.NotEqual: ret = operands[0] !== operands[1]; break;
-        case OperationType.MoreThanEqual: ret = operands[0] >= operands[1]; break;
-        case OperationType.LessThanEqual: ret = operands[0] <= operands[1]; break;
-        case OperationType.LogicalOR: ret = operands[0] | operands[1]; break;
-        case OperationType.LogicalAND: ret = operands[0] & operands[1]; break;
-    }
-
-    if (typeof(ret) === "boolean") ret = ret ? 1 : 0;
-    if (Number.isNaN(ret)) ret = 0;
-
-    return ret;
 }

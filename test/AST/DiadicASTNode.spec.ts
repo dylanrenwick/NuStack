@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { ConstantASTNode } from "../../src/AST/ConstantASTNode";
 import { DiadicASTNode } from "../../src/AST/DiadicASTNode";
 import { ExpressionASTNode } from "../../src/AST/ExpressionASTNode";
-import { applyOperator, OperationType } from "../../src/AST/OperationASTNode";
+import { OperationASTNode, OperationType } from "../../src/AST/OperationASTNode";
 
 function forOpTypes(callback: (type: OperationType, ...params: any[]) => void, ...params: any[] ) {
     let monadicTypes = [
@@ -50,7 +50,7 @@ describe("DiadicASTNode", () => {
                 let a = Math.floor(Math.random() * 15000);
                 let b = Math.floor(Math.random() * 15000);
                 expect(new DiadicASTNode(type, new ConstantASTNode(a), new ConstantASTNode(b)).expressionValue)
-                    .to.equal(applyOperator(type, [a, b]));
+                    .to.equal(OperationASTNode.applyOperator(type, [a, b]));
             });
         });
 
@@ -58,7 +58,7 @@ describe("DiadicASTNode", () => {
             forOpTypes((type: OperationType) => {
                 let a = Math.floor(Math.random() * 15000);
                 let b = Math.floor(Math.random() * 15000);
-                let expected = applyOperator(type, [applyOperator(type, [a, 0]), b]);
+                let expected = OperationASTNode.applyOperator(type, [OperationASTNode.applyOperator(type, [a, 0]), b]);
                 expect(new DiadicASTNode(
                     type, new DiadicASTNode(type, new ConstantASTNode(a), new ConstantASTNode(0)),
                     new ConstantASTNode(b)

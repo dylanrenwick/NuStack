@@ -1,5 +1,5 @@
 import { ExpressionASTNode } from "./ExpressionASTNode";
-import { applyOperator, OperationASTNode, OperationType } from "./OperationASTNode";
+import { OperationASTNode, OperationType } from "./OperationASTNode";
 
 export class DiadicASTNode extends OperationASTNode {
     private leftOperand: ExpressionASTNode;
@@ -9,7 +9,10 @@ export class DiadicASTNode extends OperationASTNode {
     public get expressionValue(): any {
         if (this.leftOperand.expressionValue !== null
             && this.rightOperand.expressionValue !== null) {
-            return applyOperator(this.opType, [this.leftOperand.expressionValue, this.rightOperand.expressionValue]);
+            return OperationASTNode.applyOperator(this.opType, [
+                this.leftOperand.expressionValue,
+                this.rightOperand.expressionValue
+            ]);
         }
 
         return null;
