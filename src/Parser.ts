@@ -92,7 +92,7 @@ export class Parser {
     private static parseStatement(tokens: Token[]): StatementASTNode {
         let tok: Token = tokens.shift();
         if (tok.tokenType !== TokenType.Keyword) {
-            throw new Error("Expected 'return' but found " + tok.toString());
+            throw new Error("Expected statement but found " + tok.toString());
         }
 
         let statement: StatementASTNode;
