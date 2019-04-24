@@ -106,8 +106,8 @@ export class Parser {
         }
 
         tok = tokens.shift();
-        if (tok.tokenType !== TokenType.Semicolon) {
-            throw new Error("Expected ';' but found " + tok.toString());
+        if (!tok || tok.tokenType !== TokenType.Semicolon) {
+            throw new Error("Expected ';' but found " + (tok ? tok.toString() : "<EOF>"));
         }
 
         return statement;
@@ -151,8 +151,8 @@ export class Parser {
 
         if (next.tokenType === TokenType.OpenParen) {
             let expr: ExpressionASTNode = this.parseExpression(tokens);
-            if (tokens.shift().tokenType !== TokenType.CloseParen) {
-                throw new Error("Expected close paren but got " + next.tokenType);
+            if ((next = tokens.shift()).tokenType !== TokenType.CloseParen) {
+                throw new Error("Expected close paren but got " + (next ? next.toString() : "<EOF>"));
             }
             return expr;
         } else if (this.monadicOperators.includes(next.tokenType)) {
@@ -162,7 +162,7 @@ export class Parser {
         } else if (next.tokenType === TokenType.Integer) {
             return new ConstantASTNode(next.tokenValue);
         } else {
-            throw new Error("Invalid factor: " + next.tokenType);
+            throw new Error("Invalid factor: " + (next ? next.toString() : "<EOF>"));
         }
     }
 
@@ -182,7 +182,7 @@ export class Parser {
             case TokenType.LessThanEqual: return OperationType.LessThanEqual;
             case TokenType.LogicalOR: return OperationType.LogicalOR;
             case TokenType.LogicalAND: return OperationType.LogicalAND;
-            default: throw new Error("Invalid operator: " + tok.tokenType);
+            default: throw new Error("Invalid operator: " + (tok ? tok.toString() : "<EOF>"));
         }
     }
 }
