@@ -146,5 +146,16 @@ describe("Parser", () => {
             bind = Parser["parseStatement"].bind(Parser, toks);
             expect(bind).to.throw("Expected ';' but found int");
         });
+
+        it("should throw an error if the statement does not begin with a keyword", () => {
+            let toks = generateReturn(generateConstant()).slice(1);
+            let bind = Parser["parseStatement"].bind(Parser, toks);
+            expect(bind).to.throw("Expected statement but found ");
+            toks = [
+                new Token(1, 1, TokenType.Semicolon)
+            ].concat(generateReturn(generateConstant()).slice(1));
+            bind = Parser["parseStatement"].bind(Parser, toks);
+            expect(bind).to.throw("Expected statement but found ;");
+        });
     });
 });
