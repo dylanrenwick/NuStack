@@ -4,8 +4,8 @@
   "description": "",
   "main": "bin/index.js",
   "scripts": {
-    "lint": "tslint -p tsconfig.json",
-    "test": "nyc mocha --recursive --extension ts -r ts-node/register test/",
+    "lint": "npm run clean && tslint -p tsconfig.json",
+    "test": "npm run clean && nyc mocha --recursive --extension ts -r ts-node/register test/",
     "run": "npm run build && node bin/index.js",
     "build": "npm run clean && tsc",
     "clean": "rm -rf bin/ && rm -rf coverage/"
