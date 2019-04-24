@@ -1,5 +1,5 @@
 import { ExpressionASTNode } from "./ExpressionASTNode";
-import { OperationASTNode, OperationType } from "./OperationASTNode";
+import { applyOperator, OperationASTNode, OperationType } from "./OperationASTNode";
 
 export class DiadicASTNode extends OperationASTNode {
     private leftOperand: ExpressionASTNode;
@@ -9,28 +9,7 @@ export class DiadicASTNode extends OperationASTNode {
     public get expressionValue(): any {
         if (this.leftOperand.expressionValue !== null
             && this.rightOperand.expressionValue !== null) {
-            switch (this.opType) {
-                case OperationType.Addition:
-                    return this.leftOperand.expressionValue + this.rightOperand.expressionValue;
-                case OperationType.Subtraction:
-                    return this.leftOperand.expressionValue - this.rightOperand.expressionValue;
-                case OperationType.Multiplication:
-                    return this.leftOperand.expressionValue * this.rightOperand.expressionValue;
-                case OperationType.Division:
-                    return this.leftOperand.expressionValue / this.rightOperand.expressionValue;
-                case OperationType.LessThan:
-                    return this.leftOperand.expressionValue < this.rightOperand.expressionValue;
-                case OperationType.MoreThan:
-                    return this.leftOperand.expressionValue > this.rightOperand.expressionValue;
-                case OperationType.Equal:
-                    return this.leftOperand.expressionValue === this.rightOperand.expressionValue;
-                case OperationType.NotEqual:
-                    return this.leftOperand.expressionValue !== this.rightOperand.expressionValue;
-                case OperationType.LessThanEqual:
-                    return this.leftOperand.expressionValue <= this.rightOperand.expressionValue;
-                case OperationType.MoreThanEqual:
-                    return this.leftOperand.expressionValue >= this.rightOperand.expressionValue;
-            }
+            return applyOperator(this.opType, [this.leftOperand.expressionValue, this.rightOperand.expressionValue]);
         }
 
         return null;
