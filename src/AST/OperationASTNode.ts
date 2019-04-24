@@ -32,7 +32,7 @@ export abstract class OperationASTNode extends ExpressionASTNode {
         }
 
         if (typeof(ret) === "boolean") ret = ret ? 1 : 0;
-        if (Number.isNaN(ret)) ret = 0;
+        if (Number.isNaN(ret)) ret = null;
 
         return ret;
     }
