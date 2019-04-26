@@ -10,7 +10,7 @@ import { ReturnStatementASTNode } from "./ReturnStatementASTNode";
 import { StatementASTNode } from "./StatementASTNode";
 import { SubroutineASTNode } from "./SubroutineASTNode";
 
-export class ASTSimplifier {
+export class ConstantFolder {
     private static variables: HashMap<string, Declaration> = new HashMap<string, Declaration>();
 
     public static SimplifyTree(ast: AbstractSyntaxTree): AbstractSyntaxTree {
