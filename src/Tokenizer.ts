@@ -11,7 +11,7 @@ export class Tokenizer {
         " ", "\t", "\n", "\r",
     ];
     private static readonly operators: string[] = [
-        "~", "!", "+", "-", "/", "*", ">", "<",
+        "~", "!", "+", "-", "/", "*", ">", "<", "="
     ];
     private static readonly twoCharOperators: string[] = [
         "==", "!=", "<=", ">=", "&&", "||",
@@ -114,6 +114,7 @@ export class Tokenizer {
             case "/": return new Token(col, line, TokenType.Division);
             case ">": return new Token(col, line, TokenType.MoreThan);
             case "<": return new Token(col, line, TokenType.LessThan);
+            case "=": return new Token(col, line, TokenType.Assignment);
             case "==": return new Token(col, line, TokenType.Equal);
             case "!=": return new Token(col, line, TokenType.NotEqual);
             case ">=": return new Token(col, line, TokenType.MoreThanEqual);

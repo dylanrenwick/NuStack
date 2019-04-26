@@ -75,5 +75,6 @@ export enum TokenType {
     MoreThanEqual,
     LessThanEqual,
     LogicalOR,
-    LogicalAND
+    LogicalAND,
+    Assignment
 }
