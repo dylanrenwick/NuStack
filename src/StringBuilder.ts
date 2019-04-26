@@ -16,9 +16,9 @@ export class StringBuilder {
         this.appendLine(title + " {");
         this.indent++;
     }
-    public endBlock(): void {
+    public endBlock(additional: string = ""): void {
         this.indent--;
-        this.appendLine("}");
+        this.appendLine("}" + additional);
     }
 
     public toString(): string {
