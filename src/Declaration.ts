@@ -8,6 +8,7 @@ export class Declaration {
     public get currentIndex(): number { return this.values.length - 1; }
     public get currentValue(): any { return this.values[this.currentIndex]; }
     public get variableType(): string { return this.type; }
+    public get wasReferenced(): boolean { return this.hasRefs.reduce((a, b) => a || b); }
 
     public constructor(varName: string, type: string) {
         this.varName = varName;

@@ -1,6 +1,8 @@
 import { AssemblyGenerator } from "./AssemblyGenerator";
 import { AbstractSyntaxTree } from "./AST/AbstractSyntaxTree";
+import { ASTPass } from "./AST/ASTPass";
 import { ConstantFolder } from "./AST/ConstantFolder";
+import { SSAReducer } from "./AST/SSAReducer";
 import { Parser } from "./Parser";
 import { Token } from "./Token";
 import { Tokenizer } from "./Tokenizer";
@@ -8,7 +10,12 @@ import { Tokenizer } from "./Tokenizer";
 export class NuStack {
     private static debug: boolean;
 
-    public static compile(code: string, debug: boolean = false): string {
+    private static passes: ASTPass[][] = [
+        [new ConstantFolder()],
+        [new SSAReducer()]
+    ];
+
+    public static compile(code: string, debug: boolean = false, optimization = 0): string {
         this.debug = debug;
         this.log("\nSource NuStack:");
         this.log(code);
@@ -18,7 +25,11 @@ export class NuStack {
         let ast: AbstractSyntaxTree = Parser.parse(tokens);
         this.log("\nAST:");
         this.log(ast.toString());
-        ast = ConstantFolder.SimplifyTree(ast);
+        for (let i = 0; i < optimization; i++) {
+            for (let pass of this.passes[i]) {
+                ast = pass.SimplifyTree(ast);
+            }
+        }
         this.log("\nSimplified AST:");
         this.log(ast.toString());
         let asm: string = AssemblyGenerator.generate(ast);
