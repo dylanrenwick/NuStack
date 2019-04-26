@@ -10,10 +10,10 @@ import { ProgramASTNode } from "./AST/ProgramASTNode";
 import { ReturnStatementASTNode } from "./AST/ReturnStatementASTNode";
 import { StatementASTNode } from "./AST/StatementASTNode";
 import { SubroutineASTNode } from "./AST/SubroutineASTNode";
+import { VariableASTNode } from "./AST/VariableASTNode";
 import { Declaration } from "./Declaration";
 import { HashMap } from "./HashMap";
 import { Token, TokenType } from "./Token";
-import { VariableASTNode } from "./AST/VariableASTNode";
 
 export class Parser {
     private static readonly INT_MAX_VALUE: number = 2 ** 31;
