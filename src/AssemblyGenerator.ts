@@ -1,5 +1,6 @@
 import { Allocator } from "./Allocator";
 import { AbstractSyntaxTree } from "./AST/AbstractSyntaxTree";
+import { AssignmentASTNode } from "./AST/AssignmentASTNode";
 import { ConstantASTNode } from "./AST/ConstantASTNode";
 import { DeclarationASTNode } from "./AST/DeclarationASTNode";
 import { ExpressionASTNode } from "./AST/ExpressionASTNode";
@@ -7,6 +8,9 @@ import { OperationASTNode, OperationType } from "./AST/OperationASTNode";
 import { ReturnStatementASTNode } from "./AST/ReturnStatementASTNode";
 import { StatementASTNode } from "./AST/StatementASTNode";
 import { SubroutineASTNode } from "./AST/SubroutineASTNode";
+import { VariableASTNode } from "./AST/VariableASTNode";
+import { Declaration } from "./Declaration";
+import { HashMap } from "./HashMap";
 import { StringBuilder } from "./StringBuilder";
 
 export class AssemblyGenerator {
@@ -28,13 +32,26 @@ export class AssemblyGenerator {
         OperationType.MoreThan, OperationType.LessThan
     ];
 
+    private static stackMap: HashMap<string, number>;
+    private static stackOffset: number;
+
     private static labelCount: number = 1;
 
     private static get label(): string { return "_util_label" + this.labelCount++; }
 
     public static generate(ast: AbstractSyntaxTree): string {
         let sb: StringBuilder = new StringBuilder();
+
+        sb.appendLine("section .text");
+        sb.appendLine("global _start");
+        sb.appendLine("");
+        sb.appendLine("_start:");
         sb.indent++;
+        sb.appendLine("call main");
+        sb.appendLine("mov ebx, eax");
+        sb.appendLine("mov eax, 1d");
+        sb.appendLine("int 0x80");
+        sb.appendLine("");
 
         sb = this.generateSubroutine(sb, ast.root.childNodes);
 
@@ -44,7 +61,10 @@ export class AssemblyGenerator {
     private static generateSubroutine(sb: StringBuilder, sub: SubroutineASTNode): StringBuilder {
         sb = this.generateLabel(sb, sub.name);
         sb.appendLine("push ebp");
-        sb.appendLine("mov sbp, esp");
+        sb.appendLine("mov ebp, esp");
+
+        this.stackMap = new HashMap<string, number>();
+        this.stackOffset = 0;
 
         for (let statement of sub.childNodes) {
             sb = this.generateStatement(sb, statement);
@@ -66,6 +86,8 @@ export class AssemblyGenerator {
             return this.generateReturn(sb, statement);
         } else if (statement instanceof DeclarationASTNode) {
             return this.generateDeclaration(sb, statement);
+        } else if (statement instanceof AssignmentASTNode) {
+            return this.generateExpression(sb, statement);
         }
 
         throw new Error("Unknown AST node");
@@ -82,14 +104,30 @@ export class AssemblyGenerator {
     }
 
     private static generateDeclaration(sb: StringBuilder, statement: DeclarationASTNode): StringBuilder {
+        let dec: Declaration = statement.declaration;
+
+        if (this.stackMap.Has(dec.variableName)) {
+            throw new Error("Variable '" + dec.variableName + "' has already been declared!");
+        }
+
+        sb.appendLine("mov eax, 0d");
+        sb.appendLine("push eax");
+
+        this.stackOffset += 4;
+        this.stackMap.Add(dec.variableName, this.stackOffset);
+
         return sb;
     }
 
     private static generateExpression(sb: StringBuilder, expr: ExpressionASTNode): StringBuilder {
         if (expr instanceof ConstantASTNode) {
             return this.generateConstant(sb, expr);
+        } else if (expr instanceof AssignmentASTNode) {
+            return this.generateAssignment(sb, expr);
         } else if (expr instanceof OperationASTNode) {
             return this.generateOperation(sb, expr);
+        } else if (expr instanceof VariableASTNode) {
+            return this.generateReference(sb, expr);
         }
 
         throw new Error("Unknown AST node: " + JSON.stringify(expr));
@@ -195,6 +233,19 @@ export class AssemblyGenerator {
             }
         }
 
+        return sb;
+    }
+
+    private static generateAssignment(sb: StringBuilder, expr: AssignmentASTNode): StringBuilder {
+        let offset = this.stackMap.Get(expr.declaration.variableName);
+        sb = this.generateExpression(sb, expr.expression);
+        sb.appendLine("mov [ebp-" + offset + "], eax");
+        return sb;
+    }
+
+    private static generateReference(sb: StringBuilder, expr: VariableASTNode): StringBuilder {
+        let offset = this.stackMap.Get(expr.declaration.variableName);
+        sb.appendLine("mov eax, [ebp-" + offset + "]");
         return sb;
     }
 }
