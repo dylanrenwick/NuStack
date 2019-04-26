@@ -1,3 +1,4 @@
+import { StringBuilder } from "../StringBuilder";
 import { IASTNode } from "./IASTNode";
 import { StatementASTNode } from "./StatementASTNode";
 
@@ -14,5 +15,16 @@ export class SubroutineASTNode implements IASTNode {
         this.subName = name;
         this.return = returnType;
         this.children = children;
+    }
+
+    public toString(sb: StringBuilder): StringBuilder {
+        sb.startBlock("Sub '" + this.subName + "' [" + this.return + "]");
+
+        for (let statement of this.children) {
+            sb = statement.toString(sb);
+        }
+
+        sb.endBlock();
+        return sb;
     }
 }

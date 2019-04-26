@@ -17,10 +17,10 @@ export class NuStack {
         this.log(JSON.stringify(tokens.map(tok => tok.toString())));
         let ast: AbstractSyntaxTree = Parser.parse(tokens);
         this.log("\nAST:");
-        this.log(JSON.stringify(ast, null, 2));
+        this.log(ast.toString());
         ast = ASTSimplifier.SimplifyTree(ast);
         this.log("\nSimplified AST:");
-        this.log(JSON.stringify(ast, null, 2));
+        this.log(ast.toString());
         let asm: string = AssemblyGenerator.generate(ast);
         this.log("\nNASM:");
         this.log(asm);

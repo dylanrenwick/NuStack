@@ -1,3 +1,4 @@
+import { StringBuilder } from "../StringBuilder";
 import { ExpressionASTNode } from "./ExpressionASTNode";
 
 export class ConstantASTNode extends ExpressionASTNode {
@@ -8,5 +9,10 @@ export class ConstantASTNode extends ExpressionASTNode {
     public constructor(value: number) {
         super();
         this.value = value;
+    }
+
+    public toString(sb: StringBuilder): StringBuilder {
+        sb.appendLine("Constant: " + this.value);
+        return sb;
     }
 }

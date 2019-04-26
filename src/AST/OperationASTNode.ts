@@ -1,3 +1,4 @@
+import { StringBuilder } from "../StringBuilder";
 import { ExpressionASTNode } from "./ExpressionASTNode";
 
 export abstract class OperationASTNode extends ExpressionASTNode {
@@ -9,6 +10,17 @@ export abstract class OperationASTNode extends ExpressionASTNode {
     public constructor(type: OperationType) {
         super();
         this.opType = type;
+    }
+
+    public toString(sb: StringBuilder): StringBuilder {
+        sb.startBlock("Operation [" + OperationType[this.opType] + "]");
+
+        for (let operand of this.childNodes) {
+            sb = operand.toString(sb);
+        }
+
+        sb.endBlock();
+        return sb;
     }
 
     public static applyOperator(op: OperationType, operands: number[]): number {
