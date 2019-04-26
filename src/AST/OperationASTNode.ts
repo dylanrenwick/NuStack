@@ -19,7 +19,7 @@ export abstract class OperationASTNode extends ExpressionASTNode {
             sb = operand.toString(sb);
         }
 
-        sb.endBlock();
+        sb.endBlock(this.expressionValue === null ? "" : " = " + this.expressionValue);
         return sb;
     }
 
