@@ -3,17 +3,18 @@ import { StringBuilder } from "../StringBuilder";
 import { ExpressionASTNode } from "./ExpressionASTNode";
 
 export class VariableASTNode extends ExpressionASTNode {
-    private var: Declaration;
+    private dec: Declaration;
 
-    public get expressionValue(): any { return null; }
+    public get declaration(): Declaration { return this.dec; }
+    public get expressionValue(): any { return this.dec.currentValue; }
 
     public constructor(dec: Declaration) {
         super();
-        this.var = dec;
+        this.dec = dec;
     }
 
     public toString(sb: StringBuilder): StringBuilder {
-        sb.appendLine("Variable: '" + this.var.variableName + "' [" + this.var.variableType + "]");
+        sb.appendLine("Variable: '" + this.dec.variableName + "' [" + this.dec.variableType + "]");
         return sb;
     }
 }
