@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { AbstractSyntaxTree } from "../../src/AST/AbstractSyntaxTree";
-import { ASTSimplifier } from "../../src/AST/ASTSimplifier";
 import { ConstantASTNode } from "../../src/AST/ConstantASTNode";
+import { ConstantFolder } from "../../src/AST/ConstantFolder";
 import { DiadicASTNode } from "../../src/AST/DiadicASTNode";
 import { ExpressionASTNode } from "../../src/AST/ExpressionASTNode";
 import { MonadicASTNode } from "../../src/AST/MonadicASTNode";
@@ -16,32 +16,34 @@ class TestExpressionNode extends ExpressionASTNode { get expressionValue(): any 
 // Un-evaluable expression
 class TestStatementNode extends StatementASTNode { get expressionValue(): any { return null; } }
 
-describe("ASTSimplifier", () => {
-    describe("ASTSimplifier.simplifyExpression()", () => {
+describe("ConstantFolder", () => {
+    let cf: ConstantFolder = new ConstantFolder();
+
+    describe("ConstantFolder.simplifyExpression()", () => {
         it("should correctly simplify evaluable expressions to constants", () => {
             let expr: ExpressionASTNode = new DiadicASTNode(
                 OperationType.Addition,
                 new ConstantASTNode(2),
                 new ConstantASTNode(4)
             );
-            let simplified = ASTSimplifier["simplifyExpression"].bind(ASTSimplifier, expr)();
+            let simplified = cf["simplifyExpression"].bind(cf, expr)();
             expect(simplified instanceof ConstantASTNode).to.be.true;
             expect(simplified.expressionValue).to.equal(6);
 
             expr = new MonadicASTNode(OperationType.Negation, new ConstantASTNode(5));
-            simplified = ASTSimplifier["simplifyExpression"].bind(ASTSimplifier, expr)();
+            simplified = cf["simplifyExpression"].bind(cf, expr)();
             expect(simplified instanceof ConstantASTNode).to.be.true;
             expect(simplified.expressionValue).to.equal(-5);
         });
 
         it("should not modify un-evaluable expressions", () => {
             let expr = new TestExpressionNode();
-            let simplified = ASTSimplifier["simplifyExpression"].bind(ASTSimplifier, expr)();
+            let simplified = cf["simplifyExpression"].bind(cf, expr)();
             expect(simplified).to.equal(expr);
         });
     });
 
-    describe("ASTSimplifier.simplifyStatement()", () => {
+    describe("ConstantFolder.simplifyStatement()", () => {
         it("should simplify the expression of a return statement", () => {
             let expr: StatementASTNode = new ReturnStatementASTNode(
                 new DiadicASTNode(
@@ -50,26 +52,26 @@ describe("ASTSimplifier", () => {
                     new ConstantASTNode(4)
                 )
             );
-            let simplified = ASTSimplifier["simplifyStatement"].bind(ASTSimplifier, expr)();
+            let simplified = cf["simplifyStatement"].bind(cf, expr)();
             expect(simplified.childNodes instanceof ConstantASTNode).to.be.true;
             expect(simplified.childNodes.expressionValue).to.equal(6);
 
             expr = new ReturnStatementASTNode(
                 new MonadicASTNode(OperationType.Negation, new ConstantASTNode(5))
             );
-            simplified = ASTSimplifier["simplifyStatement"].bind(ASTSimplifier, expr)();
+            simplified = cf["simplifyStatement"].bind(cf, expr)();
             expect(simplified.childNodes instanceof ConstantASTNode).to.be.true;
             expect(simplified.childNodes.expressionValue).to.equal(-5);
         });
 
         it("should not modify other statement types", () => {
             let expr = new TestStatementNode();
-            let simplified = ASTSimplifier["simplifyStatement"].bind(ASTSimplifier, expr)();
+            let simplified = cf["simplifyStatement"].bind(cf, expr)();
             expect(simplified).to.equal(expr);
         });
     });
 
-    describe("ASTSimplifier.simplifySubroutine()", () => {
+    describe("ConstantFolder.simplifySubroutine()", () => {
         it("should create a new subroutine with all statements simplified", () => {
             let sub: SubroutineASTNode = new SubroutineASTNode(
                 "", "", [
@@ -82,7 +84,7 @@ describe("ASTSimplifier", () => {
                     )
                 ]
             );
-            let simplified = ASTSimplifier["simplifySubroutine"].bind(ASTSimplifier, sub)();
+            let simplified = cf["simplifySubroutine"].bind(cf, sub)();
             expect(simplified).to.not.equal(sub);
             expect(simplified.childNodes.length).to.equal(1);
             expect(simplified.childNodes[0] instanceof ReturnStatementASTNode).to.be.true;
@@ -97,14 +99,14 @@ describe("ASTSimplifier", () => {
                     expr
                 ]
             );
-            let simplified = ASTSimplifier["simplifySubroutine"].bind(ASTSimplifier, sub)();
+            let simplified = cf["simplifySubroutine"].bind(cf, sub)();
             expect(simplified).to.not.equal(sub);
             expect(simplified.childNodes.length).to.equal(1);
             expect(simplified.childNodes[0]).to.equal(expr);
         });
     });
 
-    describe("ASTSimplifier.SimplifyTree()", () => {
+    describe("ConstantFolder.SimplifyTree()", () => {
         it("should replace the ProgramASTNode of a tree with a simplified copy", () => {
             let root = new ProgramASTNode(
                 new SubroutineASTNode("", "", [
@@ -118,10 +120,11 @@ describe("ASTSimplifier", () => {
                 ])
             );
             let tree = new AbstractSyntaxTree(root);
-            let simplified = ASTSimplifier.SimplifyTree(tree);
+            let simplified = cf.SimplifyTree(tree);
             expect(simplified.root).to.not.equal(root);
             expect(simplified.root.childNodes.childNodes[0].childNodes instanceof ConstantASTNode).to.be.true;
-            expect(simplified.root.childNodes.childNodes[0].childNodes.expressionValue).to.equal(6);
+            expect((simplified.root.childNodes.childNodes[0].childNodes as ConstantASTNode).expressionValue)
+                .to.equal(6);
         });
     });
 });
