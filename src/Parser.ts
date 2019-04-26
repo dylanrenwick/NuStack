@@ -13,6 +13,7 @@ import { SubroutineASTNode } from "./AST/SubroutineASTNode";
 import { Declaration } from "./Declaration";
 import { HashMap } from "./HashMap";
 import { Token, TokenType } from "./Token";
+import { VariableASTNode } from "./AST/VariableASTNode";
 
 export class Parser {
     private static readonly INT_MAX_VALUE: number = 2 ** 31;
@@ -183,6 +184,9 @@ export class Parser {
             return new MonadicASTNode(op, factor);
         } else if (next.tokenType === TokenType.Integer) {
             return new ConstantASTNode(next.tokenValue);
+        } else if (next.tokenType === TokenType.Identifier
+            && this.variables.Has(next.tokenValue)) {
+            return new VariableASTNode(this.variables.Get(next.tokenValue));
         } else {
             throw new Error("Invalid factor: " + (next ? next.toString() : "<EOF>"));
         }
