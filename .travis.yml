@@ -1,5 +1,11 @@
 language: node_js
 cache: npm
-node_js:
- - "10.15.3"
-script: bash scripts/test.sh
+matrix:
+  include:
+  - name: "Unit tests"
+    node_js: "10.15.3"
+    env: JOB=test
+  - name: "TSLint linting"
+    node_js: "10.15.3"
+    env: JOB=lint
+script: npm run $JOB
