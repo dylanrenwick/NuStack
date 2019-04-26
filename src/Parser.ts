@@ -1,4 +1,5 @@
 import { AbstractSyntaxTree } from "./AST/AbstractSyntaxTree";
+import { AssignmentASTNode } from "./AST/AssignmentASTNode";
 import { ConstantASTNode } from "./AST/ConstantASTNode";
 import { DeclarationASTNode } from "./AST/DeclarationASTNode";
 import { DiadicASTNode } from "./AST/DiadicASTNode";
@@ -91,18 +92,22 @@ export class Parser {
 
     private static parseStatement(tokens: Token[]): StatementASTNode {
         let tok: Token = tokens.shift();
-        if (tok.tokenType !== TokenType.Keyword) {
+        if (tok.tokenType !== TokenType.Keyword && tok.tokenType !== TokenType.Identifier) {
             throw new Error("Expected statement but found " + tok.toString());
         }
 
         let statement: StatementASTNode;
 
-        if (tok.tokenValue === "return") {
-            statement = new ReturnStatementASTNode(
-                this.parseExpression(tokens)
-            );
+        if (tok.tokenType === TokenType.Keyword) {
+            if (tok.tokenValue === "return") {
+                statement = new ReturnStatementASTNode(
+                    this.parseExpression(tokens)
+                );
+            } else {
+                statement = this.parseDeclaration(tokens, tok);
+            }
         } else {
-            statement = this.parseDeclaration(tokens, tok);
+            statement = this.parseAssignment(tokens, tok);
         }
 
         tok = tokens.shift();
@@ -121,8 +126,25 @@ export class Parser {
         }
         let name = tok.tokenValue;
         let declaration = new Declaration(name, type);
+        this.variables.Add(name, declaration);
 
         return new DeclarationASTNode(declaration);
+    }
+
+    private static parseAssignment(tokens: Token[], tok: Token): AssignmentASTNode {
+        if (!this.variables.Has(tok.tokenValue)) {
+            throw new Error("Attempt to reference local variable '" + tok.toString() + "' before it was defined");
+        }
+        let dec: Declaration = this.variables.Get(tok.tokenValue);
+
+        tok = tokens.shift();
+        if (tok.tokenType !== TokenType.Assignment) {
+            throw new Error("Expected '=' but found " + tok.toString());
+        }
+
+        let expr: ExpressionASTNode = this.parseExpression(tokens);
+
+        return new AssignmentASTNode(dec, expr);
     }
 
     private static parseExpression(tokens: Token[], operatorsIndex: number = 0): ExpressionASTNode {
@@ -182,6 +204,7 @@ export class Parser {
             case TokenType.LessThanEqual: return OperationType.LessThanEqual;
             case TokenType.LogicalOR: return OperationType.LogicalOR;
             case TokenType.LogicalAND: return OperationType.LogicalAND;
+            case TokenType.Assignment: return OperationType.Assignment;
             default: throw new Error("Invalid operator: " + (tok ? tok.toString() : "<EOF>"));
         }
     }

@@ -65,5 +65,6 @@ export enum OperationType {
     MoreThanEqual,
     LessThanEqual,
     LogicalOR,
-    LogicalAND
+    LogicalAND,
+    Assignment
 }
