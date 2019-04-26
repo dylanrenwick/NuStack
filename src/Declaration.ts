@@ -11,6 +11,7 @@ export class Declaration {
     public constructor(varName: string, type: string) {
         this.varName = varName;
         this.type = type;
+        this.values = [];
     }
 
     public getValue(index: number): any {
@@ -28,6 +29,7 @@ export class Declaration {
     }
 
     private typeCheck(value: any): boolean {
+        if (value === null) return true;
         switch (this.type) {
             case "int":
                 return typeof(value) === "number" && (value as number) % 1 === 0;
