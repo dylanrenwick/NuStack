@@ -3,3 +3,6 @@ bin/
 *.code-workspace
 .nyc_output/
 coverage/
+examples/*
+!examples/*.ns
+!examples/*.json
