@@ -7,6 +7,7 @@ import { OperationASTNode, OperationType } from "./AST/OperationASTNode";
 import { ReturnStatementASTNode } from "./AST/ReturnStatementASTNode";
 import { StatementASTNode } from "./AST/StatementASTNode";
 import { SubroutineASTNode } from "./AST/SubroutineASTNode";
+import { StringBuilder } from "./StringBuilder";
 
 export class AssemblyGenerator {
     private static complexOps: OperationType[] = [
@@ -32,122 +33,133 @@ export class AssemblyGenerator {
     private static get label(): string { return "_util_label" + this.labelCount++; }
 
     public static generate(ast: AbstractSyntaxTree): string {
-        let asm: string = "";
+        let sb: StringBuilder = new StringBuilder();
+        sb.indent++;
 
-        asm += this.generateSubroutine(ast.root.childNodes);
+        sb = this.generateSubroutine(sb, ast.root.childNodes);
 
-        return asm;
+        return sb.toString();
     }
 
-    private static generateSubroutine(sub: SubroutineASTNode): string {
-        let asm: string = "";
-
-        asm += sub.name + ":\n";
-        asm += "push ebp\n";
-        asm += "mov ebp, esp\n";
+    private static generateSubroutine(sb: StringBuilder, sub: SubroutineASTNode): StringBuilder {
+        sb = this.generateLabel(sb, sub.name);
+        sb.appendLine("push ebp");
+        sb.appendLine("mov sbp, esp");
 
         for (let statement of sub.childNodes) {
-            asm += this.generateStatement(statement);
+            sb = this.generateStatement(sb, statement);
         }
 
-        return asm;
+        return sb;
     }
 
-    private static generateStatement(statement: StatementASTNode): string {
+    private static generateLabel(sb: StringBuilder, label: string): StringBuilder {
+        sb.indent--;
+        sb.appendLine(label + ":");
+        sb.indent++;
+
+        return sb;
+    }
+
+    private static generateStatement(sb: StringBuilder, statement: StatementASTNode): StringBuilder {
         if (statement instanceof ReturnStatementASTNode) {
-            return this.generateReturn(statement);
+            return this.generateReturn(sb, statement);
         } else if (statement instanceof DeclarationASTNode) {
-            // return this.generateDeclaration(statement);
+            return this.generateDeclaration(sb, statement);
         }
 
         throw new Error("Unknown AST node");
     }
 
-    private static generateReturn(statement: ReturnStatementASTNode): string {
-        return ((statement.childNodes !== null)
-            ? this.generateExpression(statement.childNodes)
-            : "")
-            + "mov esp, ebp\n"
-            + "pop ebp\n"
-            + "ret\n";
+    private static generateReturn(sb: StringBuilder, statement: ReturnStatementASTNode): StringBuilder {
+        if (statement.childNodes !== null) sb = this.generateExpression(sb, statement.childNodes);
+
+        sb.appendLine("mov esp, ebp");
+        sb.appendLine("pop ebp");
+        sb.appendLine("ret");
+
+        return sb;
     }
 
-    private static generateExpression(expr: ExpressionASTNode): string {
+    private static generateDeclaration(sb: StringBuilder, statement: DeclarationASTNode): StringBuilder {
+        return sb;
+    }
+
+    private static generateExpression(sb: StringBuilder, expr: ExpressionASTNode): StringBuilder {
         if (expr instanceof ConstantASTNode) {
-            return this.generateConstant(expr);
+            return this.generateConstant(sb, expr);
         } else if (expr instanceof OperationASTNode) {
-            return this.generateOperation(expr);
+            return this.generateOperation(sb, expr);
         }
 
         throw new Error("Unknown AST node: " + JSON.stringify(expr));
     }
 
-    private static generateConstant(expr: ConstantASTNode): string {
-        return "mov eax, " + expr.expressionValue + "d\n";
+    private static generateConstant(sb: StringBuilder, expr: ConstantASTNode): StringBuilder {
+        sb.appendLine("mov eax, " + expr.expressionValue + "d");
+        return sb;
     }
 
-    private static generateOperation(op: OperationASTNode): string {
-        let asm: string = "";
-
+    private static generateOperation(sb: StringBuilder, op: OperationASTNode): StringBuilder {
         switch (op.operation) {
             case OperationType.Negation:
-                asm += this.generateExpression(op.childNodes[0]);
-                asm += "neg eax\n";
+                sb = this.generateExpression(sb, op.childNodes[0]);
+                sb.appendLine("neg eax");
                 break;
             case OperationType.BitwiseNOT:
-                asm += this.generateExpression(op.childNodes[0]);
-                asm += "not eax\n";
+                sb = this.generateExpression(sb, op.childNodes[0]);
+                sb.appendLine("not eax");
                 break;
             case OperationType.LogicalNOT:
-                asm += this.generateExpression(op.childNodes[0]);
-                asm += "cmp eax, 0\n";
-                asm += "xor eax, eax\n";
-                asm += "setz al\n";
+                sb = this.generateExpression(sb, op.childNodes[0]);
+                sb.appendLine("cmp eax, 0");
+                sb.appendLine("xor eax, eax");
+                sb.appendLine("setz al");
                 break;
         }
 
         if (this.diadicOps.includes(op.operation)) {
-            asm += this.generateExpression(op.childNodes[0]);
-            asm += "push eax\n";
-            asm += this.generateExpression(op.childNodes[1]);
-            asm += "pop ecx\n";
+            sb = this.generateExpression(sb, op.childNodes[0]);
+            sb.appendLine("push eax");
+            sb = this.generateExpression(sb, op.childNodes[1]);
+            sb.appendLine("pop ecx");
             switch (op.operation) {
                 case OperationType.Addition:
-                    asm += "add eax, ecx\n";
+                    sb.appendLine("add eax, ecx");
                     break;
                 case OperationType.Subtraction:
-                    asm += "sub eax, ecx\n";
+                    sb.appendLine("sub eax, ecx");
                     break;
                 case OperationType.Multiplication:
-                    asm += "mul ecx\n";
+                    sb.appendLine("mul ecx");
                     break;
                 case OperationType.Division:
-                    asm += "xor edx, edx\n";
-                    asm += "div ecx\n";
+                    sb.appendLine("xor edx, edx");
+                    sb.appendLine("div ecx");
                     break;
             }
 
             if (this.comparisons.includes(op.operation)) {
-                asm += "cmp eax, ecx\n";
-                asm += "xor eax, eax\n";
+                sb.appendLine("cmp eax, ecx");
+                sb.appendLine("xor eax, eax");
                 switch (op.operation) {
                     case OperationType.MoreThan:
-                        asm += "setg al\n";
+                        sb.appendLine("setg al");
                         break;
                     case OperationType.LessThan:
-                        asm += "setl al\n";
+                        sb.appendLine("setl al");
                         break;
                     case OperationType.Equal:
-                        asm += "setz al\n";
+                        sb.appendLine("setz al");
                         break;
                     case OperationType.NotEqual:
-                        asm += "setnz al\n";
+                        sb.appendLine("setnz al");
                         break;
                     case OperationType.MoreThanEqual:
-                        asm += "setge al\n";
+                        sb.appendLine("setge al");
                         break;
                     case OperationType.LessThanEqual:
-                        asm += "setle al\n";
+                        sb.appendLine("setle al");
                         break;
                 }
             }
@@ -158,31 +170,31 @@ export class AssemblyGenerator {
             let endLabel = this.label;
 
             if (op.operation === OperationType.LogicalOR) {
-                asm += this.generateExpression(op.childNodes[0]);
-                asm += "cmp eax, 0\n";
-                asm += "je " + clauseLabel + "\n";
-                asm += "mov eax, 1d\n";
-                asm += "jmp " + endLabel + "\n";
-                asm += clauseLabel + ":\n";
-                asm += this.generateExpression(op.childNodes[1]);
-                asm += "cmp eax, 0\n";
-                asm += "xor eax, eax\n";
-                asm += "setne al\n";
-                asm += endLabel + ":\n";
+                sb = this.generateExpression(sb, op.childNodes[0]);
+                sb.appendLine("cmp eax, 0");
+                sb.appendLine("je " + clauseLabel);
+                sb.appendLine("mov eax, 1d");
+                sb.appendLine("jmp " + endLabel);
+                sb = this.generateLabel(sb, clauseLabel);
+                sb = this.generateExpression(sb, op.childNodes[1]);
+                sb.appendLine("cmp eax, 0");
+                sb.appendLine("xor eax, eax");
+                sb.appendLine("setne al");
+                sb = this.generateLabel(sb, endLabel);
             } else if (op.operation === OperationType.LogicalAND) {
-                asm += this.generateExpression(op.childNodes[0]);
-                asm += "cmp eax, 0\n";
-                asm += "jne " + clauseLabel + "\n";
-                asm += "jmp " + endLabel + "\n";
-                asm += clauseLabel + ":\n";
-                asm += this.generateExpression(op.childNodes[1]);
-                asm += "cmp eax, 0\n";
-                asm += "xor eax, eax\n";
-                asm += "setne al\n";
-                asm += endLabel + ":\n";
+                sb = this.generateExpression(sb, op.childNodes[0]);
+                sb.appendLine("cmp eax, 0");
+                sb.appendLine("jne " + clauseLabel);
+                sb.appendLine("jmp " + endLabel);
+                sb = this.generateLabel(sb, clauseLabel);
+                sb = this.generateExpression(sb, op.childNodes[1]);
+                sb.appendLine("cmp eax, 0");
+                sb.appendLine("xor eax, eax");
+                sb.appendLine("setne al");
+                sb = this.generateLabel(sb, endLabel);
             }
         }
 
-        return asm;
+        return sb;
     }
 }
