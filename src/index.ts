@@ -1,22 +1,20 @@
+import { option, parse } from "args";
 import { readFileSync, writeFileSync } from "fs";
 import { NuStack } from "./NuStack";
 
-let sourceFile: string = "main.ns";
-if (process.argv.length > 2) {
-    sourceFile = process.argv[2];
-}
+option("input-file", "The source file from which to read code", "main.ns");
+option("output-file", "The file to write compiled ASM to", "main.asm");
+option("debug", "Display debug information during compile");
+
+const args = parse(process.argv);
+
+let sourceFile = args.i;
+let outFile = args.o;
+let debug = args.d;
+
 let fileBuffer: Buffer = readFileSync(sourceFile);
 
-let outFile: string = "main.asm";
-if (process.argv.length > 3) {
-    outFile = process.argv[3];
-}
 let code: string = fileBuffer.toString("utf8");
-
-let debug: boolean = false;
-if (process.argv.length > 4) {
-    debug = process.argv[4] === "-d";
-}
 
 let asm: string = NuStack.compile(code, debug);
 
