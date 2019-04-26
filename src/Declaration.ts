@@ -2,6 +2,7 @@ export class Declaration {
     private varName: string;
     private type: string;
     private values: any[];
+    private hasRefs: boolean[];
 
     public get variableName(): string { return this.varName; }
     public get currentIndex(): number { return this.values.length - 1; }
@@ -12,6 +13,7 @@ export class Declaration {
         this.varName = varName;
         this.type = type;
         this.values = [];
+        this.hasRefs = [];
     }
 
     public getValue(index: number): any {
@@ -21,11 +23,19 @@ export class Declaration {
     public addValue(value: any): number {
         if (this.typeCheck(value)) {
             this.values.push(value);
+            this.hasRefs.push(false);
             return this.values.length - 1;
         } else {
             throw new Error("Variable " + this.varName + " is of type "
                 + this.type + " but value given was of type " + typeof(value));
         }
+    }
+
+    public flagRef(index: number = this.currentIndex): void {
+        this.hasRefs[index] = true;
+    }
+    public hasRef(index: number = this.currentIndex): boolean {
+        return this.hasRefs[index];
     }
 
     private typeCheck(value: any): boolean {
