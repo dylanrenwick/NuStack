@@ -39,6 +39,8 @@
     "typescript": "^3.4.3"
   },
   "dependencies": {
-    "@types/node": "^11.13.4"
+    "@types/args": "^3.0.0",
+    "@types/node": "^11.13.4",
+    "args": "^5.0.1"
   }
 }
