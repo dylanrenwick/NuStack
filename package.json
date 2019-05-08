@@ -6,7 +6,8 @@
   "scripts": {
     "lintTests": "npm run clean && tslint test/**/*.spec.ts",
     "lint": "npm run clean && tslint -p tsconfig.json",
-    "test": "npm run clean && nyc mocha --recursive --extension ts -r ts-node/register test/",
+    "coverage": "nyc npm test && nyc report --reporter=text-lcov | coveralls",
+    "test": "npm run clean && mocha --recursive --extension ts -r ts-node/register test/",
     "run": "npm run build && node bin/index.js",
     "build": "npm run clean && tsc",
     "clean": "rm -rf bin/ coverage/ .nyc_output/"
@@ -32,6 +33,7 @@
     "@types/chai": "^4.1.7",
     "@types/mocha": "^5.2.6",
     "chai": "^4.2.0",
+    "coveralls": "^3.0.3",
     "mocha": "^6.1.4",
     "nyc": "^14.0.0",
     "ts-node": "^8.1.0",

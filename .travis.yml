@@ -4,7 +4,7 @@ matrix:
   include:
   - name: "Unit tests"
     node_js: "10.15.3"
-    env: JOB=test
+    env: JOB=coverage
   - name: "TSLint linting"
     node_js: "10.15.3"
     env: JOB=lint
