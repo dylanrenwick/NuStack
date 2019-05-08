@@ -12,7 +12,7 @@ import { VariableASTNode } from "../AST/VariableASTNode";
 import { Declaration } from "../Declaration";
 import { HashMap } from "../HashMap";
 import { StringBuilder } from "../StringBuilder";
-import { IPlatformController } from "./IPlatformController";
+import { PlatformController } from "./PlatformController";
 
 export class AssemblyGenerator {
     private static complexOps: OperationType[] = [
@@ -38,19 +38,22 @@ export class AssemblyGenerator {
 
     private static labelCount: number = 1;
 
-    private static platformController: IPlatformController;
+    private static platformController: PlatformController;
 
-    private static get ax(): string { return this.platformController.primaryAccumulator; }
-    private static get bx(): string { return this.platformController.baseRegister; }
-    private static get cx(): string { return this.platformController.countRegister; }
-    private static get dx(): string { return this.platformController.dataRegister; }
+    private static get ax(): string { return this.platformController.ax; }
+    private static get bx(): string { return this.platformController.bx; }
+    private static get cx(): string { return this.platformController.cx; }
+    private static get dx(): string { return this.platformController.dx; }
 
-    private static get bp(): string { return this.platformController.basePointer; }
-    private static get sp(): string { return this.platformController.stackPointer; }
+    private static get bp(): string { return this.platformController.bp; }
+    private static get sp(): string { return this.platformController.sp; }
+
+    private static get si(): string { return this.platformController.si; }
+    private static get di(): string { return this.platformController.di; }
 
     private static get label(): string { return "_util_label" + this.labelCount++; }
 
-    public static generate(ast: AbstractSyntaxTree, platform: IPlatformController): string {
+    public static generate(ast: AbstractSyntaxTree, platform: PlatformController): string {
         this.platformController = platform;
         let sb: StringBuilder = new StringBuilder();
 

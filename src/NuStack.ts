@@ -1,4 +1,7 @@
 import { AssemblyGenerator } from "./ASM/AssemblyGenerator";
+import { PlatformController } from "./ASM/PlatformController";
+import { PlatformController32 } from "./ASM/PlatformController32";
+import { PlatformController64 } from "./ASM/PlatformController64";
 import { AbstractSyntaxTree } from "./AST/AbstractSyntaxTree";
 import { ASTPass } from "./AST/ASTPass";
 import { ConstantFolder } from "./AST/ConstantFolder";
@@ -6,9 +9,6 @@ import { SSAReducer } from "./AST/SSAReducer";
 import { Parser } from "./Parser";
 import { Token } from "./Token";
 import { Tokenizer } from "./Tokenizer";
-import { IPlatformController } from "./ASM/IPlatformController";
-import { PlatformController32 } from "./ASM/PlatformController32";
-import { PlatformController64 } from "./ASM/PlatformController64";
 
 export class NuStack {
     private static debug: boolean;
@@ -35,7 +35,7 @@ export class NuStack {
         }
         this.log("\nSimplified AST:");
         this.log(ast.toString());
-        let platformController: IPlatformController;
+        let platformController: PlatformController;
         if (platform === "32") platformController = new PlatformController32();
         else if (platform === "64") platformController = new PlatformController64();
         let asm: string = AssemblyGenerator.generate(ast, platformController);
