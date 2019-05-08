@@ -40,6 +40,14 @@ export class AssemblyGenerator {
 
     private static platformController: IPlatformController;
 
+    private static get ax(): string { return this.platformController.primaryAccumulator; }
+    private static get bx(): string { return this.platformController.baseRegister; }
+    private static get cx(): string { return this.platformController.countRegister; }
+    private static get dx(): string { return this.platformController.dataRegister; }
+
+    private static get bp(): string { return this.platformController.basePointer; }
+    private static get sp(): string { return this.platformController.stackPointer; }
+
     private static get label(): string { return "_util_label" + this.labelCount++; }
 
     public static generate(ast: AbstractSyntaxTree, platform: IPlatformController): string {
@@ -52,9 +60,7 @@ export class AssemblyGenerator {
         sb.appendLine("_start:");
         sb.indent++;
         sb.appendLine("call main");
-        sb.appendLine("mov rbx, rax");
-        sb.appendLine("mov rax, 1");
-        sb.appendLine("int 0x80");
+        sb = this.platformController.makeExit(sb, this.ax);
         sb.appendLine("");
 
         sb = this.generateSubroutine(sb, ast.root.childNodes);
@@ -64,8 +70,7 @@ export class AssemblyGenerator {
 
     private static generateSubroutine(sb: StringBuilder, sub: SubroutineASTNode): StringBuilder {
         sb = this.generateLabel(sb, sub.name);
-        sb.appendLine("push rbp");
-        sb.appendLine("mov rbp, rsp");
+        sb = this.platformController.makeStackFrame(sb);
 
         this.stackMap = new HashMap<string, number>();
         this.stackOffset = 0;
@@ -100,8 +105,7 @@ export class AssemblyGenerator {
     private static generateReturn(sb: StringBuilder, statement: ReturnStatementASTNode): StringBuilder {
         if (statement.childNodes !== null) sb = this.generateExpression(sb, statement.childNodes);
 
-        sb.appendLine("mov rsp, rbp");
-        sb.appendLine("pop rbp");
+        sb = this.platformController.endStackFrame(sb);
         sb.appendLine("ret");
 
         return sb;
@@ -114,8 +118,8 @@ export class AssemblyGenerator {
             throw new Error("Variable '" + dec.variableName + "' has already been declared!");
         }
 
-        sb.appendLine("mov rax, 0d");
-        sb.appendLine("push rax");
+        sb.appendLine(`mov ${this.ax}, 0d`);
+        sb.appendLine("push " + this.ax);
 
         this.stackOffset += 4;
         this.stackMap.Add(dec.variableName, this.stackOffset);
@@ -138,7 +142,7 @@ export class AssemblyGenerator {
     }
 
     private static generateConstant(sb: StringBuilder, expr: ConstantASTNode): StringBuilder {
-        sb.appendLine("mov rax, " + expr.expressionValue + "d");
+        sb.appendLine(`mov ${this.ax}, ` + expr.expressionValue + "d");
         return sb;
     }
 
@@ -146,44 +150,44 @@ export class AssemblyGenerator {
         switch (op.operation) {
             case OperationType.Negation:
                 sb = this.generateExpression(sb, op.childNodes[0]);
-                sb.appendLine("neg rax");
+                sb.appendLine("neg " + this.ax);
                 break;
             case OperationType.BitwiseNOT:
                 sb = this.generateExpression(sb, op.childNodes[0]);
-                sb.appendLine("not rax");
+                sb.appendLine("not " + this.ax);
                 break;
             case OperationType.LogicalNOT:
                 sb = this.generateExpression(sb, op.childNodes[0]);
-                sb.appendLine("cmp rax, 0");
-                sb.appendLine("xor rax, rax");
+                sb.appendLine(`cmp ${this.ax}, 0`);
+                sb.appendLine(`xor ${this.ax}, ${this.ax}`);
                 sb.appendLine("setz al");
                 break;
         }
 
         if (this.diadicOps.includes(op.operation)) {
             sb = this.generateExpression(sb, op.childNodes[0]);
-            sb.appendLine("push rax");
+            sb.appendLine("push " + this.ax);
             sb = this.generateExpression(sb, op.childNodes[1]);
-            sb.appendLine("pop rcx");
+            sb.appendLine("pop " + this.cx);
             switch (op.operation) {
                 case OperationType.Addition:
-                    sb.appendLine("add rax, rcx");
+                    sb.appendLine(`add ${this.ax}, ${this.cx}`);
                     break;
                 case OperationType.Subtraction:
-                    sb.appendLine("sub rax, rcx");
+                    sb.appendLine(`sub ${this.ax}, ${this.cx}`);
                     break;
                 case OperationType.Multiplication:
-                    sb.appendLine("mul rcx");
+                    sb.appendLine("mul " + this.cx);
                     break;
                 case OperationType.Division:
-                    sb.appendLine("xor rdx, rdx");
-                    sb.appendLine("div rcx");
+                    sb.appendLine(`xor ${this.dx}, ${this.dx}`);
+                    sb.appendLine("div " + this.cx);
                     break;
             }
 
             if (this.comparisons.includes(op.operation)) {
-                sb.appendLine("cmp rax, rcx");
-                sb.appendLine("xor rax, rax");
+                sb.appendLine(`cmp ${this.ax}, ${this.cx}`);
+                sb.appendLine(`xor ${this.ax}, ${this.ax}`);
                 switch (op.operation) {
                     case OperationType.MoreThan:
                         sb.appendLine("setg al");
@@ -213,25 +217,25 @@ export class AssemblyGenerator {
 
             if (op.operation === OperationType.LogicalOR) {
                 sb = this.generateExpression(sb, op.childNodes[0]);
-                sb.appendLine("cmp rax, 0");
+                sb.appendLine(`cmp ${this.ax}, 0`);
                 sb.appendLine("je " + clauseLabel);
-                sb.appendLine("mov rax, 1d");
+                sb.appendLine(`mov ${this.ax}, 1d`);
                 sb.appendLine("jmp " + endLabel);
                 sb = this.generateLabel(sb, clauseLabel);
                 sb = this.generateExpression(sb, op.childNodes[1]);
-                sb.appendLine("cmp rax, 0");
-                sb.appendLine("xor rax, rax");
+                sb.appendLine(`cmp ${this.ax}, 0`);
+                sb.appendLine(`xor ${this.ax}, ${this.ax}`);
                 sb.appendLine("setne al");
                 sb = this.generateLabel(sb, endLabel);
             } else if (op.operation === OperationType.LogicalAND) {
                 sb = this.generateExpression(sb, op.childNodes[0]);
-                sb.appendLine("cmp rax, 0");
+                sb.appendLine(`cmp ${this.ax}, 0`);
                 sb.appendLine("jne " + clauseLabel);
                 sb.appendLine("jmp " + endLabel);
                 sb = this.generateLabel(sb, clauseLabel);
                 sb = this.generateExpression(sb, op.childNodes[1]);
-                sb.appendLine("cmp rax, 0");
-                sb.appendLine("xor rax, rax");
+                sb.appendLine(`cmp ${this.ax}, 0`);
+                sb.appendLine(`xor ${this.ax}, ${this.ax}`);
                 sb.appendLine("setne al");
                 sb = this.generateLabel(sb, endLabel);
             }
@@ -243,13 +247,13 @@ export class AssemblyGenerator {
     private static generateAssignment(sb: StringBuilder, expr: AssignmentASTNode): StringBuilder {
         let offset = this.stackMap.Get(expr.declaration.variableName);
         sb = this.generateExpression(sb, expr.expression);
-        sb.appendLine("mov [rbp-" + offset + "], rax");
+        sb.appendLine("mov [rbp-" + offset + "], " + this.ax);
         return sb;
     }
 
     private static generateReference(sb: StringBuilder, expr: VariableASTNode): StringBuilder {
         let offset = this.stackMap.Get(expr.declaration.variableName);
-        sb.appendLine("mov rax, [rbp-" + offset + "]");
+        sb.appendLine(`mov ${this.ax}, [${this.bp}-` + offset + "]");
         return sb;
     }
 }
