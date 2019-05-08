@@ -10,7 +10,7 @@
     "test": "npm run clean && mocha --recursive --extension ts -r ts-node/register test/",
     "run": "npm run build && node bin/index.js",
     "build": "npm run clean && tsc",
-    "clean": "rm -rf bin/ coverage/ .nyc_output/"
+    "clean": "rm -rf bin/ coverage/"
   },
   "author": "",
   "license": "ISC",
