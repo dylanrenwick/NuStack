@@ -1,4 +1,4 @@
-import { AssemblyGenerator } from "./AssemblyGenerator";
+import { AssemblyGenerator } from "./ASM/AssemblyGenerator";
 import { AbstractSyntaxTree } from "./AST/AbstractSyntaxTree";
 import { ASTPass } from "./AST/ASTPass";
 import { ConstantFolder } from "./AST/ConstantFolder";
@@ -6,6 +6,9 @@ import { SSAReducer } from "./AST/SSAReducer";
 import { Parser } from "./Parser";
 import { Token } from "./Token";
 import { Tokenizer } from "./Tokenizer";
+import { IPlatformController } from "./ASM/IPlatformController";
+import { PlatformController32 } from "./ASM/PlatformController32";
+import { PlatformController64 } from "./ASM/PlatformController64";
 
 export class NuStack {
     private static debug: boolean;
@@ -15,7 +18,7 @@ export class NuStack {
         [new SSAReducer()]
     ];
 
-    public static compile(code: string, debug: boolean = false, optimization = 0): string {
+    public static compile(code: string, platform: string = "32", debug: boolean = false, optimization = 0): string {
         this.debug = debug;
         this.log("\nSource NuStack:");
         this.log(code);
@@ -32,7 +35,10 @@ export class NuStack {
         }
         this.log("\nSimplified AST:");
         this.log(ast.toString());
-        let asm: string = AssemblyGenerator.generate(ast);
+        let platformController: IPlatformController;
+        if (platform === "32") platformController = new PlatformController32();
+        else if (platform === "64") platformController = new PlatformController64();
+        let asm: string = AssemblyGenerator.generate(ast, platformController);
         this.log("\nNASM:");
         this.log(asm);
 
