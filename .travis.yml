@@ -5,6 +5,9 @@ matrix:
   - name: "Unit tests"
     node_js: "10.15.3"
     env: JOB=coverage
+  - name: "E2E tests"
+    node_js: "10.15.3"
+    env: JOB=e2e
   - name: "TSLint linting"
     node_js: "10.15.3"
     env: JOB=lint
