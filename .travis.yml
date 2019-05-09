@@ -13,4 +13,4 @@ matrix:
     env: JOB=lint
 script: npm run $JOB
 before_install:
-  - sudo apt-get install -y nasm ld
+  - sudo apt-get install -y nasm
