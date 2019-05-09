@@ -124,7 +124,7 @@ export class AssemblyGenerator {
         sb.appendLine(`mov ${this.ax}, 0d`);
         sb.appendLine("push " + this.ax);
 
-        this.stackOffset += 4;
+        this.stackOffset += this.platformController.wordSize;
         this.stackMap.Add(dec.variableName, this.stackOffset);
 
         return sb;

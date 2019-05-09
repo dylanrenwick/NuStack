@@ -12,6 +12,8 @@ export abstract class PlatformController {
     public get si(): string { return this.regPrefix + "si"; }
     public get di(): string { return this.regPrefix + "di"; }
 
+    public abstract get wordSize(): number;
+
     protected abstract get regPrefix(): string;
 
     public abstract makeSysCall(sb: StringBuilder, sysCall: Syscall, ...data: any[]): StringBuilder;

@@ -4,6 +4,8 @@ import { PlatformController, Syscall } from "./PlatformController";
 export class PlatformController32 extends PlatformController {
     protected get regPrefix(): string { return "e"; }
 
+    public get wordSize(): number { return 4; }
+
     public makeSysCall(sb: StringBuilder, sysCall: Syscall, ...data: any[]): StringBuilder {
         switch (sysCall) {
             case Syscall.exit:
