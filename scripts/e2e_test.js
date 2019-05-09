@@ -14,6 +14,8 @@ let errs = "";
 
 let result = 0;
 
+console.log(tests.length + " tests to run");
+
 for (let test of tests) {
     let output = "";
     let testName = test.fileName;
@@ -22,7 +24,6 @@ for (let test of tests) {
     finishedTests[testName] = [];
 
     output += ("Running " + testName) + "\n";
-
     for (let i = 0; i < 3; i++) {
         let realName = testName + "-" + i;
 
@@ -35,6 +36,7 @@ for (let test of tests) {
                 errs += stdout + "\n";
                 errs += stderr + "\n";
                 result = 1;
+                registerFinish(testName, i, output);
             } else {
                 exec("./examples/" + realName, (err, stdout, stderr) => {
                     let outCode = 0;
@@ -63,13 +65,20 @@ function registerFinish(testName, i, output) {
         && finishedTests[testName].includes(1)
         && finishedTests[testName].includes(2))
         console.log(output);
+}
 
+function wait() {
     let finishedTestNames = Object.keys(finishedTests).filter(x => finishedTests.hasOwnProperty(x)).filter(x => finishedTests[x].length == 3);
     let unfinished = tests.map(x => x.fileName).filter(x => !finishedTestNames.includes(x));
+
     if (!unfinished.length) {
         if (errs.trim().length) {
             console.log(errs.trim());
         }
         process.exit(result);
+    } else {
+        setTimeout(wait, 1000);
     }
 }
+
+setTimeout(wait, 1000);
