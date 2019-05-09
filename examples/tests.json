@@ -6,5 +6,9 @@
     {
         "fileName": "test2",
         "answer": 11
+    },
+    {
+        "fileName": "test3",
+        "answer": 1
     }
 ]
