@@ -28,6 +28,7 @@ for (let test of tests) {
         let realName = testName + "-" + i;
 
         exec("node bin/index.js -i examples/" + testName + ".ns -o examples/" + realName + ".asm -a 64 -O " + i
+            + (process.argv.includes("-d") ? " -d" : "")
             + " && nasm -f elf64 -o examples/" + realName + ".o examples/" + realName + ".asm"
             + " && ld -e main -o examples/" + realName + " examples/" + realName + ".o",
         (err, stdout, stderr) => {
