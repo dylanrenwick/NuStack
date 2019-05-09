@@ -35,22 +35,23 @@ for (let test of tests) {
                 errs += stdout + "\n";
                 errs += stderr + "\n";
                 result = 1;
-            }
-            exec("./examples/" + realName, (err, stdout, stderr) => {
-                let outCode = 0;
-                if (err) outCode = err.code;
-    
-                if (outCode !== expected) {
-                    output += ("\t" + realName + " - FAIL: Expected " + expected + " but got " + outCode) + "\n";
-                    errs += stdout + "\n";
-                    errs += stderr + "\n";
-                    result = 1;
-                } else {
-                    output += ("\t" + realName + " - PASS: Expected " + expected + " and got " + outCode) + "\n";
-                }
+            } else {
+                exec("./examples/" + realName, (err, stdout, stderr) => {
+                    let outCode = 0;
+                    if (err) outCode = err.code;
+        
+                    if (outCode !== expected) {
+                        output += ("\t" + realName + " - FAIL: Expected " + expected + " but got " + outCode) + "\n";
+                        errs += stdout + "\n";
+                        errs += stderr + "\n";
+                        result = 1;
+                    } else {
+                        output += ("\t" + realName + " - PASS: Expected " + expected + " and got " + outCode) + "\n";
+                    }
 
-                registerFinish(testName, i, output);
-            });
+                    registerFinish(testName, i, output);
+                });
+            }
         });
     }
 }
