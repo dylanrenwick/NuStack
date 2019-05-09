@@ -1,12 +1,13 @@
 import { Declaration } from "../Declaration";
 import { StringBuilder } from "../StringBuilder";
-import { ExpressionASTNode } from "./ExpressionASTNode";
+import { ExpressionASTNode, ValueType } from "./ExpressionASTNode";
 
 export class VariableASTNode extends ExpressionASTNode {
     private dec: Declaration;
 
     public get declaration(): Declaration { return this.dec; }
     public get expressionValue(): any { return this.dec.currentValue; }
+    public get expressionType(): ValueType { return this.dec.variableType; }
 
     public constructor(dec: Declaration) {
         super();

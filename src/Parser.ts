@@ -3,7 +3,7 @@ import { AssignmentASTNode } from "./AST/AssignmentASTNode";
 import { ConstantASTNode } from "./AST/ConstantASTNode";
 import { DeclarationASTNode } from "./AST/DeclarationASTNode";
 import { DiadicASTNode } from "./AST/DiadicASTNode";
-import { ExpressionASTNode } from "./AST/ExpressionASTNode";
+import { ExpressionASTNode, ValueType } from "./AST/ExpressionASTNode";
 import { MonadicASTNode } from "./AST/MonadicASTNode";
 import { OperationType } from "./AST/OperationASTNode";
 import { ProgramASTNode } from "./AST/ProgramASTNode";
@@ -46,7 +46,7 @@ export class Parser {
     private static parseSubroutine(tokens: Token[]): SubroutineASTNode {
         let returnTypeTok: Token = tokens.shift();
         if (returnTypeTok.tokenType !== TokenType.Keyword ||
-            returnTypeTok.tokenValue !== "int") {
+            !ExpressionASTNode.getTypeFromString(returnTypeTok.tokenValue)) {
             throw new Error("Expected 'int' but found " + returnTypeTok.toString());
         }
 
@@ -134,6 +134,10 @@ export class Parser {
         if (tokens[0].tokenType === TokenType.Assignment) {
             tokens.shift();
             expr = this.parseExpression(tokens);
+            if (expr.expressionType !== declaration.variableType) {
+                throw new Error("Type " + expr.expressionType
+                    + " is not assignable to type " + declaration.variableType);
+            }
         }
 
         return new DeclarationASTNode(declaration, expr);
@@ -152,6 +156,11 @@ export class Parser {
 
         let expr: ExpressionASTNode = this.parseExpression(tokens);
 
+        if (expr.expressionType !== dec.variableType) {
+            throw new Error("Type " + expr.expressionType
+                + " is not assignable to type " + dec.variableType);
+        }
+
         return new AssignmentASTNode(dec, expr);
     }
 
@@ -165,6 +174,10 @@ export class Parser {
             let nextTerm: ExpressionASTNode = operatorsIndex === this.exprOperators.length - 1
                 ? this.parseFactor(tokens)
                 : this.parseExpression(tokens, operatorsIndex + 1);
+            if (term.expressionType !== nextTerm.expressionType) {
+                throw new Error("Operator " + op + " is not valid for types "
+                    + term.expressionType + " and " + nextTerm.expressionType);
+            }
             term = new DiadicASTNode(
                 op, term, nextTerm
             );
@@ -176,7 +189,6 @@ export class Parser {
     }
 
     private static parseFactor(tokens: Token[]): ExpressionASTNode {
-
         let next: Token = tokens.shift();
 
         if (next.tokenType === TokenType.OpenParen) {
@@ -190,7 +202,7 @@ export class Parser {
             let factor: ExpressionASTNode = this.parseFactor(tokens);
             return new MonadicASTNode(op, factor);
         } else if (next.tokenType === TokenType.Integer) {
-            return new ConstantASTNode(next.tokenValue);
+            return new ConstantASTNode(next.tokenValue, ValueType.int);
         } else if (next.tokenType === TokenType.Identifier
             && this.variables.Has(next.tokenValue)) {
             return new VariableASTNode(this.variables.Get(next.tokenValue));

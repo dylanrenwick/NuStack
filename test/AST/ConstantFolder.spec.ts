@@ -3,7 +3,7 @@ import { AbstractSyntaxTree } from "../../src/AST/AbstractSyntaxTree";
 import { ConstantASTNode } from "../../src/AST/ConstantASTNode";
 import { ConstantFolder } from "../../src/AST/ConstantFolder";
 import { DiadicASTNode } from "../../src/AST/DiadicASTNode";
-import { ExpressionASTNode } from "../../src/AST/ExpressionASTNode";
+import { ExpressionASTNode, ValueType } from "../../src/AST/ExpressionASTNode";
 import { MonadicASTNode } from "../../src/AST/MonadicASTNode";
 import { OperationType } from "../../src/AST/OperationASTNode";
 import { ProgramASTNode } from "../../src/AST/ProgramASTNode";
@@ -12,9 +12,15 @@ import { StatementASTNode } from "../../src/AST/StatementASTNode";
 import { SubroutineASTNode } from "../../src/AST/SubroutineASTNode";
 
 // Un-evaluable expression
-class TestExpressionNode extends ExpressionASTNode { get expressionValue(): any { return null; } }
+class TestExpressionNode extends ExpressionASTNode {
+    get expressionValue(): any { return null; }
+    get expressionType(): ValueType { return null; }
+}
 // Un-evaluable expression
-class TestStatementNode extends StatementASTNode { get expressionValue(): any { return null; } }
+class TestStatementNode extends StatementASTNode {
+    get expressionValue(): any { return null; }
+    get expressionType(): ValueType { return null; }
+}
 
 describe("ConstantFolder", () => {
     let cf: ConstantFolder = new ConstantFolder();
@@ -23,14 +29,14 @@ describe("ConstantFolder", () => {
         it("should correctly simplify evaluable expressions to constants", () => {
             let expr: ExpressionASTNode = new DiadicASTNode(
                 OperationType.Addition,
-                new ConstantASTNode(2),
-                new ConstantASTNode(4)
+                new ConstantASTNode(2, "int"),
+                new ConstantASTNode(4, "int")
             );
             let simplified = cf["simplifyExpression"].bind(cf, expr)();
             expect(simplified instanceof ConstantASTNode).to.be.true;
             expect(simplified.expressionValue).to.equal(6);
 
-            expr = new MonadicASTNode(OperationType.Negation, new ConstantASTNode(5));
+            expr = new MonadicASTNode(OperationType.Negation, new ConstantASTNode(5, "int"));
             simplified = cf["simplifyExpression"].bind(cf, expr)();
             expect(simplified instanceof ConstantASTNode).to.be.true;
             expect(simplified.expressionValue).to.equal(-5);
@@ -48,8 +54,8 @@ describe("ConstantFolder", () => {
             let expr: StatementASTNode = new ReturnStatementASTNode(
                 new DiadicASTNode(
                     OperationType.Addition,
-                    new ConstantASTNode(2),
-                    new ConstantASTNode(4)
+                    new ConstantASTNode(2, "int"),
+                    new ConstantASTNode(4, "int")
                 )
             );
             let simplified = cf["simplifyStatement"].bind(cf, expr)();
@@ -57,7 +63,7 @@ describe("ConstantFolder", () => {
             expect(simplified.childNodes.expressionValue).to.equal(6);
 
             expr = new ReturnStatementASTNode(
-                new MonadicASTNode(OperationType.Negation, new ConstantASTNode(5))
+                new MonadicASTNode(OperationType.Negation, new ConstantASTNode(5, "int"))
             );
             simplified = cf["simplifyStatement"].bind(cf, expr)();
             expect(simplified.childNodes instanceof ConstantASTNode).to.be.true;
@@ -78,8 +84,8 @@ describe("ConstantFolder", () => {
                     new ReturnStatementASTNode(
                         new DiadicASTNode(
                             OperationType.Addition,
-                            new ConstantASTNode(2),
-                            new ConstantASTNode(4)
+                            new ConstantASTNode(2, "int"),
+                            new ConstantASTNode(4, "int")
                         )
                     )
                 ]
@@ -113,8 +119,8 @@ describe("ConstantFolder", () => {
                     new ReturnStatementASTNode(
                         new DiadicASTNode(
                             OperationType.Addition,
-                            new ConstantASTNode(2),
-                            new ConstantASTNode(4)
+                            new ConstantASTNode(2, "int"),
+                            new ConstantASTNode(4, "int")
                         )
                     )
                 ])

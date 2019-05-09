@@ -39,7 +39,7 @@ export class ConstantFolder extends ASTPass {
 
     protected simplifyExpression(expr: ExpressionASTNode): ExpressionASTNode {
         if (expr.expressionValue !== null) {
-            return new ConstantASTNode(expr.expressionValue);
+            return new ConstantASTNode(expr.expressionValue, expr.expressionType);
         }
 
         return expr;

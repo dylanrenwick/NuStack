@@ -1,10 +1,11 @@
 import { expect } from "chai";
-import { ExpressionASTNode } from "../../src/AST/ExpressionASTNode";
+import { ExpressionASTNode, ValueType } from "../../src/AST/ExpressionASTNode";
 import { OperationASTNode, OperationType } from "../../src/AST/OperationASTNode";
 
 class TestNode extends OperationASTNode {
     get childNodes(): ExpressionASTNode[] { return null; }
     get expressionValue(): any { return null; }
+    get expressionType(): ValueType { return null; }
 }
 
 function forOpTypes(callback: (type: OperationType) => void) {

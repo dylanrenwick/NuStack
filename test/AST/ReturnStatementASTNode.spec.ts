@@ -7,7 +7,7 @@ describe("ReturnStatementASTNode", () => {
         it("should correctly set returnValue", () => {
             let node = new ReturnStatementASTNode(null);
             expect(node["returnValue"]).to.equal(null);
-            let innerNode = new ConstantASTNode(0);
+            let innerNode = new ConstantASTNode(0, "int");
             node = new ReturnStatementASTNode(innerNode);
             expect(node["returnValue"]).to.equal(innerNode);
         });
@@ -17,7 +17,7 @@ describe("ReturnStatementASTNode", () => {
         it("should return returnValue", () => {
             let node = new ReturnStatementASTNode(null);
             expect(node.childNodes).to.equal(null);
-            let innerNode = new ConstantASTNode(0);
+            let innerNode = new ConstantASTNode(0, "int");
             node = new ReturnStatementASTNode(innerNode);
             expect(node.childNodes).to.equal(innerNode);
         });

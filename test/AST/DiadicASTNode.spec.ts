@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { ConstantASTNode } from "../../src/AST/ConstantASTNode";
 import { DiadicASTNode } from "../../src/AST/DiadicASTNode";
-import { ExpressionASTNode } from "../../src/AST/ExpressionASTNode";
+import { ExpressionASTNode, ValueType } from "../../src/AST/ExpressionASTNode";
 import { OperationASTNode, OperationType } from "../../src/AST/OperationASTNode";
 
 function forOpTypes(callback: (type: OperationType, ...params: any[]) => void, ...params: any[] ) {
@@ -22,7 +22,7 @@ describe("DiadicASTNode", () => {
             let node = new DiadicASTNode(0, null, null);
             expect(node["leftOperand"]).to.equal(null);
             expect(node["rightOperand"]).to.equal(null);
-            let innerNode = new ConstantASTNode(0);
+            let innerNode = new ConstantASTNode(0, "int");
             node = new DiadicASTNode(0, innerNode, null);
             expect(node["leftOperand"]).to.equal(innerNode);
             expect(node["rightOperand"]).to.equal(null);
@@ -36,7 +36,7 @@ describe("DiadicASTNode", () => {
         it("should return an array containing operands", () => {
             let node = new DiadicASTNode(0, null, null);
             expect(node.childNodes).to.deep.equal([null, null]);
-            let innerNode = new ConstantASTNode(0);
+            let innerNode = new ConstantASTNode(0, "int");
             node = new DiadicASTNode(0, innerNode, null);
             expect(node.childNodes).to.deep.equal([ innerNode, null]);
             node = new DiadicASTNode(0, null, innerNode);
@@ -49,7 +49,10 @@ describe("DiadicASTNode", () => {
             forOpTypes((type: OperationType) => {
                 let a = Math.floor(Math.random() * 15000);
                 let b = Math.floor(Math.random() * 15000);
-                expect(new DiadicASTNode(type, new ConstantASTNode(a), new ConstantASTNode(b)).expressionValue)
+                expect(new DiadicASTNode(type,
+                        new ConstantASTNode(a, "int"),
+                        new ConstantASTNode(b, "int"))
+                    .expressionValue)
                     .to.equal(OperationASTNode.applyOperator(type, [a, b]));
             });
         });
@@ -60,18 +63,21 @@ describe("DiadicASTNode", () => {
                 let b = Math.floor(Math.random() * 15000);
                 let expected = OperationASTNode.applyOperator(type, [OperationASTNode.applyOperator(type, [a, 0]), b]);
                 expect(new DiadicASTNode(
-                    type, new DiadicASTNode(type, new ConstantASTNode(a), new ConstantASTNode(0)),
-                    new ConstantASTNode(b)
+                    type, new DiadicASTNode(type, new ConstantASTNode(a, "int"), new ConstantASTNode(0, "int")),
+                    new ConstantASTNode(b, "int")
                 ).expressionValue).to.equal(expected);
             });
         });
 
         it("should return null with a non-constant, null-expressionValue child", () => {
-            class TestNode extends ExpressionASTNode { get expressionValue(): any { return null; } }
+            class TestNode extends ExpressionASTNode {
+                get expressionValue(): any { return null; }
+                get expressionType(): ValueType { return null; }
+            }
 
             forOpTypes((type: OperationType) => {
                 expect(new DiadicASTNode(
-                    type, new TestNode(), new ConstantASTNode(Math.floor(Math.random() * 15000))
+                    type, new TestNode(), new ConstantASTNode(Math.floor(Math.random() * 15000), "int")
                 ).expressionValue).to.equal(null);
             });
         });
