@@ -46,7 +46,7 @@ export class Parser {
     private static parseSubroutine(tokens: Token[]): SubroutineASTNode {
         let returnTypeTok: Token = tokens.shift();
         if (returnTypeTok.tokenType !== TokenType.Keyword ||
-            !ExpressionASTNode.getTypeFromString(returnTypeTok.tokenValue)) {
+            ExpressionASTNode.getTypeFromString(returnTypeTok.tokenValue) === null) {
             throw new Error("Expected 'int' but found " + returnTypeTok.toString());
         }
 
