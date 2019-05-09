@@ -121,7 +121,12 @@ export class AssemblyGenerator {
             throw new Error("Variable '" + dec.variableName + "' has already been declared!");
         }
 
-        sb.appendLine(`mov ${this.ax}, 0d`);
+        if (statement.expression) {
+            sb = this.generateExpression(sb, statement.expression);
+        } else {
+            sb.appendLine(`mov ${this.ax}, 0d`);
+        }
+
         sb.appendLine("push " + this.ax);
 
         this.stackOffset += this.platformController.wordSize;

@@ -129,7 +129,14 @@ export class Parser {
         let declaration = new Declaration(name, type);
         this.variables.Add(name, declaration);
 
-        return new DeclarationASTNode(declaration);
+        let expr: ExpressionASTNode = null;
+
+        if (tokens[0].tokenType === TokenType.Assignment) {
+            tokens.shift();
+            expr = this.parseExpression(tokens);
+        }
+
+        return new DeclarationASTNode(declaration, expr);
     }
 
     private static parseAssignment(tokens: Token[], tok: Token): AssignmentASTNode {

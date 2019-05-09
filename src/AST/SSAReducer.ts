@@ -28,6 +28,9 @@ export class SSAReducer extends ASTPass {
         if (statement instanceof DeclarationASTNode) {
             if (!this.variables.Has(statement.declaration.variableName)) {
                 this.variables.Add(statement.declaration.variableName, statement.declaration);
+                if (statement.expression) {
+                    statement.declaration.addValue(statement.expression.expressionValue);
+                }
             }
         } else if (statement instanceof ReturnStatementASTNode) {
             return new ReturnStatementASTNode(this.scanExpression(statement.childNodes));

@@ -21,7 +21,8 @@ export class ConstantFolder extends ASTPass {
                     + dec.variableName + "' [" + dec.variableType
                     + "] but variable was already declared");
             }
-            dec.addValue(null);
+            if (statement.expression) dec.addValue(statement.expression.expressionValue);
+            else dec.addValue(null);
             this.variables.Add(dec.variableName, dec);
         } else if (statement instanceof AssignmentASTNode) {
             let dec: Declaration = statement.declaration;
