@@ -12,6 +12,8 @@ let finishedTests = {};
 
 let errs = "";
 
+let result = 0;
+
 for (let test of tests) {
     let output = "";
     let testName = test.fileName;
@@ -32,6 +34,7 @@ for (let test of tests) {
                 output += ("\t" + realName + " - COMPILE FAIL") + "\n";
                 errs += stdout + "\n";
                 errs += stderr + "\n";
+                result = 1;
             }
             exec("./examples/" + realName, (err, stdout, stderr) => {
                 let outCode = 0;
@@ -41,6 +44,7 @@ for (let test of tests) {
                     output += ("\t" + realName + " - FAIL: Expected " + expected + " but got " + outCode) + "\n";
                     errs += stdout + "\n";
                     errs += stderr + "\n";
+                    result = 1;
                 } else {
                     output += ("\t" + realName + " - PASS: Expected " + expected + " and got " + outCode) + "\n";
                 }
@@ -59,10 +63,12 @@ function registerFinish(testName, i, output) {
         && finishedTests[testName].includes(2))
         console.log(output);
 
-    if (errs.trim().length) {
-        if (Object.keys(finishedTests).filter(x => finishedTests.hasOwnProperty(x))
-            .filter(x => tests.map(y => y.fileName).includes(x)).length) {
-                console.log(errs.trim());
-            }
+    let finishedTestNames = Object.keys(finishedTests).filter(x => finishedTests.hasOwnProperty(x)).filter(x => finishedTests[x].length == 3);
+    let unfinished = tests.map(x => x.fileName).filter(x => !finishedTestNames.includes(x));
+    if (!unfinished.length) {
+        if (errs.trim().length) {
+            console.log(errs.trim());
+        }
+        process.exit(result);
     }
 }
