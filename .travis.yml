@@ -12,3 +12,5 @@ matrix:
     node_js: "10.15.3"
     env: JOB=lint
 script: npm run $JOB
+before_install:
+  - sudo apt-get install -y nasm ld
