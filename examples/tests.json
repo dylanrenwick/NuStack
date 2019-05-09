@@ -1,14 +1,22 @@
 [
     {
-        "fileName": "test1",
+        "fileName": "constant",
         "answer": 5
     },
     {
-        "fileName": "test2",
+        "fileName": "addition",
         "answer": 11
     },
     {
-        "fileName": "test3",
+        "fileName": "greater_than",
         "answer": 1
+    },
+    {
+        "fileName": "variable",
+        "answer": 8
+    },
+    {
+        "fileName": "multiple_vars",
+        "answer": 9
     }
 ]
