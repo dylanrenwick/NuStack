@@ -104,6 +104,8 @@ export class Parser {
                 statement = new ReturnStatementASTNode(
                     this.parseExpression(tokens)
                 );
+            } else if (tok.tokenValue === "if") {
+                // TODO: parse if statement
             } else {
                 statement = this.parseDeclaration(tokens, tok);
             }
