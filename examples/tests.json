@@ -2,5 +2,9 @@
     {
         "fileName": "test1",
         "answer": 5
+    },
+    {
+        "fileName": "test2",
+        "answer": 11
     }
 ]
