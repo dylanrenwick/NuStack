@@ -11,7 +11,7 @@
     "run": "npm run build && node bin/index.js",
     "build": "npm run clean && tsc",
     "clean": "rm -rf bin/ coverage/",
-    "e2e": "node run build && node scripts/e2e_test.js && find ./examples -regextype egrep -regex '^.*examples/[^.]*(.(o|asm))?$' -type f -delete"
+    "e2e": "npm run build && node scripts/e2e_test.js && find ./examples -regextype egrep -regex '^.*examples/[^.]*(.(o|asm))?$' -type f -delete"
   },
   "author": "",
   "license": "ISC",
