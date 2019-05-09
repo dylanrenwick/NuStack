@@ -162,7 +162,7 @@ export class AssemblyGenerator {
             case OperationType.LogicalNOT:
                 sb = this.generateExpression(sb, op.childNodes[0]);
                 sb.appendLine(`cmp ${this.ax}, 0`);
-                sb.appendLine(`xor ${this.ax}, ${this.ax}`);
+                sb.appendLine(`mov ${this.ax}, 0`);
                 sb.appendLine("setz al");
                 break;
         }
@@ -183,14 +183,14 @@ export class AssemblyGenerator {
                     sb.appendLine("mul " + this.cx);
                     break;
                 case OperationType.Division:
-                    sb.appendLine(`xor ${this.dx}, ${this.dx}`);
+                    sb.appendLine(`mov ${this.dx}, 0`);
                     sb.appendLine("div " + this.cx);
                     break;
             }
 
             if (this.comparisons.includes(op.operation)) {
-                sb.appendLine(`cmp ${this.ax}, ${this.cx}`);
-                sb.appendLine(`xor ${this.ax}, ${this.ax}`);
+                sb.appendLine(`cmp ${this.cx}, ${this.ax}`);
+                sb.appendLine(`mov ${this.ax}, 0`);
                 switch (op.operation) {
                     case OperationType.MoreThan:
                         sb.appendLine("setg al");
@@ -227,7 +227,7 @@ export class AssemblyGenerator {
                 sb = this.generateLabel(sb, clauseLabel);
                 sb = this.generateExpression(sb, op.childNodes[1]);
                 sb.appendLine(`cmp ${this.ax}, 0`);
-                sb.appendLine(`xor ${this.ax}, ${this.ax}`);
+                sb.appendLine(`mov ${this.ax}, 0`);
                 sb.appendLine("setne al");
                 sb = this.generateLabel(sb, endLabel);
             } else if (op.operation === OperationType.LogicalAND) {
@@ -238,7 +238,7 @@ export class AssemblyGenerator {
                 sb = this.generateLabel(sb, clauseLabel);
                 sb = this.generateExpression(sb, op.childNodes[1]);
                 sb.appendLine(`cmp ${this.ax}, 0`);
-                sb.appendLine(`xor ${this.ax}, ${this.ax}`);
+                sb.appendLine(`mov ${this.ax}, 0`);
                 sb.appendLine("setne al");
                 sb = this.generateLabel(sb, endLabel);
             }
