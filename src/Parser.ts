@@ -78,10 +78,9 @@ export class Parser {
         let statements: StatementASTNode[] = [];
 
         if (tokens[0].tokenType === TokenType.OpenBrace) {
-            // Can't use shift here as tsc doesn't recognize it as modifying the array
+            // Can't use shift here in TS ^3.3.0 as tsc doesn't recognize it as modifying the array
             // TODO: https://github.com/microsoft/TypeScript/issues/31334
-            tokens = tokens.slice(1);
-            // tokens.shift();
+            tokens.shift();
             while (tokens.length > 0 && tokens[0].tokenType !== TokenType.CloseBrace) {
                 statements.push(this.parseStatement(tokens));
             }
