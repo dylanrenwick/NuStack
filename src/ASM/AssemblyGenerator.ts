@@ -214,7 +214,8 @@ export class AssemblyGenerator {
                     sb.appendLine(`add ${this.ax}, ${this.cx}`);
                     break;
                 case OperationType.Subtraction:
-                    sb.appendLine(`sub ${this.ax}, ${this.cx}`);
+                    sb.appendLine(`sub ${this.cx}, ${this.ax}`);
+                    sb.appendLine(`mov ${this.ax}, ${this.cx}`);
                     break;
                 case OperationType.Multiplication:
                     sb.appendLine("mul " + this.cx);
