@@ -205,18 +205,17 @@ export class AssemblyGenerator {
         }
 
         if (this.diadicOps.includes(op.operation)) {
-            let isDiv: boolean = op.operation === OperationType.Division;
-            sb = this.generateExpression(sb, op.childNodes[isDiv ? 1 : 0]);
+            let swap: boolean = op.operation === OperationType.Division || op.operation === OperationType.Subtraction;
+            sb = this.generateExpression(sb, op.childNodes[swap ? 1 : 0]);
             sb.appendLine("push " + this.ax);
-            sb = this.generateExpression(sb, op.childNodes[isDiv ? 0 : 1]);
+            sb = this.generateExpression(sb, op.childNodes[swap ? 0 : 1]);
             sb.appendLine("pop " + this.cx);
             switch (op.operation) {
                 case OperationType.Addition:
                     sb.appendLine(`add ${this.ax}, ${this.cx}`);
                     break;
                 case OperationType.Subtraction:
-                    sb.appendLine(`sub ${this.cx}, ${this.ax}`);
-                    sb.appendLine(`mov ${this.ax}, ${this.cx}`);
+                    sb.appendLine(`sub ${this.ax}, ${this.cx}`);
                     break;
                 case OperationType.Multiplication:
                     sb.appendLine("mul " + this.cx);
