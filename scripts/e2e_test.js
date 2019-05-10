@@ -21,55 +21,46 @@ for (let test of tests) {
     let testName = test.fileName;
     let expected = test.answer;
 
-    finishedTests[testName] = [];
+    finishedTests[testName] = false;
 
     output += ("Running " + testName) + "\n";
-    for (let i = 0; i < 3; i++) {
-        let realName = testName + "-" + i;
 
-        exec("node bin/index.js -i examples/" + testName + ".ns -o examples/" + realName + ".asm -a 64 -O " + i
-            + (process.argv.includes("-d") ? " -d" : "")
-            + " && nasm -f elf64 -o examples/" + realName + ".o examples/" + realName + ".asm"
-            + " && ld -e main -o examples/" + realName + " examples/" + realName + ".o",
-        (err, stdout, stderr) => {
-            if (err) {
-                output += ("\t" + realName + " - COMPILE FAIL") + "\n";
-                errs += stdout + "\n";
-                errs += stderr + "\n";
-                result = 1;
-                registerFinish(testName, i, output);
-            } else {
-                exec("./examples/" + realName, (err, stdout, stderr) => {
-                    let outCode = 0;
-                    if (err) outCode = err.code;
-        
-                    if (outCode !== expected) {
-                        output += ("\t" + realName + " - FAIL: Expected " + expected + " but got " + outCode) + "\n";
-                        errs += stdout + "\n";
-                        errs += stderr + "\n";
-                        result = 1;
-                    } else {
-                        output += ("\t" + realName + " - PASS: Expected " + expected + " and got " + outCode) + "\n";
-                    }
+    exec("node bin/index.js -i examples/" + testName + ".ns -o examples/" + testName + ".asm -a 64"
+        + (process.argv.includes("-d") ? " -d" : "")
+        + " && nasm -f elf64 -o examples/" + testName + ".o examples/" + testName + ".asm"
+        + " && ld -e main -o examples/" + testName + " examples/" + testName + ".o",
+    (err, stdout, stderr) => {
+        if (err) {
+            output += ("\t - COMPILE FAIL") + "\n";
+            errs += stdout + "\n";
+            errs += stderr + "\n";
+            result = 1;
 
-                    registerFinish(testName, i, output);
-                });
-            }
-        });
-    }
-}
+            finishedTests[testName] = true;
+            console.log(output);
+        } else {
+            exec("./examples/" + testName, (err, stdout, stderr) => {
+                let outCode = 0;
+                if (err) outCode = err.code;
+    
+                if (outCode !== expected) {
+                    output += ("\t - FAIL: Expected " + expected + " but got " + outCode) + "\n";
+                    errs += stdout + "\n";
+                    errs += stderr + "\n";
+                    result = 1;
+                } else {
+                    output += ("\t - PASS: Expected " + expected + " and got " + outCode) + "\n";
+                }
 
-function registerFinish(testName, i, output) {
-    if (!finishedTests[testName].includes(i)) finishedTests[testName].push(i);
-
-    if (finishedTests[testName].includes(0)
-        && finishedTests[testName].includes(1)
-        && finishedTests[testName].includes(2))
-        console.log(output);
+                finishedTests[testName] = true;
+                console.log(output);
+            });
+        }
+    });
 }
 
 function wait() {
-    let finishedTestNames = Object.keys(finishedTests).filter(x => finishedTests.hasOwnProperty(x)).filter(x => finishedTests[x].length == 3);
+    let finishedTestNames = Object.keys(finishedTests).filter(x => finishedTests.hasOwnProperty(x)).filter(x => finishedTests[x]);
     let unfinished = tests.map(x => x.fileName).filter(x => !finishedTestNames.includes(x));
 
     if (!unfinished.length) {
