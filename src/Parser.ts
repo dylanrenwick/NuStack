@@ -109,6 +109,8 @@ export class Parser {
             throw new Error("Expected statement but found " + tok.toString());
         }
 
+        let needSemicolon: boolean = true;
+
         let statement: StatementASTNode;
 
         if (tok.tokenType === TokenType.Keyword) {
@@ -118,6 +120,7 @@ export class Parser {
                 );
             } else if (tok.tokenValue === "if") {
                 statement = this.parseIf(tokens);
+                needSemicolon = false;
             } else {
                 statement = this.parseDeclaration(tokens, tok);
             }
@@ -125,9 +128,11 @@ export class Parser {
             statement = this.parseAssignment(tokens, tok);
         }
 
-        tok = tokens.shift();
-        if (!tok || tok.tokenType !== TokenType.Semicolon) {
-            throw new Error("Expected ';' but found " + (tok ? tok.toString() : "<EOF>"));
+        if (needSemicolon) {
+            tok = tokens.shift();
+            if (!tok || tok.tokenType !== TokenType.Semicolon) {
+                throw new Error("Expected ';' but found " + (tok ? tok.toString() : "<EOF>"));
+            }
         }
 
         return statement;
