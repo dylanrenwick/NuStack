@@ -216,7 +216,7 @@ export class Parser {
             : this.parseExpression(tokens, operatorsIndex + 1);
         let next: Token = tokens[0];
         while (next && this.exprOperators[operatorsIndex].includes(next.tokenType)) {
-            let op: OperationType = this.parseOpType(tokens.shift());
+            let op: OperationType = this.parseOpType(tokens.shift(), true);
             let nextTerm: ExpressionASTNode = operatorsIndex === this.exprOperators.length - 1
                 ? this.parseFactor(tokens)
                 : this.parseExpression(tokens, operatorsIndex + 1);
@@ -257,9 +257,9 @@ export class Parser {
         }
     }
 
-    private static parseOpType(tok: Token): OperationType {
+    private static parseOpType(tok: Token, diadic: boolean = false): OperationType {
         switch (tok.tokenType) {
-            case TokenType.Negation: return OperationType.Negation;
+            case TokenType.Negation: return diadic ? OperationType.Subtraction : OperationType.Negation;
             case TokenType.BitwiseNOT: return OperationType.BitwiseNOT;
             case TokenType.LogicalNOT: return OperationType.LogicalNOT;
             case TokenType.Addition: return OperationType.Addition;
