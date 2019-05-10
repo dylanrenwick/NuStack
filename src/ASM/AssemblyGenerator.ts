@@ -4,6 +4,7 @@ import { AssignmentASTNode } from "../AST/AssignmentASTNode";
 import { ConstantASTNode } from "../AST/ConstantASTNode";
 import { DeclarationASTNode } from "../AST/DeclarationASTNode";
 import { ExpressionASTNode } from "../AST/ExpressionASTNode";
+import { IfASTNode } from "../AST/IfASTNode";
 import { OperationASTNode, OperationType } from "../AST/OperationASTNode";
 import { ReturnStatementASTNode } from "../AST/ReturnStatementASTNode";
 import { StatementASTNode } from "../AST/StatementASTNode";
@@ -13,7 +14,6 @@ import { Declaration } from "../Declaration";
 import { HashMap } from "../HashMap";
 import { StringBuilder } from "../StringBuilder";
 import { PlatformController } from "./PlatformController";
-import { IfASTNode } from "../AST/IfASTNode";
 
 export class AssemblyGenerator {
     private static complexOps: OperationType[] = [
