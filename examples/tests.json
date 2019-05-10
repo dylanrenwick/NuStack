@@ -18,5 +18,9 @@
     {
         "fileName": "multiple_vars",
         "answer": 9
+    },
+    {
+        "fileName": "if",
+        "answer": 0
     }
 ]
