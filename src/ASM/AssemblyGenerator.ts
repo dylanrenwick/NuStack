@@ -13,6 +13,7 @@ import { Declaration } from "../Declaration";
 import { HashMap } from "../HashMap";
 import { StringBuilder } from "../StringBuilder";
 import { PlatformController } from "./PlatformController";
+import { WhileASTNode } from "../AST/WhileASTNode";
 
 export class AssemblyGenerator {
     private static complexOps: OperationType[] = [
@@ -102,6 +103,8 @@ export class AssemblyGenerator {
             return this.generateExpression(sb, statement);
         } else if (statement instanceof IfASTNode) {
             return this.generateIf(sb, statement);
+        } else if (statement instanceof WhileASTNode) {
+            return this.generateWhile(sb, statement);
         }
 
         throw new Error("Unknown AST node");
@@ -162,6 +165,23 @@ export class AssemblyGenerator {
             }
             sb = this.generateLabel(sb, endLabel);
         }
+
+        return sb;
+    }
+
+    private static generateWhile(sb: StringBuilder, whileNode: WhileASTNode): StringBuilder {
+        let startLabel: string = this.label;
+        let endLabel: string = this.label;
+        sb = this.generateLabel(sb, startLabel);
+        sb = this.generateExpression(sb, whileNode.condition);
+        sb.appendLine(`cmp ${this.ax}, 0d`);
+        sb.appendLine("je " + endLabel);
+
+        for (let statement of whileNode.childNodes) {
+            sb = this.generateStatement(sb, statement);
+        }
+        sb.appendLine("jmp " + startLabel);
+        sb = this.generateLabel(sb, endLabel);
 
         return sb;
     }
