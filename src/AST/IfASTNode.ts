@@ -24,7 +24,8 @@ export class IfASTNode extends StatementASTNode {
     }
 
     public toString(sb: StringBuilder): StringBuilder {
-        sb.startBlock("If (" + this.cond + ")");
+        sb.startBlock("If");
+        sb = this.cond.toString(sb);
 
         for (let statement of this.block) {
             sb = statement.toString(sb);
