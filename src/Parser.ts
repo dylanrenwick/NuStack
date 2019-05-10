@@ -15,6 +15,7 @@ import { VariableASTNode } from "./AST/VariableASTNode";
 import { Declaration } from "./Declaration";
 import { HashMap } from "./HashMap";
 import { Token, TokenType } from "./Token";
+import { WhileASTNode } from "./AST/WhileASTNode";
 
 export class Parser {
     private static readonly INT_MAX_VALUE: number = 2 ** 31;
@@ -113,15 +114,22 @@ export class Parser {
         let statement: StatementASTNode;
 
         if (tok.tokenType === TokenType.Keyword) {
-            if (tok.tokenValue === "return") {
-                statement = new ReturnStatementASTNode(
-                    this.parseExpression(tokens)
-                );
-            } else if (tok.tokenValue === "if") {
-                statement = this.parseIf(tokens);
-                needSemicolon = false;
-            } else {
-                statement = this.parseDeclaration(tokens, tok);
+            switch (tok.tokenValue) {
+                case "return":
+                    statement = new ReturnStatementASTNode(
+                        this.parseExpression(tokens)
+                    );
+                    break;
+                case "if":
+                    statement = this.parseIf(tokens);
+                    needSemicolon = false;
+                    break;
+                case "while":
+                    statement = this.parseWhile(tokens);
+                    needSemicolon = false;
+                    break;
+                default:
+                    statement = this.parseDeclaration(tokens, tok);
             }
         } else {
             statement = this.parseAssignment(tokens, tok);
@@ -182,7 +190,7 @@ export class Parser {
         return new AssignmentASTNode(dec, expr);
     }
 
-    private static parseIf(tokens: Token[]): StatementASTNode {
+    private static parseIf(tokens: Token[]): IfASTNode {
         let tok: Token = tokens.shift();
         if (tok.tokenType !== TokenType.OpenParen) {
             throw new Error("Expected '(' after 'if', but found " + tok.toString());
@@ -208,6 +216,27 @@ export class Parser {
         }
 
         return new IfASTNode(condition, block, elseBlock);
+    }
+
+    private static parseWhile(tokens: Token[]): WhileASTNode {
+        let tok: Token = tokens.shift();
+        if (tok.tokenType !== TokenType.OpenParen) {
+            throw new Error("Expected '(' after 'if', but found " + tok.toString());
+        }
+
+        let condition: ExpressionASTNode = this.parseExpression(tokens);
+        if (condition.expressionType !== ValueType.bool) {
+            throw new Error("Type " + condition.expressionType + " is not bool");
+        }
+
+        tok = tokens.shift();
+        if (tok.tokenType !== TokenType.CloseParen) {
+            throw new Error("Expected ')', but found " + tok.toString());
+        }
+
+        let block: StatementASTNode[] = this.parseBlock(tokens);
+
+        return new WhileASTNode(condition, block);
     }
 
     private static parseExpression(tokens: Token[], operatorsIndex: number = 0): ExpressionASTNode {
