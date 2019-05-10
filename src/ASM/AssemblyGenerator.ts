@@ -13,6 +13,7 @@ import { Declaration } from "../Declaration";
 import { HashMap } from "../HashMap";
 import { StringBuilder } from "../StringBuilder";
 import { PlatformController } from "./PlatformController";
+import { IfASTNode } from "../AST/IfASTNode";
 
 export class AssemblyGenerator {
     private static complexOps: OperationType[] = [
@@ -100,6 +101,8 @@ export class AssemblyGenerator {
             return this.generateDeclaration(sb, statement);
         } else if (statement instanceof AssignmentASTNode) {
             return this.generateExpression(sb, statement);
+        } else if (statement instanceof IfASTNode) {
+            return this.generateIf(sb, statement);
         }
 
         throw new Error("Unknown AST node");
@@ -131,6 +134,35 @@ export class AssemblyGenerator {
 
         this.stackOffset += this.platformController.wordSize;
         this.stackMap.Add(dec.variableName, this.stackOffset);
+
+        return sb;
+    }
+
+    private static generateIf(sb: StringBuilder, ifNode: IfASTNode): StringBuilder {
+        sb = this.generateExpression(sb, ifNode.condition);
+
+        sb.appendLine(`cmp ${this.ax}, 0d`);
+        let elseLabel: string = this.label;
+        let endLabel: string = ""; // Only define this if else exists
+        sb.appendLine("je " + elseLabel);
+
+        for (let statement of ifNode.ifBlock) {
+            sb = this.generateStatement(sb, statement);
+        }
+
+        if (ifNode.elseBlock !== null) {
+            endLabel = this.label;
+            sb.appendLine("jmp " + endLabel);
+        }
+
+        sb = this.generateLabel(sb, elseLabel);
+
+        if (ifNode.elseBlock !== null) {
+            for (let statement of ifNode.elseBlock) {
+                sb = this.generateStatement(sb, statement);
+            }
+            sb = this.generateLabel(sb, endLabel);
+        }
 
         return sb;
     }
