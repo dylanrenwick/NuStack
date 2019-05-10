@@ -12,6 +12,14 @@
         "answer": 11
     },
     {
+        "fileName": "multiplication",
+        "answer": 6
+    },
+    {
+        "fileName": "division",
+        "answer": 2
+    },
+    {
         "fileName": "greater_than",
         "answer": 1
     },
