@@ -204,6 +204,7 @@ export class Parser {
 
         if (tokens[0].tokenType === TokenType.Keyword &&
             tokens[0].tokenValue === "else") {
+            tokens.shift();
             elseBlock = this.parseBlock(tokens);
         }
 
