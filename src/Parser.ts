@@ -4,6 +4,7 @@ import { ConstantASTNode } from "./AST/ConstantASTNode";
 import { DeclarationASTNode } from "./AST/DeclarationASTNode";
 import { DiadicASTNode } from "./AST/DiadicASTNode";
 import { ExpressionASTNode, ValueType } from "./AST/ExpressionASTNode";
+import { IfASTNode } from "./AST/IfASTNode";
 import { MonadicASTNode } from "./AST/MonadicASTNode";
 import { OperationType } from "./AST/OperationASTNode";
 import { ProgramASTNode } from "./AST/ProgramASTNode";
@@ -14,7 +15,6 @@ import { VariableASTNode } from "./AST/VariableASTNode";
 import { Declaration } from "./Declaration";
 import { HashMap } from "./HashMap";
 import { Token, TokenType } from "./Token";
-import { IfASTNode } from "./AST/IfASTNode";
 
 export class Parser {
     private static readonly INT_MAX_VALUE: number = 2 ** 31;
