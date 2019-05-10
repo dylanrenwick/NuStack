@@ -1,4 +1,3 @@
-import { Allocator } from "../Allocator";
 import { AbstractSyntaxTree } from "../AST/AbstractSyntaxTree";
 import { AssignmentASTNode } from "../AST/AssignmentASTNode";
 import { ConstantASTNode } from "../AST/ConstantASTNode";
@@ -143,7 +142,7 @@ export class AssemblyGenerator {
 
         sb.appendLine(`cmp ${this.ax}, 0d`);
         let elseLabel: string = this.label;
-        let endLabel: string = ""; // Only define this if else exists
+        let endLabel: string = ""; // Only define this if 'else' exists
         sb.appendLine("je " + elseLabel);
 
         for (let statement of ifNode.ifBlock) {
