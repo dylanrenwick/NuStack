@@ -2,7 +2,7 @@ import { Token, TokenType } from "./Token";
 
 export class Tokenizer {
     private static readonly keywords: string[] = [
-        "int", "return", "if", "else",
+        "int", "return", "if", "else", "while",
     ];
     private static readonly singletons: string[] = [
         "(", ")", "{", "}", ";",
