@@ -5,19 +5,22 @@ import { StatementASTNode } from "./StatementASTNode";
 export class IfASTNode extends StatementASTNode {
     private cond: ExpressionASTNode;
     private block: StatementASTNode[];
-    private elseBlock: StatementASTNode[];
+    private eBlock: StatementASTNode[];
 
+    public get condition(): ExpressionASTNode { return this.cond; }
+    public get ifBlock(): StatementASTNode[] { return this.block; }
+    public get elseBlock(): StatementASTNode[] | null { return this.eBlock; }
     public get childNodes(): StatementASTNode[] {
         return this.elseBlock === null
             ? this.block
             : this.block.concat(this.elseBlock);
     }
 
-    public constructor(cond: ExpressionASTNode, block: StatementASTNode[], elseBlock?: StatementASTNode[]) {
+    public constructor(cond: ExpressionASTNode, block: StatementASTNode[], eBlock?: StatementASTNode[]) {
         super();
         this.cond = cond;
         this.block = block;
-        this.elseBlock = elseBlock;
+        this.eBlock = eBlock;
     }
 
     public toString(sb: StringBuilder): StringBuilder {
