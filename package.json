@@ -9,7 +9,7 @@
     "coverage": "nyc npm test && nyc report --reporter=text-lcov | coveralls",
     "test": "npm run clean && mocha --recursive --extension ts -r ts-node/register test/",
     "run": "npm run build && node bin/index.js",
-    "build": "npm run clean && tsc",
+    "build": "npm run clean && node_modules/typescript/bin/tsc",
     "clean": "rm -rf bin/ coverage/",
     "e2e": "npm run build && node scripts/e2e_test.js && find ./examples -regextype egrep -regex '^.*examples/[^.]*(.(o|asm))?$' -type f -delete"
   },
@@ -40,7 +40,7 @@
     "nyc": "^14.0.0",
     "ts-node": "^8.1.0",
     "tslint": "^5.15.0",
-    "typescript": "^3.4.3"
+    "typescript": "3.2.2"
   },
   "dependencies": {
     "@types/args": "^3.0.0",
