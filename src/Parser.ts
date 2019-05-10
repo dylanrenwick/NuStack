@@ -14,6 +14,7 @@ import { VariableASTNode } from "./AST/VariableASTNode";
 import { Declaration } from "./Declaration";
 import { HashMap } from "./HashMap";
 import { Token, TokenType } from "./Token";
+import { IfASTNode } from "./AST/IfASTNode";
 
 export class Parser {
     private static readonly INT_MAX_VALUE: number = 2 ** 31;
@@ -64,31 +65,42 @@ export class Parser {
             throw new Error("Expected ')' but found " + closeParenTok.toString());
         }
 
-        let openBraceTok: Token = tokens.shift();
-        if (openBraceTok.tokenType !== TokenType.OpenBrace) {
-            throw new Error("Expected '{' but found " + openBraceTok.toString());
-        }
-
-        let statements: StatementASTNode[] = [];
-
-        while (tokens.length > 0 && tokens[0].tokenType !== TokenType.CloseBrace) {
-            statements.push(this.parseStatement(tokens));
-        }
-
-        if (tokens.length === 0) {
-            throw new Error("Expected '}' but found <EOF>");
-        }
-
-        let closeBraceTok: Token = tokens.shift();
-        if (closeBraceTok.tokenType !== TokenType.CloseBrace) {
-            throw new Error("Expected '}' but found " + closeBraceTok.toString());
-        }
+        let statements: StatementASTNode[] = this.parseBlock(tokens, true);
 
         return new SubroutineASTNode(
             subNameTok.tokenValue,
             returnTypeTok.tokenValue,
             statements
         );
+    }
+
+    private static parseBlock(tokens: Token[], requireBrace: boolean = false): StatementASTNode[] {
+        let statements: StatementASTNode[] = [];
+
+        if (tokens[0].tokenType === TokenType.OpenBrace) {
+            // Can't use shift here as tsc doesn't recognize it as modifying the array
+            // TODO: https://github.com/microsoft/TypeScript/issues/31334
+            tokens = tokens.slice(1);
+            // tokens.shift();
+            while (tokens.length > 0 && tokens[0].tokenType !== TokenType.CloseBrace) {
+                statements.push(this.parseStatement(tokens));
+            }
+
+            if (tokens.length === 0) {
+                throw new Error("Expected '}' but found <EOF>");
+            }
+
+            let closeBraceTok: Token = tokens.shift();
+            if (closeBraceTok.tokenType !== TokenType.CloseBrace) {
+                throw new Error("Expected '}' but found " + closeBraceTok.toString());
+            }
+        } else if (requireBrace) {
+            throw new Error("Expected '{' but found " + tokens[0].toString());
+        } else {
+            statements.push(this.parseStatement(tokens));
+        }
+
+        return statements;
     }
 
     private static parseStatement(tokens: Token[]): StatementASTNode {
@@ -105,7 +117,7 @@ export class Parser {
                     this.parseExpression(tokens)
                 );
             } else if (tok.tokenValue === "if") {
-                // TODO: parse if statement
+                statement = this.parseIf(tokens);
             } else {
                 statement = this.parseDeclaration(tokens, tok);
             }
@@ -164,6 +176,33 @@ export class Parser {
         }
 
         return new AssignmentASTNode(dec, expr);
+    }
+
+    private static parseIf(tokens: Token[]): StatementASTNode {
+        let tok: Token = tokens.shift();
+        if (tok.tokenType !== TokenType.OpenParen) {
+            throw new Error("Expected '(' after 'if', but found " + tok.toString());
+        }
+
+        let condition: ExpressionASTNode = this.parseExpression(tokens);
+        if (condition.expressionType !== ValueType.bool) {
+            throw new Error("Type " + condition.expressionType + " is not bool");
+        }
+
+        tok = tokens.shift();
+        if (tok.tokenType !== TokenType.CloseParen) {
+            throw new Error("Expected ')', but found " + tok.toString());
+        }
+
+        let block: StatementASTNode[] = this.parseBlock(tokens);
+        let elseBlock: StatementASTNode[] = null;
+
+        if (tokens[0].tokenType === TokenType.Keyword &&
+            tokens[0].tokenValue === "else") {
+            elseBlock = this.parseBlock(tokens);
+        }
+
+        return new IfASTNode(condition, block, elseBlock);
     }
 
     private static parseExpression(tokens: Token[], operatorsIndex: number = 0): ExpressionASTNode {
