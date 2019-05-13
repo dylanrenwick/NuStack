@@ -6,13 +6,13 @@ describe("FunctionASTNode", () => {
     describe("FunctionASTNode.constructor()", () => {
         it("should correctly assign name and returnType", () => {
             let node = new FunctionASTNode("name", "returnType", []);
-            expect(node["subName"]).to.equal("name");
+            expect(node["funcName"]).to.equal("name");
             expect(node["return"]).to.equal("returnType");
             node = new FunctionASTNode("hello", "goodbye", []);
-            expect(node["subName"]).to.equal("hello");
+            expect(node["funcName"]).to.equal("hello");
             expect(node["return"]).to.equal("goodbye");
             node = new FunctionASTNode("", "", []);
-            expect(node["subName"]).to.equal("");
+            expect(node["funcName"]).to.equal("");
             expect(node["return"]).to.equal("");
         });
 

@@ -4,18 +4,23 @@ import { ProgramASTNode } from "../../src/AST/ProgramASTNode";
 
 describe("ProgramASTNode:", () => {
     describe("ProgramASTNode.constructor()", () => {
-        it("should correctly assign its given argument to mainSub", () => {
-            expect(new ProgramASTNode(null)["mainSub"]).to.equal(null);
+        it("should correctly assign the entry point to main", () => {
+            expect(new ProgramASTNode(null)["main"]).to.equal(null);
+            let sub = new FunctionASTNode("main", "int", []);
+            expect(new ProgramASTNode([sub])["main"]).to.equal(sub);
+        });
+        it("should error when given no valid entry point", () => {
             let sub = new FunctionASTNode("", "", []);
-            expect(new ProgramASTNode(sub)["mainSub"]).to.equal(sub);
+            let func = () => { new ProgramASTNode([sub]); };
+            expect(func).to.throw("No function of signature 'int main()' found. Could not get entry point");
         });
     });
 
     describe("ProgramASTNode.childNodes", () => {
-        it("should correctly return the mainSub", () => {
+        it("should correctly return the given functions", () => {
             expect(new ProgramASTNode(null).childNodes).to.equal(null);
             let sub = new FunctionASTNode("", "", []);
-            expect(new ProgramASTNode(sub).childNodes).to.equal(sub);
+            expect(new ProgramASTNode([sub]).childNodes).to.deep.equal([sub]);
         });
     });
 });

@@ -148,7 +148,7 @@ describe("Tokenizer:", () => {
         });
 
         it("should error on invalid tokens", () => {
-            let invalids = ["#", "%", "\\"];
+            let invalids = ["`", "%", "\\"];
 
             for (let invalid of invalids) {
                 let program =
