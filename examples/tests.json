@@ -58,5 +58,13 @@
     {
         "fileName": "continue",
         "answer": 20
+    },
+    {
+        "fileName": "multi_function",
+        "answer": 2
+    },
+    {
+        "fileName": "function_call",
+        "answer": 3
     }
 ]

@@ -1,0 +1,7 @@
+int main() {
+    return myFunc(2);
+}
+
+int myFunc(int a) {
+    return a + 1;
+}
