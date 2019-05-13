@@ -89,14 +89,7 @@ export class Parser {
                 statements.push(this.parseStatement(tokens, inLoop));
             }
 
-            if (tokens.length === 0) {
-                throw new Error("Expected '}' but found <EOF>");
-            }
-
-            let closeBraceTok: Token = tokens.shift();
-            if (closeBraceTok.tokenType !== TokenType.CloseBrace) {
-                throw new Error("Expected '}' but found " + closeBraceTok.toString());
-            }
+            let closeBraceTok: Token = this.parseToken(tokens, TokenType.CloseBrace);
         } else if (needBrace) {
             throw new Error("Expected '{' but found " + tokens[0].toString());
         } else {
@@ -107,10 +100,10 @@ export class Parser {
     }
 
     private static parseStatement(tokens: Token[], inLoop: boolean = false): StatementASTNode {
-        let tok: Token = tokens.shift();
-        if (tok.tokenType !== TokenType.Keyword && tok.tokenType !== TokenType.Identifier) {
-            throw new Error("Expected statement but found " + tok.toString());
-        }
+        let tok: Token = this.parseToken(tokens,
+            x => (x.tokenType === TokenType.Keyword || x.tokenType === TokenType.Identifier),
+            "statement"
+        );
 
         let needSemicolon: boolean = true;
 
@@ -145,10 +138,7 @@ export class Parser {
         }
 
         if (needSemicolon) {
-            tok = tokens.shift();
-            if (!tok || tok.tokenType !== TokenType.Semicolon) {
-                throw new Error("Expected ';' but found " + (tok ? tok.toString() : "<EOF>"));
-            }
+            tok = this.parseToken(tokens, TokenType.Semicolon);
         }
 
         return statement;
@@ -156,10 +146,7 @@ export class Parser {
 
     private static parseDeclaration(tokens: Token[], tok: Token): DeclarationASTNode {
         let type: string = tok.tokenValue;
-        tok = tokens.shift();
-        if (tok.tokenType !== TokenType.Identifier) {
-            throw new Error("Expected identifier but found " + tok.toString());
-        }
+        tok = this.parseToken(tokens, TokenType.Identifier);
         let name = tok.tokenValue;
         let declaration = new Declaration(name, type);
         this.variables.Add(name, declaration);
@@ -184,10 +171,7 @@ export class Parser {
         }
         let dec: Declaration = this.variables.Get(tok.tokenValue);
 
-        tok = tokens.shift();
-        if (tok.tokenType !== TokenType.Assignment) {
-            throw new Error("Expected '=' but found " + tok.toString());
-        }
+        tok = this.parseToken(tokens, TokenType.Assignment);
 
         let expr: ExpressionASTNode = this.parseExpression(tokens);
 
@@ -210,10 +194,7 @@ export class Parser {
             throw new Error("Type " + condition.expressionType + " is not bool");
         }
 
-        tok = tokens.shift();
-        if (tok.tokenType !== TokenType.CloseParen) {
-            throw new Error("Expected ')', but found " + tok.toString());
-        }
+        tok = this.parseToken(tokens, TokenType.CloseParen);
 
         let block: StatementASTNode[] = this.parseBlock(tokens);
         let elseBlock: StatementASTNode[] = null;
@@ -228,20 +209,14 @@ export class Parser {
     }
 
     private static parseWhile(tokens: Token[]): WhileASTNode {
-        let tok: Token = tokens.shift();
-        if (tok.tokenType !== TokenType.OpenParen) {
-            throw new Error("Expected '(' after 'if', but found " + tok.toString());
-        }
+        let tok: Token = this.parseToken(tokens, TokenType.OpenParen);
 
         let condition: ExpressionASTNode = this.parseExpression(tokens);
         if (condition.expressionType !== ValueType.bool) {
             throw new Error("Type " + condition.expressionType + " is not bool");
         }
 
-        tok = tokens.shift();
-        if (tok.tokenType !== TokenType.CloseParen) {
-            throw new Error("Expected ')', but found " + tok.toString());
-        }
+        tok = this.parseToken(tokens, TokenType.CloseParen);
 
         let block: StatementASTNode[] = this.parseBlock(tokens, false, true);
 
@@ -277,9 +252,7 @@ export class Parser {
 
         if (next.tokenType === TokenType.OpenParen) {
             let expr: ExpressionASTNode = this.parseExpression(tokens);
-            if ((next = tokens.shift()).tokenType !== TokenType.CloseParen) {
-                throw new Error("Expected close paren but got " + (next ? next.toString() : "<EOF>"));
-            }
+            this.parseToken(tokens, TokenType.CloseParen);
             return expr;
         } else if (this.monadicOperators.includes(next.tokenType)) {
             let op: OperationType = this.parseOpType(next);
@@ -293,6 +266,21 @@ export class Parser {
         } else {
             throw new Error("Invalid factor: " + (next ? next.toString() : "<EOF>"));
         }
+    }
+
+    private static parseToken(
+        tokens: Token[], expected: ((tok: Token) => boolean) | string | TokenType, errStr?: string
+    ): Token {
+        if (tokens.length === 0) throw new Error("Expected " + expected + " but found <EOF>");
+        let tok: Token = tokens.shift();
+        if ((typeof(expected) === "string" && tok.tokenValue !== expected)
+            || (typeof(expected) === "function" && !expected(tok))
+            || tok.tokenType !== expected) {
+            throw new Error("Expected "
+                + (typeof(expected) === "function" ? errStr : expected)
+                + " but found " + tok.toString());
+        }
+        return tok;
     }
 
     private static parseOpType(tok: Token, diadic: boolean = false): OperationType {
