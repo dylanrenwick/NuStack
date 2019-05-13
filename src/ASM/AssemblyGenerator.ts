@@ -197,11 +197,11 @@ export class AssemblyGenerator {
         switch (keyword.keywordType) {
             case KeywordType.break:
                 if (!this.lastLoop) throw new Error("Attempted to break outside of loop");
-                sb.append("jmp " + this.lastLoop[1]);
+                sb.appendLine("jmp " + this.lastLoop[1]);
                 return sb;
             case KeywordType.continue:
                 if (!this.lastLoop) throw new Error("Attempted to continue outside of loop");
-                sb.append("jmp " + this.lastLoop[0]);
+                sb.appendLine("jmp " + this.lastLoop[0]);
                 return sb;
             default:
                 throw new Error("Unknown keyword: " + keyword.keywordType);
