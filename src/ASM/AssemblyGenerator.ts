@@ -4,6 +4,7 @@ import { ConstantASTNode } from "../AST/ConstantASTNode";
 import { DeclarationASTNode } from "../AST/DeclarationASTNode";
 import { ExpressionASTNode } from "../AST/ExpressionASTNode";
 import { IfASTNode } from "../AST/IfASTNode";
+import { KeywordASTNode, KeywordType } from "../AST/KeywordASTNode";
 import { OperationASTNode, OperationType } from "../AST/OperationASTNode";
 import { ReturnStatementASTNode } from "../AST/ReturnStatementASTNode";
 import { StatementASTNode } from "../AST/StatementASTNode";
@@ -38,6 +39,7 @@ export class AssemblyGenerator {
     private static stackOffset: number;
 
     private static labelCount: number = 1;
+    private static lastLoop: string[];
 
     private static platformController: PlatformController;
 
@@ -105,6 +107,8 @@ export class AssemblyGenerator {
             return this.generateIf(sb, statement);
         } else if (statement instanceof WhileASTNode) {
             return this.generateWhile(sb, statement);
+        } else if (statement instanceof KeywordASTNode) {
+            return this.generateKeyword(sb, statement);
         }
 
         throw new Error("Unknown AST node");
@@ -177,13 +181,31 @@ export class AssemblyGenerator {
         sb.appendLine(`cmp ${this.ax}, 0d`);
         sb.appendLine("je " + endLabel);
 
+        let oldLoop: string[] = this.lastLoop;
+        this.lastLoop = [startLabel, endLabel];
         for (let statement of whileNode.childNodes) {
             sb = this.generateStatement(sb, statement);
         }
+        this.lastLoop = oldLoop;
         sb.appendLine("jmp " + startLabel);
         sb = this.generateLabel(sb, endLabel);
 
         return sb;
+    }
+
+    private static generateKeyword(sb: StringBuilder, keyword: KeywordASTNode): StringBuilder {
+        switch (keyword.keywordType) {
+            case KeywordType.break:
+                if (!this.lastLoop) throw new Error("Attempted to break outside of loop");
+                sb.append("jmp " + this.lastLoop[1]);
+                return sb;
+            case KeywordType.continue:
+                if (!this.lastLoop) throw new Error("Attempted to continue outside of loop");
+                sb.append("jmp " + this.lastLoop[0]);
+                return sb;
+            default:
+                throw new Error("Unknown keyword: " + keyword.keywordType);
+        }
     }
 
     private static generateExpression(sb: StringBuilder, expr: ExpressionASTNode): StringBuilder {

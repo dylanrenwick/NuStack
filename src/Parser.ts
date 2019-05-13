@@ -75,7 +75,9 @@ export class Parser {
         );
     }
 
-    private static parseBlock(tokens: Token[], requireBrace: boolean = false): StatementASTNode[] {
+    private static parseBlock(
+        tokens: Token[], needBrace: boolean = false, inLoop: boolean = false
+    ): StatementASTNode[] {
         let statements: StatementASTNode[] = [];
 
         if (tokens[0].tokenType === TokenType.OpenBrace) {
@@ -83,7 +85,7 @@ export class Parser {
             // TODO: https://github.com/microsoft/TypeScript/issues/31334
             tokens.shift();
             while (tokens.length > 0 && tokens[0].tokenType !== TokenType.CloseBrace) {
-                statements.push(this.parseStatement(tokens));
+                statements.push(this.parseStatement(tokens, inLoop));
             }
 
             if (tokens.length === 0) {
@@ -94,16 +96,16 @@ export class Parser {
             if (closeBraceTok.tokenType !== TokenType.CloseBrace) {
                 throw new Error("Expected '}' but found " + closeBraceTok.toString());
             }
-        } else if (requireBrace) {
+        } else if (needBrace) {
             throw new Error("Expected '{' but found " + tokens[0].toString());
         } else {
-            statements.push(this.parseStatement(tokens));
+            statements.push(this.parseStatement(tokens, inLoop));
         }
 
         return statements;
     }
 
-    private static parseStatement(tokens: Token[]): StatementASTNode {
+    private static parseStatement(tokens: Token[], inLoop: boolean = false): StatementASTNode {
         let tok: Token = tokens.shift();
         if (tok.tokenType !== TokenType.Keyword && tok.tokenType !== TokenType.Identifier) {
             throw new Error("Expected statement but found " + tok.toString());
@@ -234,7 +236,7 @@ export class Parser {
             throw new Error("Expected ')', but found " + tok.toString());
         }
 
-        let block: StatementASTNode[] = this.parseBlock(tokens);
+        let block: StatementASTNode[] = this.parseBlock(tokens, false, true);
 
         return new WhileASTNode(condition, block);
     }
