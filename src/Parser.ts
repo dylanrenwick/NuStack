@@ -5,6 +5,7 @@ import { DeclarationASTNode } from "./AST/DeclarationASTNode";
 import { DiadicASTNode } from "./AST/DiadicASTNode";
 import { ExpressionASTNode, ValueType } from "./AST/ExpressionASTNode";
 import { IfASTNode } from "./AST/IfASTNode";
+import { KeywordASTNode, KeywordType } from "./AST/KeywordASTNode";
 import { MonadicASTNode } from "./AST/MonadicASTNode";
 import { OperationType } from "./AST/OperationASTNode";
 import { ProgramASTNode } from "./AST/ProgramASTNode";
@@ -129,6 +130,12 @@ export class Parser {
                 case "while":
                     statement = this.parseWhile(tokens);
                     needSemicolon = false;
+                    break;
+                case "break":
+                    statement = new KeywordASTNode(KeywordType.break);
+                    break;
+                case "continue":
+                    statement = new KeywordASTNode(KeywordType.continue);
                     break;
                 default:
                     statement = this.parseDeclaration(tokens, tok);
