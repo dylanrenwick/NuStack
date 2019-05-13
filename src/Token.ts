@@ -34,6 +34,7 @@ export class Token  {
             case TokenType.OpenBrace: return "{";
             case TokenType.CloseBrace: return "}";
             case TokenType.Semicolon: return ";";
+            case TokenType.Comma: return ",";
             case TokenType.Negation: return "-";
             case TokenType.BitwiseNOT: return "~";
             case TokenType.LogicalNOT: return "!";
@@ -61,6 +62,7 @@ export enum TokenType {
     OpenBrace,
     CloseBrace,
     Semicolon,
+    Comma,
     Integer,
     Negation,
     BitwiseNOT,

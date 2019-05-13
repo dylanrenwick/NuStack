@@ -3,16 +3,16 @@ import { Token, TokenType } from "./Token";
 export class Tokenizer {
     private static readonly keywords: string[] = [
         "int", "return", "if", "else", "while",
-        "break", "continue"
+        "break", "continue",
     ];
     private static readonly singletons: string[] = [
-        "(", ")", "{", "}", ";",
+        "(", ")", "{", "}", ";", ",",
     ];
     private static readonly separators: string[] = [
         " ", "\t", "\n", "\r",
     ];
     private static readonly operators: string[] = [
-        "~", "!", "+", "-", "/", "*", ">", "<", "="
+        "~", "!", "+", "-", "/", "*", ">", "<", "=",
     ];
     private static readonly twoCharOperators: string[] = [
         "==", "!=", "<=", ">=", "&&", "||",
@@ -107,6 +107,7 @@ export class Tokenizer {
             case "(": return new Token(col, line, TokenType.OpenParen);
             case ")": return new Token(col, line, TokenType.CloseParen);
             case ";": return new Token(col, line, TokenType.Semicolon);
+            case ",": return new Token(col, line, TokenType.Comma);
             case "-": return new Token(col, line, TokenType.Negation);
             case "~": return new Token(col, line, TokenType.BitwiseNOT);
             case "!": return new Token(col, line, TokenType.LogicalNOT);
