@@ -3,7 +3,6 @@ import { PlatformController } from "./ASM/PlatformController";
 import { PlatformController32 } from "./ASM/PlatformController32";
 import { PlatformController64 } from "./ASM/PlatformController64";
 import { AbstractSyntaxTree } from "./AST/AbstractSyntaxTree";
-import { ASTPass } from "./AST/ASTPass";
 import { Parser } from "./Parser";
 import { Token } from "./Token";
 import { Tokenizer } from "./Tokenizer";
