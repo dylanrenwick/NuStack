@@ -17,6 +17,7 @@ import { WhileASTNode } from "./AST/WhileASTNode";
 import { Declaration } from "./Declaration";
 import { HashMap } from "./HashMap";
 import { Token, TokenType } from "./Token";
+import { FunctionCallASTNode } from "./AST/FunctionCallASTNode";
 
 export interface IFootprint {
     name: string;
@@ -236,7 +237,11 @@ export class Parser {
                     statement = this.parseDeclaration(tokens, tok);
             }
         } else {
-            statement = this.parseAssignment(tokens, tok);
+            if (tokens[0].tokenType === TokenType.Assignment) {
+                statement = this.parseAssignment(tokens, tok);
+            } else if (tokens[0].tokenType === TokenType.OpenParen) {
+                statement = this.parseFuncCall(tokens, tok);
+            }
         }
 
         if (needSemicolon) {
@@ -283,6 +288,28 @@ export class Parser {
         }
 
         return new AssignmentASTNode(dec, expr);
+    }
+
+    private static parseFuncCall(tokens: Token[], tok: Token): FunctionCallASTNode {
+        let func: IFootprint = this.functions.Get(tok.tokenValue);
+        if (!func) {
+            throw new Error("Could not find function " + tok.tokenValue);
+        }
+
+        this.parseToken(tokens, TokenType.OpenParen);
+
+        let argExprs: ExpressionASTNode[] = [];
+        for (let i = 0; i < func.args.length; i++) {
+            let arg: ExpressionASTNode = this.parseExpression(tokens);
+            if (arg.expressionType !== null && arg.expressionType !== func.args[i].type) {
+                throw new Error("Type " + arg.expressionType + " is not assignable to type " + func.args[i].type);
+            }
+            if (i + 1 < func.args.length) this.parseToken(tokens, TokenType.Comma);
+        }
+
+        this.parseToken(tokens, TokenType.CloseParen);
+
+        return new FunctionCallASTNode(func, argExprs);
     }
 
     private static parseIf(tokens: Token[]): IfASTNode {
