@@ -9,11 +9,11 @@ import { ReturnStatementASTNode } from "../AST/ReturnStatementASTNode";
 import { StatementASTNode } from "../AST/StatementASTNode";
 import { SubroutineASTNode } from "../AST/SubroutineASTNode";
 import { VariableASTNode } from "../AST/VariableASTNode";
+import { WhileASTNode } from "../AST/WhileASTNode";
 import { Declaration } from "../Declaration";
 import { HashMap } from "../HashMap";
 import { StringBuilder } from "../StringBuilder";
 import { PlatformController } from "./PlatformController";
-import { WhileASTNode } from "../AST/WhileASTNode";
 
 export class AssemblyGenerator {
     private static complexOps: OperationType[] = [
