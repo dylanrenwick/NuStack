@@ -5,7 +5,6 @@ import { ProgramASTNode } from "../../src/AST/ProgramASTNode";
 describe("ProgramASTNode:", () => {
     describe("ProgramASTNode.constructor()", () => {
         it("should correctly assign the entry point to main", () => {
-            expect(new ProgramASTNode(null)["main"]).to.equal(null);
             let sub = new FunctionASTNode("main", "int", []);
             expect(new ProgramASTNode([sub])["main"]).to.equal(sub);
         });
@@ -18,8 +17,7 @@ describe("ProgramASTNode:", () => {
 
     describe("ProgramASTNode.childNodes", () => {
         it("should correctly return the given functions", () => {
-            expect(new ProgramASTNode(null).childNodes).to.equal(null);
-            let sub = new FunctionASTNode("", "", []);
+            let sub = new FunctionASTNode("main", "int", []);
             expect(new ProgramASTNode([sub]).childNodes).to.deep.equal([sub]);
         });
     });

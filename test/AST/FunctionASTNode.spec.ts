@@ -1,19 +1,20 @@
 import { expect } from "chai";
+import { ValueType } from "../../src/AST/ExpressionASTNode";
 import { FunctionASTNode } from "../../src/AST/FunctionASTNode";
 import { ReturnStatementASTNode } from "../../src/AST/ReturnStatementASTNode";
 
 describe("FunctionASTNode", () => {
     describe("FunctionASTNode.constructor()", () => {
         it("should correctly assign name and returnType", () => {
-            let node = new FunctionASTNode("name", "returnType", []);
+            let node = new FunctionASTNode("name", "int", []);
             expect(node["funcName"]).to.equal("name");
-            expect(node["return"]).to.equal("returnType");
-            node = new FunctionASTNode("hello", "goodbye", []);
+            expect(node["return"]).to.equal(ValueType.int);
+            node = new FunctionASTNode("hello", "string", []);
             expect(node["funcName"]).to.equal("hello");
-            expect(node["return"]).to.equal("goodbye");
+            expect(node["return"]).to.equal(ValueType.string);
             node = new FunctionASTNode("", "", []);
             expect(node["funcName"]).to.equal("");
-            expect(node["return"]).to.equal("");
+            expect(node["return"]).to.equal(null);
         });
 
         it("should correctly assign children", () => {
@@ -52,12 +53,12 @@ describe("FunctionASTNode", () => {
 
     describe("FunctionASTNode.returnType", () => {
         it("should return the subroutine's returnType", () => {
-            let node = new FunctionASTNode("", "void", []);
-            expect(node.returnType).to.equal("void");
-            node = new FunctionASTNode("", "returnType", []);
-            expect(node.returnType).to.equal("returnType");
+            let node = new FunctionASTNode("", "bool", []);
+            expect(node.returnType).to.equal(ValueType.bool);
+            node = new FunctionASTNode("", "int", []);
+            expect(node.returnType).to.equal(ValueType.int);
             node = new FunctionASTNode("", "", []);
-            expect(node.returnType).to.equal("");
+            expect(node.returnType).to.equal(null);
         });
     });
 });

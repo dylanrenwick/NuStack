@@ -27,14 +27,19 @@ export class Tokenizer {
         let col = 1;
 
         let str = false;
+        let newline = false;
 
         for (let char of code) {
-            col++;
-
-            if (char === "\n") {
+            if (newline) {
                 col = 1;
                 line++;
+                newline = false;
             }
+            if (char === "\n") {
+                newline = true;
+            }
+
+            col++;
 
             if (str) {
                 if (char === "\"" && !curToken.endsWith("\\")) {

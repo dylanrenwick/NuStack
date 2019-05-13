@@ -405,7 +405,7 @@ export class Parser {
         } else if (next.tokenType === TokenType.String) {
             return new ConstantASTNode(next.tokenValue, ValueType.string);
         } else if (next.tokenType === TokenType.Identifier) {
-            if (tokens[0].tokenType === TokenType.OpenParen) {
+            if (tokens.length && tokens[0].tokenType === TokenType.OpenParen) {
                 return this.parseFuncCall(tokens, next);
             } else if (this.variables.Has(next.tokenValue)) {
                 return new VariableASTNode(this.variables.Get(next.tokenValue));

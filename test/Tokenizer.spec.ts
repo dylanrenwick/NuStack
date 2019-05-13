@@ -6,12 +6,12 @@ describe("Tokenizer:", () => {
     describe("Tokenizer.tokenFromString()", () => {
         it("should correctly tokenize a variety of valid tokens", () => {
             let tokens: { [key: string]: Token} = {
-                "int": new Token(1, 1, 0, "int"),
-                "main": new Token(1, 1, 1, "main"),
-                "(": new Token(1, 1, 2),
-                ")": new Token(1, 1, 3),
-                ";": new Token(1, 1, 6),
-                "17": new Token(1, 1, 7, 17)
+                "int": new Token(1, 1, TokenType.Keyword, "int"),
+                "main": new Token(1, 1, TokenType.Identifier, "main"),
+                "(": new Token(1, 1, TokenType.OpenParen),
+                ")": new Token(1, 1, TokenType.CloseParen),
+                ";": new Token(1, 1, TokenType.Semicolon),
+                "17": new Token(1, 1, TokenType.Integer, 17)
             };
 
             for (let token in tokens) {
@@ -24,7 +24,7 @@ describe("Tokenizer:", () => {
 
         it("should error on invalid token strings", () => {
             let invalidStrings = [
-                "#", "%", "\\"
+                "`", "%", "\\"
             ];
 
             for (let invalid of invalidStrings) {
