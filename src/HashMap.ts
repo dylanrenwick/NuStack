@@ -22,4 +22,8 @@ export class HashMap<K, V> {
         return this.innerContainer[hash] !== undefined
             && this.innerContainer[hash] !== null;
     }
+
+    public GetValues(): V[] {
+        return Object.values(this.innerContainer);
+    }
 }
