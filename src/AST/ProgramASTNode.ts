@@ -1,13 +1,13 @@
 import { StringBuilder } from "../StringBuilder";
+import { FunctionASTNode } from "./FunctionASTNode";
 import { IASTNode } from "./IASTNode";
-import { SubroutineASTNode } from "./SubroutineASTNode";
 
 export class ProgramASTNode implements IASTNode {
-    private mainSub: SubroutineASTNode;
+    private mainSub: FunctionASTNode;
 
-    public get childNodes(): SubroutineASTNode { return this.mainSub; }
+    public get childNodes(): FunctionASTNode { return this.mainSub; }
 
-    public constructor(subroutine: SubroutineASTNode) {
+    public constructor(subroutine: FunctionASTNode) {
         this.mainSub = subroutine;
     }
 

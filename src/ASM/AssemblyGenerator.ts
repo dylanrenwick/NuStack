@@ -3,12 +3,12 @@ import { AssignmentASTNode } from "../AST/AssignmentASTNode";
 import { ConstantASTNode } from "../AST/ConstantASTNode";
 import { DeclarationASTNode } from "../AST/DeclarationASTNode";
 import { ExpressionASTNode } from "../AST/ExpressionASTNode";
+import { FunctionASTNode } from "../AST/FunctionASTNode";
 import { IfASTNode } from "../AST/IfASTNode";
 import { KeywordASTNode, KeywordType } from "../AST/KeywordASTNode";
 import { OperationASTNode, OperationType } from "../AST/OperationASTNode";
 import { ReturnStatementASTNode } from "../AST/ReturnStatementASTNode";
 import { StatementASTNode } from "../AST/StatementASTNode";
-import { SubroutineASTNode } from "../AST/SubroutineASTNode";
 import { VariableASTNode } from "../AST/VariableASTNode";
 import { WhileASTNode } from "../AST/WhileASTNode";
 import { Declaration } from "../Declaration";
@@ -69,12 +69,12 @@ export class AssemblyGenerator {
         sb = this.platformController.makeExit(sb, this.ax);
         sb.appendLine("");
 
-        sb = this.generateSubroutine(sb, ast.root.childNodes);
+        sb = this.generateFunction(sb, ast.root.childNodes);
 
         return sb.toString();
     }
 
-    private static generateSubroutine(sb: StringBuilder, sub: SubroutineASTNode): StringBuilder {
+    private static generateFunction(sb: StringBuilder, sub: FunctionASTNode): StringBuilder {
         sb = this.generateLabel(sb, sub.name);
         sb = this.platformController.makeStackFrame(sb);
 

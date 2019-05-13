@@ -4,6 +4,7 @@ import { ConstantASTNode } from "./AST/ConstantASTNode";
 import { DeclarationASTNode } from "./AST/DeclarationASTNode";
 import { DiadicASTNode } from "./AST/DiadicASTNode";
 import { ExpressionASTNode, ValueType } from "./AST/ExpressionASTNode";
+import { FunctionASTNode } from "./AST/FunctionASTNode";
 import { IfASTNode } from "./AST/IfASTNode";
 import { KeywordASTNode, KeywordType } from "./AST/KeywordASTNode";
 import { MonadicASTNode } from "./AST/MonadicASTNode";
@@ -11,7 +12,6 @@ import { OperationType } from "./AST/OperationASTNode";
 import { ProgramASTNode } from "./AST/ProgramASTNode";
 import { ReturnStatementASTNode } from "./AST/ReturnStatementASTNode";
 import { StatementASTNode } from "./AST/StatementASTNode";
-import { SubroutineASTNode } from "./AST/SubroutineASTNode";
 import { VariableASTNode } from "./AST/VariableASTNode";
 import { WhileASTNode } from "./AST/WhileASTNode";
 import { Declaration } from "./Declaration";
@@ -41,12 +41,12 @@ export class Parser {
     public static parse(tokens: Token[]): AbstractSyntaxTree {
         return new AbstractSyntaxTree(
             new ProgramASTNode(
-                this.parseSubroutine(tokens)
+                this.parseFunction(tokens)
             )
         );
     }
 
-    private static parseSubroutine(tokens: Token[]): SubroutineASTNode {
+    private static parseFunction(tokens: Token[]): FunctionASTNode {
         let returnTypeTok: Token = tokens.shift();
         if (returnTypeTok.tokenType !== TokenType.Keyword ||
             ExpressionASTNode.getTypeFromString(returnTypeTok.tokenValue) === null) {
@@ -69,7 +69,7 @@ export class Parser {
 
         let statements: StatementASTNode[] = this.parseBlock(tokens, true);
 
-        return new SubroutineASTNode(
+        return new FunctionASTNode(
             subNameTok.tokenValue,
             returnTypeTok.tokenValue,
             statements

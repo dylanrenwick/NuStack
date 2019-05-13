@@ -2,7 +2,7 @@ import { StringBuilder } from "../StringBuilder";
 import { IASTNode } from "./IASTNode";
 import { StatementASTNode } from "./StatementASTNode";
 
-export class SubroutineASTNode implements IASTNode {
+export class FunctionASTNode implements IASTNode {
     private subName: string;
     private return: string;
     private children: StatementASTNode[];
