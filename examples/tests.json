@@ -50,5 +50,13 @@
     {
         "fileName": "while",
         "answer": 10
+    },
+    {
+        "fileName": "break",
+        "answer": 10
+    },
+    {
+        "fileName": "continue",
+        "answer": 20
     }
 ]
