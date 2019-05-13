@@ -68,7 +68,7 @@ export class AssemblyGenerator {
         sb.appendLine("");
         sb.appendLine("_start:");
         sb.indent++;
-        sb.appendLine("call main");
+        sb.appendLine("call __func_main");
         sb = this.platformController.makeExit(sb, this.ax);
         sb.appendLine("");
 
@@ -87,8 +87,8 @@ export class AssemblyGenerator {
         this.stackMap = new HashMap<string, number>();
         this.stackOffset = 0;
 
-        for (let i = func.arguments.length; i > 0; i--) {
-            this.stackMap.Add(func.arguments[i - 1].variableName, -(this.platformController.wordSize * i));
+        for (let i = func.arguments.length - 1; i >= 0; i--) {
+            this.stackMap.Add(func.arguments[i].variableName, -(this.platformController.wordSize * (i + 2)));
         }
 
         for (let statement of func.childNodes) {
