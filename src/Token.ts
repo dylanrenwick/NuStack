@@ -10,6 +10,8 @@ export class Token  {
             case TokenType.Keyword:
             case TokenType.Identifier:
             case TokenType.Integer:
+            case TokenType.Char:
+            case TokenType.String:
                 return this.tokenValue !== null && this.tokenValue !== undefined;
             default:
                 return false;
@@ -28,6 +30,8 @@ export class Token  {
             case TokenType.Keyword:
             case TokenType.Identifier:
             case TokenType.Integer:
+            case TokenType.Char:
+            case TokenType.String:
                 return this.tokenValue.toString();
             case TokenType.OpenParen: return "(";
             case TokenType.CloseParen: return ")";
@@ -41,6 +45,7 @@ export class Token  {
             case TokenType.Addition: return "+";
             case TokenType.Multiplication: return "*";
             case TokenType.Division: return "/";
+            case TokenType.Macro: return "#";
             case TokenType.MoreThan: return ">";
             case TokenType.LessThan: return "<";
             case TokenType.Equal: return "==";
@@ -64,12 +69,15 @@ export enum TokenType {
     Semicolon,
     Comma,
     Integer,
+    Char,
+    String,
     Negation,
     BitwiseNOT,
     LogicalNOT,
     Addition,
     Multiplication,
     Division,
+    Macro,
     MoreThan,
     LessThan,
     Equal,

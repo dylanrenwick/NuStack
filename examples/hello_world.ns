@@ -1,0 +1,28 @@
+int putchar(int c) {
+    #asm "mov %si, %bp"
+    #asm "mov %cx, *c"
+    #asm "add %si, %cx"
+    #asm "mov %ax, 1"
+    #asm "mov %di, 1"
+    #asm "mov %dx, 1"
+    #asm "syscall"
+    return c;
+}
+
+int main() {
+    putchar(72);
+    putchar(101);
+    putchar(108);
+    putchar(108);
+    putchar(111);
+    putchar(44);
+    putchar(32);
+    putchar(87);
+    putchar(111);
+    putchar(114);
+    putchar(108);
+    putchar(100);
+    putchar(33);
+    putchar(10);
+    return 0;
+}

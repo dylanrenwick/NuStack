@@ -22,6 +22,20 @@ export abstract class PlatformController {
         return this.makeSysCall(sb, Syscall.exit, exitCode);
     }
 
+    public getRegisterName(reg: string): string {
+        switch (reg) {
+            case "ax": return this.ax;
+            case "bx": return this.bx;
+            case "cx": return this.cx;
+            case "dx": return this.dx;
+            case "sp": return this.sp;
+            case "bp": return this.bp;
+            case "si": return this.si;
+            case "di": return this.di;
+            default: return reg;
+        }
+    }
+
     public makeStackFrame(sb: StringBuilder): StringBuilder {
         sb.appendLine("push " + this.bp);
         sb.appendLine(`mov ${this.bp}, ${this.sp}`);

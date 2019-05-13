@@ -1,0 +1,6 @@
+int main() {
+    int a = 0;
+    #asm "mov %ax, 3d"
+    #asm "mov $a, %ax"
+    return a;
+}

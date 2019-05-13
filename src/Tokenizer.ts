@@ -3,10 +3,10 @@ import { Token, TokenType } from "./Token";
 export class Tokenizer {
     private static readonly keywords: string[] = [
         "int", "return", "if", "else", "while",
-        "break", "continue",
+        "break", "continue", "string"
     ];
     private static readonly singletons: string[] = [
-        "(", ")", "{", "}", ";", ",",
+        "(", ")", "{", "}", ";", ",", "#"
     ];
     private static readonly separators: string[] = [
         " ", "\t", "\n", "\r",
@@ -26,8 +26,34 @@ export class Tokenizer {
         let line = 1;
         let col = 1;
 
+        let str = false;
+
         for (let char of code) {
             col++;
+
+            if (char === "\n") {
+                col = 1;
+                line++;
+            }
+
+            if (str) {
+                if (char === "\"" && !curToken.endsWith("\\")) {
+                    str = false;
+                    tokens.push(new Token(col - curToken.length, line, TokenType.String, curToken));
+                    curToken = "";
+                    continue;
+                } else {
+                    curToken += char;
+                    continue;
+                }
+            } else if (char === "\"") {
+                if (curToken.length > 0) {
+                    tokens.push(this.tokenFromString(line, col - curToken.length, curToken));
+                    curToken = "";
+                }
+                str = true;
+                continue;
+            }
 
             if (this.twoCharOperators.includes(curToken + char)) {
                 curToken += char;
@@ -77,11 +103,6 @@ export class Tokenizer {
                     curToken = "";
                 }
 
-                if (char === "\n") {
-                    line++;
-                    col = 1;
-                }
-
                 continue;
             }
 
@@ -114,6 +135,7 @@ export class Tokenizer {
             case "+": return new Token(col, line, TokenType.Addition);
             case "*": return new Token(col, line, TokenType.Multiplication);
             case "/": return new Token(col, line, TokenType.Division);
+            case "#": return new Token(col, line, TokenType.Macro);
             case ">": return new Token(col, line, TokenType.MoreThan);
             case "<": return new Token(col, line, TokenType.LessThan);
             case "=": return new Token(col, line, TokenType.Assignment);

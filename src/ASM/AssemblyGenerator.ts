@@ -16,6 +16,7 @@ import { HashMap } from "../HashMap";
 import { StringBuilder } from "../StringBuilder";
 import { PlatformController } from "./PlatformController";
 import { FunctionCallASTNode } from "../AST/FunctionCallASTNode";
+import { AssemblyMacroASTNode } from "../AST/AssemblyMacroASTNode";
 
 export class AssemblyGenerator {
     private static complexOps: OperationType[] = [
@@ -121,6 +122,8 @@ export class AssemblyGenerator {
             return this.generateKeyword(sb, statement);
         } else if (statement instanceof FunctionCallASTNode) {
             return this.generateFunctionCall(sb, statement);
+        } else if (statement instanceof AssemblyMacroASTNode) {
+            return this.generateAssemblyMacro(sb, statement);
         }
 
         throw new Error("Unknown AST node");
@@ -167,6 +170,26 @@ export class AssemblyGenerator {
             sb.appendLine("push " + this.ax);
         }
         sb.appendLine("call __func_" + call.functionName);
+
+        return sb;
+    }
+
+    private static generateAssemblyMacro(sb: StringBuilder, macro: AssemblyMacroASTNode): StringBuilder {
+        let process: (x: string) => string = (line => {
+            return line.replace(/%([a-z]{2})/g, (_, p1) => this.platformController.getRegisterName(p1))
+                .replace(/\$([a-zA-Z_]+)/g, (_, p1) => {
+                    let offset = this.stackMap.Get(p1);
+                    return `[${this.bp}${offset >= 0 ? "-" : "+"}${Math.abs(offset)}]`;
+                })
+                .replace(/\*([a-zA-Z_]+)/g, (_, p1) => {
+                    let offset = this.stackMap.Get(p1);
+                    return `${-offset}d`;
+                });
+        });
+
+        for (let line of macro.assembly.split("\n")) {
+            sb.appendLine(process(line));
+        }
 
         return sb;
     }

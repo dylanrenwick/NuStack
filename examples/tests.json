@@ -66,5 +66,13 @@
     {
         "fileName": "function_call",
         "answer": 3
+    },
+    {
+        "fileName": "asm_macro",
+        "answer": 3
+    },
+    {
+        "fileName": "putchar",
+        "answer": 65
     }
 ]

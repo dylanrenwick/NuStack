@@ -18,6 +18,8 @@ import { WhileASTNode } from "./AST/WhileASTNode";
 import { Declaration } from "./Declaration";
 import { HashMap } from "./HashMap";
 import { Token, TokenType } from "./Token";
+import { CompilerMacroASTNode, MacroType } from "./AST/CompilerMacroASTNode";
+import { AssemblyMacroASTNode } from "./AST/AssemblyMacroASTNode";
 
 export interface IFootprint {
     name: string;
@@ -204,7 +206,9 @@ export class Parser {
 
     private static parseStatement(tokens: Token[], inLoop: boolean = false): StatementASTNode {
         let tok: Token = this.parseToken(tokens,
-            x => (x.tokenType === TokenType.Keyword || x.tokenType === TokenType.Identifier),
+            x => (x.tokenType === TokenType.Keyword
+                || x.tokenType === TokenType.Identifier
+                || x.tokenType === TokenType.Macro),
             "statement"
         );
 
@@ -236,19 +240,30 @@ export class Parser {
                 default:
                     statement = this.parseDeclaration(tokens, tok);
             }
-        } else {
+        } else if (tok.tokenType === TokenType.Identifier) {
             if (tokens[0].tokenType === TokenType.Assignment) {
                 statement = this.parseAssignment(tokens, tok);
             } else if (tokens[0].tokenType === TokenType.OpenParen) {
                 statement = this.parseFuncCall(tokens, tok);
             }
+        } else if (tok.tokenType === TokenType.Macro) {
+            statement = this.parseMacro(tokens);
+            needSemicolon = false;
         }
 
         if (needSemicolon) {
-            tok = this.parseToken(tokens, TokenType.Semicolon);
+            this.parseToken(tokens, TokenType.Semicolon);
         }
 
         return statement;
+    }
+
+    private static parseMacro(tokens: Token[]): CompilerMacroASTNode {
+        let macroToken: Token = this.parseToken(tokens, TokenType.Identifier);
+        let macroType: MacroType = CompilerMacroASTNode.macroFromString(macroToken.tokenValue);
+        let macroContents: string = this.parseToken(tokens, TokenType.String).tokenValue;
+
+        return new AssemblyMacroASTNode(macroContents);
     }
 
     private static parseDeclaration(tokens: Token[], tok: Token): DeclarationASTNode {
@@ -387,6 +402,8 @@ export class Parser {
             return new MonadicASTNode(op, factor);
         } else if (next.tokenType === TokenType.Integer) {
             return new ConstantASTNode(next.tokenValue, ValueType.int);
+        } else if (next.tokenType === TokenType.String) {
+            return new ConstantASTNode(next.tokenValue, ValueType.string);
         } else if (next.tokenType === TokenType.Identifier) {
             if (tokens[0].tokenType === TokenType.OpenParen) {
                 return this.parseFuncCall(tokens, next);
