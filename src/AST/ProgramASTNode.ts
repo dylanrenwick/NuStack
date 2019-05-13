@@ -1,21 +1,29 @@
 import { StringBuilder } from "../StringBuilder";
+import { ValueType } from "./ExpressionASTNode";
 import { FunctionASTNode } from "./FunctionASTNode";
 import { IASTNode } from "./IASTNode";
 
 export class ProgramASTNode implements IASTNode {
-    private mainSub: FunctionASTNode;
+    private funcs: FunctionASTNode[];
+    private main: FunctionASTNode;
 
-    public get childNodes(): FunctionASTNode { return this.mainSub; }
+    public get childNodes(): FunctionASTNode[] { return this.funcs; }
+    public get mainFunc(): FunctionASTNode { return this.main; }
 
-    public constructor(subroutine: FunctionASTNode) {
-        this.mainSub = subroutine;
+    public constructor(functions: FunctionASTNode[]) {
+        this.funcs = functions;
+        let entryPoints = this.funcs.filter(x => x.name === "main" && x.returnType === ValueType.int);
+        if (entryPoints.length === 0) {
+            throw new Error("No function of signature 'int main()' found. Could not get entry point");
+        }
+        this.main = entryPoints[0];
     }
 
     public toString(sb: StringBuilder): StringBuilder {
         sb.startBlock("Program");
-        sb.startBlock("Main Sub");
-        sb = this.mainSub.toString(sb);
-        sb.endBlock();
+        for (let func of this.funcs) {
+            sb = func.toString(sb);
+        }
         sb.endBlock();
 
         return sb;

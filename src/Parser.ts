@@ -18,6 +18,18 @@ import { Declaration } from "./Declaration";
 import { HashMap } from "./HashMap";
 import { Token, TokenType } from "./Token";
 
+export interface IFootprint {
+    name: string;
+    type: ValueType;
+    args: IArg[];
+    tokenStart: number;
+    tokenEnd: number;
+}
+
+interface IArg {
+    name: string;
+    type: ValueType;
+}
 export class Parser {
     private static readonly INT_MAX_VALUE: number = 2 ** 31;
 
@@ -28,6 +40,7 @@ export class Parser {
         TokenType.Addition, TokenType.Negation, TokenType.Multiplication, TokenType.Division
     ];
     private static variables: HashMap<string, Declaration> = new HashMap<string, Declaration>();
+    private static functions: HashMap<string, IFootprint> = new HashMap<string, IFootprint>();
 
     private static exprOperators: TokenType[][] = [
         [TokenType.LogicalOR], [TokenType.LogicalAND],
@@ -41,38 +54,127 @@ export class Parser {
     public static parse(tokens: Token[]): AbstractSyntaxTree {
         return new AbstractSyntaxTree(
             new ProgramASTNode(
-                this.parseFunction(tokens)
+                this.parseAllFunctions(tokens)
             )
         );
     }
 
+    private static parseAllFunctions(tokens: Token[]): FunctionASTNode[] {
+        // Copy array
+        let footprintToks: Token[] = tokens.concat();
+
+        let next: IFootprint = this.parseFunctionFootprint(footprintToks, tokens.length - footprintToks.length);
+        for (; next !== null; next = this.parseFunctionFootprint(footprintToks, tokens.length - footprintToks.length)) {
+            this.functions.Add(next.name, next);
+        }
+
+        let funcs: FunctionASTNode[] = [];
+        for (let func of this.functions.GetValues()) {
+            console.log(tokens.slice(func.tokenStart, func.tokenEnd).toString());
+            funcs.push(this.parseFunction(tokens.slice(func.tokenStart, func.tokenEnd)));
+        }
+
+        return funcs;
+    }
+
+    private static parseFunctionFootprint(tokens: Token[], start: number): IFootprint {
+        if (tokens.length === 0) return null;
+
+        let end = start + 1;
+        let type = this.parseToken(tokens,
+            x => (x.tokenType === TokenType.Keyword && ExpressionASTNode.getTypeFromString(x.tokenValue) !== null),
+            "type"
+        );
+
+        end++;
+        let name = this.parseToken(tokens, TokenType.Identifier);
+
+        end++;
+        this.parseToken(tokens, TokenType.OpenParen);
+
+        let funcArgs: IArg[] = [];
+        while (tokens[0].tokenType !== TokenType.CloseParen) {
+            if (funcArgs.length > 0) {
+                this.parseToken(tokens, TokenType.Comma);
+                end++;
+            }
+            let argType = this.parseToken(tokens,
+                x => (x.tokenType === TokenType.Keyword && ExpressionASTNode.getTypeFromString(x.tokenValue) !== null),
+                "type"
+            );
+
+            let argName = this.parseToken(tokens, TokenType.Identifier);
+
+            funcArgs.push({
+                name: argName.tokenValue,
+                type: ExpressionASTNode.getTypeFromString(argType.tokenValue)
+            });
+
+            end += 2;
+        }
+
+        end++;
+        this.parseToken(tokens, TokenType.CloseParen);
+
+        end++;
+        this.parseToken(tokens, TokenType.OpenBrace);
+
+        let level: number = 1;
+        while (level) {
+            if (tokens[0].tokenType === TokenType.OpenBrace) {
+                level++;
+            } else if (tokens[0].tokenType === TokenType.CloseBrace) {
+                level--;
+            }
+            tokens.shift();
+            end++;
+        }
+
+        return {
+            args: funcArgs,
+            name: name.tokenValue,
+            tokenEnd: end,
+            tokenStart: start,
+            type: ExpressionASTNode.getTypeFromString(type.tokenValue)
+        };
+    }
+
     private static parseFunction(tokens: Token[]): FunctionASTNode {
-        let returnTypeTok: Token = tokens.shift();
-        if (returnTypeTok.tokenType !== TokenType.Keyword ||
-            ExpressionASTNode.getTypeFromString(returnTypeTok.tokenValue) === null) {
-            throw new Error("Expected 'int' but found " + returnTypeTok.toString());
+        let returnTypeTok: Token = this.parseToken(tokens,
+            x => (x.tokenType === TokenType.Keyword && ExpressionASTNode.getTypeFromString(x.tokenValue) !== null),
+            "type"
+        );
+
+        let subNameTok: Token = this.parseToken(tokens, TokenType.Identifier);
+
+        this.parseToken(tokens, TokenType.OpenParen);
+
+        let funcArgs: Declaration[] = [];
+        while (tokens[0].tokenType !== TokenType.CloseParen) {
+            if (funcArgs.length > 0) {
+                this.parseToken(tokens, TokenType.Comma);
+            }
+            let argType = this.parseToken(tokens,
+                x => (x.tokenType === TokenType.Keyword && ExpressionASTNode.getTypeFromString(x.tokenValue) !== null),
+                "type"
+            );
+
+            let argName = this.parseToken(tokens, TokenType.Identifier);
+
+            let dec: Declaration = new Declaration(argName.tokenValue, argType.tokenValue);
+            funcArgs.push(dec);
+            this.variables.Add(argName.tokenValue, dec);
         }
 
-        let subNameTok: Token = tokens.shift();
-        if (subNameTok.tokenType !== TokenType.Identifier) {
-            throw new Error("Expected identifier but found " + subNameTok.toString());
-        }
-
-        let openParenTok: Token = tokens.shift();
-        if (openParenTok.tokenType !== TokenType.OpenParen) {
-            throw new Error("Expected '(' but found " + openParenTok.toString());
-        }
-        let closeParenTok: Token = tokens.shift();
-        if (closeParenTok.tokenType !== TokenType.CloseParen) {
-            throw new Error("Expected ')' but found " + closeParenTok.toString());
-        }
+        let closeParenTok: Token = this.parseToken(tokens, TokenType.CloseParen);
 
         let statements: StatementASTNode[] = this.parseBlock(tokens, true);
 
         return new FunctionASTNode(
             subNameTok.tokenValue,
             returnTypeTok.tokenValue,
-            statements
+            statements,
+            funcArgs
         );
     }
 
@@ -184,10 +286,7 @@ export class Parser {
     }
 
     private static parseIf(tokens: Token[]): IfASTNode {
-        let tok: Token = tokens.shift();
-        if (tok.tokenType !== TokenType.OpenParen) {
-            throw new Error("Expected '(' after 'if', but found " + tok.toString());
-        }
+        let tok: Token = this.parseToken(tokens, TokenType.OpenParen);
 
         let condition: ExpressionASTNode = this.parseExpression(tokens);
         if (condition.expressionType !== ValueType.bool) {

@@ -69,7 +69,9 @@ export class AssemblyGenerator {
         sb = this.platformController.makeExit(sb, this.ax);
         sb.appendLine("");
 
-        sb = this.generateFunction(sb, ast.root.childNodes);
+        for (let func of ast.root.childNodes) {
+            sb = this.generateFunction(sb, func);
+        }
 
         return sb.toString();
     }
@@ -80,6 +82,10 @@ export class AssemblyGenerator {
 
         this.stackMap = new HashMap<string, number>();
         this.stackOffset = 0;
+
+        for (let arg of sub.arguments) {
+            sb = this.generateDeclaration(sb, arg);
+        }
 
         for (let statement of sub.childNodes) {
             sb = this.generateStatement(sb, statement);
@@ -118,20 +124,25 @@ export class AssemblyGenerator {
         if (statement.childNodes !== null) sb = this.generateExpression(sb, statement.childNodes);
 
         sb = this.platformController.endStackFrame(sb);
-        sb.appendLine("ret");
+        sb.appendLine("ret\n");
 
         return sb;
     }
 
-    private static generateDeclaration(sb: StringBuilder, statement: DeclarationASTNode): StringBuilder {
-        let dec: Declaration = statement.declaration;
+    private static generateDeclaration(sb: StringBuilder, statement: DeclarationASTNode | Declaration): StringBuilder {
+        let dec: Declaration = statement instanceof DeclarationASTNode
+            ? statement.declaration
+            : statement;
+        let stat = statement instanceof DeclarationASTNode
+            ? statement
+            : null;
 
         if (this.stackMap.Has(dec.variableName)) {
             throw new Error("Variable '" + dec.variableName + "' has already been declared!");
         }
 
-        if (statement.expression) {
-            sb = this.generateExpression(sb, statement.expression);
+        if (stat && stat.expression) {
+            sb = this.generateExpression(sb, stat.expression);
         } else {
             sb.appendLine(`mov ${this.ax}, 0d`);
         }
