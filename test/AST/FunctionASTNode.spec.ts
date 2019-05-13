@@ -1,62 +1,62 @@
 import { expect } from "chai";
+import { FunctionASTNode } from "../../src/AST/FunctionASTNode";
 import { ReturnStatementASTNode } from "../../src/AST/ReturnStatementASTNode";
-import { SubroutineASTNode } from "../../src/AST/SubroutineASTNode";
 
-describe("SubroutineASTNode", () => {
-    describe("SubroutineASTNode.constructor()", () => {
+describe("FunctionASTNode", () => {
+    describe("FunctionASTNode.constructor()", () => {
         it("should correctly assign name and returnType", () => {
-            let node = new SubroutineASTNode("name", "returnType", []);
+            let node = new FunctionASTNode("name", "returnType", []);
             expect(node["subName"]).to.equal("name");
             expect(node["return"]).to.equal("returnType");
-            node = new SubroutineASTNode("hello", "goodbye", []);
+            node = new FunctionASTNode("hello", "goodbye", []);
             expect(node["subName"]).to.equal("hello");
             expect(node["return"]).to.equal("goodbye");
-            node = new SubroutineASTNode("", "", []);
+            node = new FunctionASTNode("", "", []);
             expect(node["subName"]).to.equal("");
             expect(node["return"]).to.equal("");
         });
 
         it("should correctly assign children", () => {
-            let node = new SubroutineASTNode("", "", []);
+            let node = new FunctionASTNode("", "", []);
             expect(node["children"]).to.deep.equal([]);
-            node = new SubroutineASTNode("", "", [null]);
+            node = new FunctionASTNode("", "", [null]);
             expect(node["children"]).to.deep.equal([null]);
             let innerNode = new ReturnStatementASTNode(null);
-            node = new SubroutineASTNode("", "", [ innerNode ]);
+            node = new FunctionASTNode("", "", [ innerNode ]);
             expect(node["children"]).to.deep.equal([ innerNode ]);
         });
     });
 
-    describe("SubroutineASTNode.childNodes", () => {
+    describe("FunctionASTNode.childNodes", () => {
         it("should return the node's children", () => {
-            let node = new SubroutineASTNode("", "", []);
+            let node = new FunctionASTNode("", "", []);
             expect(node.childNodes).to.deep.equal([]);
-            node = new SubroutineASTNode("", "", [null]);
+            node = new FunctionASTNode("", "", [null]);
             expect(node.childNodes).to.deep.equal([null]);
             let innerNode = new ReturnStatementASTNode(null);
-            node = new SubroutineASTNode("", "", [ innerNode ]);
+            node = new FunctionASTNode("", "", [ innerNode ]);
             expect(node.childNodes).to.deep.equal([ innerNode ]);
         });
     });
 
-    describe("SubroutineASTNode.name", () => {
+    describe("FunctionASTNode.name", () => {
         it("should return the subroutine's name", () => {
-            let node = new SubroutineASTNode("name", "", []);
+            let node = new FunctionASTNode("name", "", []);
             expect(node.name).to.equal("name");
-            node = new SubroutineASTNode("hello", "", []);
+            node = new FunctionASTNode("hello", "", []);
             expect(node.name).to.equal("hello");
-            node = new SubroutineASTNode("", "", []);
+            node = new FunctionASTNode("", "", []);
             expect(node.name).to.equal("");
         });
     });
 
-    describe("SubroutineASTNode.returnType", () => {
+    describe("FunctionASTNode.returnType", () => {
         it("should return the subroutine's returnType", () => {
-            let node = new SubroutineASTNode("", "void", []);
+            let node = new FunctionASTNode("", "void", []);
             expect(node.returnType).to.equal("void");
-            node = new SubroutineASTNode("", "returnType", []);
+            node = new FunctionASTNode("", "returnType", []);
             expect(node.returnType).to.equal("returnType");
-            node = new SubroutineASTNode("", "", []);
+            node = new FunctionASTNode("", "", []);
             expect(node.returnType).to.equal("");
         });
     });
