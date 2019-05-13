@@ -1,8 +1,8 @@
+import { Declaration } from "../Declaration";
 import { StringBuilder } from "../StringBuilder";
 import { ExpressionASTNode, ValueType } from "./ExpressionASTNode";
 import { IASTNode } from "./IASTNode";
 import { StatementASTNode } from "./StatementASTNode";
-import { Declaration } from "../Declaration";
 
 export class FunctionASTNode implements IASTNode {
     private funcName: string;
