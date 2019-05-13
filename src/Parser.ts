@@ -1,5 +1,7 @@
 import { AbstractSyntaxTree } from "./AST/AbstractSyntaxTree";
+import { AssemblyMacroASTNode } from "./AST/AssemblyMacroASTNode";
 import { AssignmentASTNode } from "./AST/AssignmentASTNode";
+import { CompilerMacroASTNode, MacroType } from "./AST/CompilerMacroASTNode";
 import { ConstantASTNode } from "./AST/ConstantASTNode";
 import { DeclarationASTNode } from "./AST/DeclarationASTNode";
 import { DiadicASTNode } from "./AST/DiadicASTNode";
@@ -18,8 +20,6 @@ import { WhileASTNode } from "./AST/WhileASTNode";
 import { Declaration } from "./Declaration";
 import { HashMap } from "./HashMap";
 import { Token, TokenType } from "./Token";
-import { CompilerMacroASTNode, MacroType } from "./AST/CompilerMacroASTNode";
-import { AssemblyMacroASTNode } from "./AST/AssemblyMacroASTNode";
 
 export interface IFootprint {
     name: string;

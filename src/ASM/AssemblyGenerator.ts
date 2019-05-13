@@ -1,9 +1,11 @@
 import { AbstractSyntaxTree } from "../AST/AbstractSyntaxTree";
+import { AssemblyMacroASTNode } from "../AST/AssemblyMacroASTNode";
 import { AssignmentASTNode } from "../AST/AssignmentASTNode";
 import { ConstantASTNode } from "../AST/ConstantASTNode";
 import { DeclarationASTNode } from "../AST/DeclarationASTNode";
 import { ExpressionASTNode } from "../AST/ExpressionASTNode";
 import { FunctionASTNode } from "../AST/FunctionASTNode";
+import { FunctionCallASTNode } from "../AST/FunctionCallASTNode";
 import { IfASTNode } from "../AST/IfASTNode";
 import { KeywordASTNode, KeywordType } from "../AST/KeywordASTNode";
 import { OperationASTNode, OperationType } from "../AST/OperationASTNode";
@@ -15,8 +17,6 @@ import { Declaration } from "../Declaration";
 import { HashMap } from "../HashMap";
 import { StringBuilder } from "../StringBuilder";
 import { PlatformController } from "./PlatformController";
-import { FunctionCallASTNode } from "../AST/FunctionCallASTNode";
-import { AssemblyMacroASTNode } from "../AST/AssemblyMacroASTNode";
 
 export class AssemblyGenerator {
     private static complexOps: OperationType[] = [
