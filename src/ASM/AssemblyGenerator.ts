@@ -15,6 +15,7 @@ import { Declaration } from "../Declaration";
 import { HashMap } from "../HashMap";
 import { StringBuilder } from "../StringBuilder";
 import { PlatformController } from "./PlatformController";
+import { FunctionCallASTNode } from "../AST/FunctionCallASTNode";
 
 export class AssemblyGenerator {
     private static complexOps: OperationType[] = [
@@ -37,6 +38,8 @@ export class AssemblyGenerator {
 
     private static stackMap: HashMap<string, number>;
     private static stackOffset: number;
+
+    private static funcMapping: HashMap<string, string> = new HashMap<string, string>();
 
     private static labelCount: number = 1;
     private static lastLoop: string[];
@@ -76,18 +79,19 @@ export class AssemblyGenerator {
         return sb.toString();
     }
 
-    private static generateFunction(sb: StringBuilder, sub: FunctionASTNode): StringBuilder {
-        sb = this.generateLabel(sb, sub.name);
+    private static generateFunction(sb: StringBuilder, func: FunctionASTNode): StringBuilder {
+        this.funcMapping.Add(func.name, "__func_" + func.name);
+        sb = this.generateLabel(sb, "__func_" + func.name);
         sb = this.platformController.makeStackFrame(sb);
 
         this.stackMap = new HashMap<string, number>();
         this.stackOffset = 0;
 
-        for (let arg of sub.arguments) {
-            sb = this.generateDeclaration(sb, arg);
+        for (let i = func.arguments.length; i > 0; i--) {
+            this.stackMap.Add(func.arguments[i - 1].variableName, -(this.platformController.wordSize * i));
         }
 
-        for (let statement of sub.childNodes) {
+        for (let statement of func.childNodes) {
             sb = this.generateStatement(sb, statement);
         }
 
@@ -115,6 +119,8 @@ export class AssemblyGenerator {
             return this.generateWhile(sb, statement);
         } else if (statement instanceof KeywordASTNode) {
             return this.generateKeyword(sb, statement);
+        } else if (statement instanceof FunctionCallASTNode) {
+            return this.generateFunctionCall(sb, statement);
         }
 
         throw new Error("Unknown AST node");
@@ -151,6 +157,16 @@ export class AssemblyGenerator {
 
         this.stackOffset += this.platformController.wordSize;
         this.stackMap.Add(dec.variableName, this.stackOffset);
+
+        return sb;
+    }
+
+    private static generateFunctionCall(sb: StringBuilder, call: FunctionCallASTNode): StringBuilder {
+        for (let i = call.arguments.length - 1; i >= 0; i--) {
+            sb = this.generateExpression(sb, call.arguments[i]);
+            sb.appendLine("push " + this.ax);
+        }
+        sb.appendLine("call __func_" + call.functionName);
 
         return sb;
     }
@@ -228,6 +244,8 @@ export class AssemblyGenerator {
             return this.generateOperation(sb, expr);
         } else if (expr instanceof VariableASTNode) {
             return this.generateReference(sb, expr);
+        } else if (expr instanceof FunctionCallASTNode) {
+            return this.generateFunctionCall(sb, expr);
         }
 
         throw new Error("Unknown AST node: " + JSON.stringify(expr));
@@ -346,7 +364,8 @@ export class AssemblyGenerator {
 
     private static generateReference(sb: StringBuilder, expr: VariableASTNode): StringBuilder {
         let offset = this.stackMap.Get(expr.declaration.variableName);
-        sb.appendLine(`mov ${this.ax}, [${this.bp}-` + offset + "]");
+        let stackPos = `[${this.bp}${offset >= 0 ? "-" : "+"}${Math.abs(offset)}]`;
+        sb.appendLine(`mov ${this.ax}, ${stackPos}`);
         return sb;
     }
 }
