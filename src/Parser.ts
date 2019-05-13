@@ -5,6 +5,7 @@ import { DeclarationASTNode } from "./AST/DeclarationASTNode";
 import { DiadicASTNode } from "./AST/DiadicASTNode";
 import { ExpressionASTNode, ValueType } from "./AST/ExpressionASTNode";
 import { FunctionASTNode } from "./AST/FunctionASTNode";
+import { FunctionCallASTNode } from "./AST/FunctionCallASTNode";
 import { IfASTNode } from "./AST/IfASTNode";
 import { KeywordASTNode, KeywordType } from "./AST/KeywordASTNode";
 import { MonadicASTNode } from "./AST/MonadicASTNode";
@@ -17,7 +18,6 @@ import { WhileASTNode } from "./AST/WhileASTNode";
 import { Declaration } from "./Declaration";
 import { HashMap } from "./HashMap";
 import { Token, TokenType } from "./Token";
-import { FunctionCallASTNode } from "./AST/FunctionCallASTNode";
 
 export interface IFootprint {
     name: string;
@@ -304,6 +304,7 @@ export class Parser {
             if (arg.expressionType !== null && arg.expressionType !== func.args[i].type) {
                 throw new Error("Type " + arg.expressionType + " is not assignable to type " + func.args[i].type);
             }
+            argExprs.push(arg);
             if (i + 1 < func.args.length) this.parseToken(tokens, TokenType.Comma);
         }
 
@@ -386,12 +387,15 @@ export class Parser {
             return new MonadicASTNode(op, factor);
         } else if (next.tokenType === TokenType.Integer) {
             return new ConstantASTNode(next.tokenValue, ValueType.int);
-        } else if (next.tokenType === TokenType.Identifier
-            && this.variables.Has(next.tokenValue)) {
-            return new VariableASTNode(this.variables.Get(next.tokenValue));
-        } else {
-            throw new Error("Invalid factor: " + (next ? next.toString() : "<EOF>"));
+        } else if (next.tokenType === TokenType.Identifier) {
+            if (tokens[0].tokenType === TokenType.OpenParen) {
+                return this.parseFuncCall(tokens, next);
+            } else if (this.variables.Has(next.tokenValue)) {
+                return new VariableASTNode(this.variables.Get(next.tokenValue));
+            }
         }
+
+        throw new Error("Invalid factor: " + (next ? next.toString() : "<EOF>"));
     }
 
     private static parseToken(
@@ -399,9 +403,11 @@ export class Parser {
     ): Token {
         if (tokens.length === 0) throw new Error("Expected " + expected + " but found <EOF>");
         let tok: Token = tokens.shift();
-        if ((typeof(expected) === "string" && tok.tokenValue !== expected)
-            || (typeof(expected) === "function" && !expected(tok))
-            || tok.tokenType !== expected) {
+        let err: boolean = false;
+        if (typeof(expected) === "string") err = tok.tokenValue !== expected;
+        else if (typeof(expected) === "function") err = !expected(tok);
+        else err = tok.tokenType !== expected;
+        if (err) {
             throw new Error("Expected "
                 + (typeof(expected) === "function" ? errStr : expected)
                 + " but found " + tok.toString());
