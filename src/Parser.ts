@@ -12,13 +12,13 @@ import { FunctionASTNode } from "./AST/FunctionASTNode";
 import { FunctionCallASTNode } from "./AST/FunctionCallASTNode";
 import { IfASTNode } from "./AST/IfASTNode";
 import { KeywordASTNode, KeywordType } from "./AST/KeywordASTNode";
+import { LoopASTNode } from "./AST/LoopASTNode";
 import { MonadicASTNode } from "./AST/MonadicASTNode";
 import { OperationType } from "./AST/OperationASTNode";
 import { ProgramASTNode } from "./AST/ProgramASTNode";
 import { ReturnStatementASTNode } from "./AST/ReturnStatementASTNode";
 import { StatementASTNode } from "./AST/StatementASTNode";
 import { VariableASTNode } from "./AST/VariableASTNode";
-import { WhileASTNode } from "./AST/WhileASTNode";
 import { Declaration } from "./Declaration";
 import { HashMap } from "./HashMap";
 import { Token, TokenType } from "./Token";
@@ -358,7 +358,7 @@ export class Parser {
         return new IfASTNode(condition, block, elseBlock);
     }
 
-    private static parseWhile(tokens: Token[]): WhileASTNode {
+    private static parseWhile(tokens: Token[]): LoopASTNode {
         let tok: Token = this.parseToken(tokens, TokenType.OpenParen);
 
         let condition: ExpressionASTNode = this.parseExpression(tokens);
@@ -370,7 +370,7 @@ export class Parser {
 
         let block: StatementASTNode[] = this.parseBlock(tokens, false, true);
 
-        return new WhileASTNode(condition, block);
+        return new LoopASTNode(condition, block);
     }
 
     private static parseExpression(tokens: Token[], operatorsIndex: number = 0): ExpressionASTNode {

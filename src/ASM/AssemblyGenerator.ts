@@ -9,11 +9,11 @@ import { FunctionASTNode } from "../AST/FunctionASTNode";
 import { FunctionCallASTNode } from "../AST/FunctionCallASTNode";
 import { IfASTNode } from "../AST/IfASTNode";
 import { KeywordASTNode, KeywordType } from "../AST/KeywordASTNode";
+import { LoopASTNode } from "../AST/LoopASTNode";
 import { OperationASTNode, OperationType } from "../AST/OperationASTNode";
 import { ReturnStatementASTNode } from "../AST/ReturnStatementASTNode";
 import { StatementASTNode } from "../AST/StatementASTNode";
 import { VariableASTNode } from "../AST/VariableASTNode";
-import { WhileASTNode } from "../AST/WhileASTNode";
 import { Declaration } from "../Declaration";
 import { HashMap } from "../HashMap";
 import { StringBuilder } from "../StringBuilder";
@@ -117,8 +117,8 @@ export class AssemblyGenerator {
             return this.generateExpression(sb, statement);
         } else if (statement instanceof IfASTNode) {
             return this.generateIf(sb, statement);
-        } else if (statement instanceof WhileASTNode) {
-            return this.generateWhile(sb, statement);
+        } else if (statement instanceof LoopASTNode) {
+            return this.generateLoop(sb, statement);
         } else if (statement instanceof KeywordASTNode) {
             return this.generateKeyword(sb, statement);
         } else if (statement instanceof FunctionCallASTNode) {
@@ -225,17 +225,17 @@ export class AssemblyGenerator {
         return sb;
     }
 
-    private static generateWhile(sb: StringBuilder, whileNode: WhileASTNode): StringBuilder {
+    private static generateLoop(sb: StringBuilder, loopNode: LoopASTNode): StringBuilder {
         let startLabel: string = this.label;
         let endLabel: string = this.label;
         sb = this.generateLabel(sb, startLabel);
-        sb = this.generateExpression(sb, whileNode.condition);
+        sb = this.generateExpression(sb, loopNode.condition);
         sb.appendLine(`cmp ${this.ax}, 0d`);
         sb.appendLine("je " + endLabel);
 
         let oldLoop: string[] = this.lastLoop;
         this.lastLoop = [startLabel, endLabel];
-        for (let statement of whileNode.childNodes) {
+        for (let statement of loopNode.childNodes) {
             sb = this.generateStatement(sb, statement);
         }
         this.lastLoop = oldLoop;
@@ -279,6 +279,7 @@ export class AssemblyGenerator {
     }
 
     private static generateArray(sb: StringBuilder, expr: ArrayASTNode): StringBuilder {
+
         for (let i = 0; i < expr.arraySize; i++) {
             sb.appendLine(`mov ${this.ax}, 0d`);
             sb.appendLine("push " + this.ax);

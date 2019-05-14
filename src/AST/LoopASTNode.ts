@@ -2,7 +2,7 @@ import { StringBuilder } from "../StringBuilder";
 import { ExpressionASTNode } from "./ExpressionASTNode";
 import { StatementASTNode } from "./StatementASTNode";
 
-export class WhileASTNode extends StatementASTNode {
+export class LoopASTNode extends StatementASTNode {
     private cond: ExpressionASTNode;
     private children: StatementASTNode[];
 
