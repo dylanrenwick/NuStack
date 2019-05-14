@@ -2,6 +2,14 @@
 NuStack is a new WIP compiled language, heavily inspired by C and Perl 6.  
 The main goal of this project is to experiment with building "true" compilers and learn more about asm in the process.
 
-The compiler is written entirely in TypeScript, and is run via `node bin/index.js <inputFileName> <outputFileName>`  
-If no `inputFileName` is given, the compiler defaults to `main.ns`. If no `outputFileName` is given, the compiler defaults to `main.asm`.  
-The compiler consumes a NuStack source code file (currently only supports `utf8` encoding) and produces a `nasm` syntax assembly file, which can then be passed to the assembler with `nasm <assemblyFileName>`
+The compiler is written entirely in TypeScript, and is run via `node bin/index.js`  
+
+## Quickstart
+Quick commands to compile and run code:
+```
+npm run build # Compile compiler
+node bin/index.js -i inFile.ns -o outFile.asm -a 64 # Compile NuStack source
+nasm -f elf64 -o objFile.o outFile.asm # Assemble asm output
+ld -e main -o bin objFile.o # Link obj file
+./bin # Run executable
+```
