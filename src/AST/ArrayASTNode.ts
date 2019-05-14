@@ -1,5 +1,5 @@
-import { ExpressionASTNode, ValueType } from "./ExpressionASTNode";
 import { ArrayValue } from "../ArrayValue";
+import { ExpressionASTNode, ValueType } from "./ExpressionASTNode";
 
 export class ArrayASTNode extends ExpressionASTNode {
     private arr: ArrayValue;
