@@ -228,6 +228,9 @@ export class AssemblyGenerator {
     private static generateLoop(sb: StringBuilder, loopNode: LoopASTNode): StringBuilder {
         let startLabel: string = this.label;
         let endLabel: string = this.label;
+        for (let statement of loopNode.beforeNodes) {
+            sb = this.generateStatement(sb, statement);
+        }
         sb = this.generateLabel(sb, startLabel);
         sb = this.generateExpression(sb, loopNode.condition);
         sb.appendLine(`cmp ${this.ax}, 0d`);
