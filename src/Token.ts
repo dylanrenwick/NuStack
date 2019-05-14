@@ -37,6 +37,8 @@ export class Token  {
             case TokenType.CloseParen: return ")";
             case TokenType.OpenBrace: return "{";
             case TokenType.CloseBrace: return "}";
+            case TokenType.OpenBrack: return "[";
+            case TokenType.CloseBrack: return "]";
             case TokenType.Semicolon: return ";";
             case TokenType.Comma: return ",";
             case TokenType.Negation: return "-";
@@ -54,6 +56,7 @@ export class Token  {
             case TokenType.LessThanEqual: return "<=";
             case TokenType.LogicalOR: return "||";
             case TokenType.LogicalAND: return "&&";
+            case TokenType.Assignment: return "=";
             default: return "";
         }
     }
