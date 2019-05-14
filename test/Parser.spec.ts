@@ -139,12 +139,12 @@ describe("Parser", () => {
         it("should throw an error if the statement does not end in a semicolon", () => {
             let toks = generateReturn(generateConstant()).slice(0, 2);
             let bind = Parser["parseStatement"].bind(Parser, toks);
-            expect(bind).to.throw("Expected 6 but found <EOF>");
+            expect(bind).to.throw("Expected " + TokenType.Semicolon + " but found <EOF>");
             toks = generateReturn(generateConstant()).slice(0, 2).concat([
                 new Token(1, 1, TokenType.Keyword, "int")
             ]);
             bind = Parser["parseStatement"].bind(Parser, toks);
-            expect(bind).to.throw("Expected 6 but found int");
+            expect(bind).to.throw("Expected " + TokenType.Semicolon + " but found int");
         });
 
         it("should throw an error if the statement does not begin with a keyword", () => {
