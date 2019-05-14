@@ -8,6 +8,7 @@ export class VariableASTNode extends ExpressionASTNode {
     public get declaration(): Declaration { return this.dec; }
     public get expressionValue(): any { return this.dec.currentValue; }
     public get expressionType(): ValueType { return this.dec.variableType; }
+    public get isArray(): boolean { return this.dec.isArray; }
 
     public constructor(dec: Declaration) {
         super();

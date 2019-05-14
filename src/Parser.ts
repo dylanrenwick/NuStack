@@ -1,4 +1,6 @@
+import { ArrayValue } from "./ArrayValue";
 import { AbstractSyntaxTree } from "./AST/AbstractSyntaxTree";
+import { ArrayASTNode } from "./AST/ArrayASTNode";
 import { AssemblyMacroASTNode } from "./AST/AssemblyMacroASTNode";
 import { AssignmentASTNode } from "./AST/AssignmentASTNode";
 import { CompilerMacroASTNode, MacroType } from "./AST/CompilerMacroASTNode";
@@ -268,9 +270,15 @@ export class Parser {
 
     private static parseDeclaration(tokens: Token[], tok: Token): DeclarationASTNode {
         let type: string = tok.tokenValue;
+        let isArray: boolean = false;
+        if (tokens[0].tokenType === TokenType.OpenBrack) {
+            this.parseToken(tokens, TokenType.OpenBrack);
+            this.parseToken(tokens, TokenType.CloseBrack);
+            isArray = true;
+        }
         tok = this.parseToken(tokens, TokenType.Identifier);
         let name = tok.tokenValue;
-        let declaration = new Declaration(name, type);
+        let declaration = new Declaration(name, type, isArray);
         this.variables.Add(name, declaration);
 
         let expr: ExpressionASTNode = null;
@@ -410,6 +418,14 @@ export class Parser {
             } else if (this.variables.Has(next.tokenValue)) {
                 return new VariableASTNode(this.variables.Get(next.tokenValue));
             }
+        } else if (next.tokenType === TokenType.Keyword
+            && ExpressionASTNode.getTypeFromString(next.tokenValue) !== null) {
+            this.parseToken(tokens, TokenType.OpenBrack);
+            // TODO: Store size as an expression to allow runtime size calculation
+            let size = this.parseToken(tokens, TokenType.Integer).tokenValue;
+            this.parseToken(tokens, TokenType.CloseBrack);
+            let type = ExpressionASTNode.getTypeFromString(next.tokenValue);
+            return new ArrayASTNode(new ArrayValue(type, size));
         }
 
         return this.error("Invalid factor: " + (next ? next.toString() : "<EOF>"));
@@ -427,7 +443,7 @@ export class Parser {
         if (err) {
             return this.error("Expected "
                 + (typeof(expected) === "function" ? errStr : expected)
-                + " but found " + tok.toString());
+                + " but found " + tok.toString(), tok);
         }
         return tok;
     }
