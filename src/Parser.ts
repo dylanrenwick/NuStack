@@ -196,7 +196,7 @@ export class Parser {
 
             let closeBraceTok: Token = this.parseToken(tokens, TokenType.CloseBrace);
         } else if (needBrace) {
-            throw new Error("Expected '{' but found " + tokens[0].toString());
+            return this.error("Expected '{' but found " + tokens[0].toString());
         } else {
             statements.push(this.parseStatement(tokens, inLoop));
         }
@@ -279,7 +279,7 @@ export class Parser {
             tokens.shift();
             expr = this.parseExpression(tokens);
             if (expr.expressionType !== declaration.variableType) {
-                throw new Error("Type " + expr.expressionType
+                return this.error("Type " + expr.expressionType
                     + " is not assignable to type " + declaration.variableType);
             }
         }
@@ -289,7 +289,7 @@ export class Parser {
 
     private static parseAssignment(tokens: Token[], tok: Token): AssignmentASTNode {
         if (!this.variables.Has(tok.tokenValue)) {
-            throw new Error("Attempt to reference local variable '" + tok.toString() + "' before it was defined");
+            return this.error("Attempt to reference local variable '" + tok.toString() + "' before it was defined");
         }
         let dec: Declaration = this.variables.Get(tok.tokenValue);
 
@@ -298,7 +298,7 @@ export class Parser {
         let expr: ExpressionASTNode = this.parseExpression(tokens);
 
         if (expr.expressionType !== dec.variableType) {
-            throw new Error("Type " + expr.expressionType
+            return this.error("Type " + expr.expressionType
                 + " is not assignable to type " + dec.variableType);
         }
 
@@ -308,7 +308,7 @@ export class Parser {
     private static parseFuncCall(tokens: Token[], tok: Token): FunctionCallASTNode {
         let func: IFootprint = this.functions.Get(tok.tokenValue);
         if (!func) {
-            throw new Error("Could not find function " + tok.tokenValue);
+            return this.error("Could not find function " + tok.tokenValue);
         }
 
         this.parseToken(tokens, TokenType.OpenParen);
@@ -317,7 +317,7 @@ export class Parser {
         for (let i = 0; i < func.args.length; i++) {
             let arg: ExpressionASTNode = this.parseExpression(tokens);
             if (arg.expressionType !== null && arg.expressionType !== func.args[i].type) {
-                throw new Error("Type " + arg.expressionType + " is not assignable to type " + func.args[i].type);
+                return this.error("Type " + arg.expressionType + " is not assignable to type " + func.args[i].type);
             }
             argExprs.push(arg);
             if (i + 1 < func.args.length) this.parseToken(tokens, TokenType.Comma);
@@ -333,7 +333,7 @@ export class Parser {
 
         let condition: ExpressionASTNode = this.parseExpression(tokens);
         if (condition.expressionType !== ValueType.bool) {
-            throw new Error("Type " + condition.expressionType + " is not bool");
+            return this.error("Type " + condition.expressionType + " is not bool");
         }
 
         tok = this.parseToken(tokens, TokenType.CloseParen);
@@ -355,7 +355,7 @@ export class Parser {
 
         let condition: ExpressionASTNode = this.parseExpression(tokens);
         if (condition.expressionType !== ValueType.bool) {
-            throw new Error("Type " + condition.expressionType + " is not bool");
+            return this.error("Type " + condition.expressionType + " is not bool");
         }
 
         tok = this.parseToken(tokens, TokenType.CloseParen);
@@ -376,7 +376,7 @@ export class Parser {
                 ? this.parseFactor(tokens)
                 : this.parseExpression(tokens, operatorsIndex + 1);
             if (term.expressionType !== nextTerm.expressionType) {
-                throw new Error("Operator " + op + " is not valid for types "
+                return this.error("Operator " + op + " is not valid for types "
                     + term.expressionType + " and " + nextTerm.expressionType);
             }
             term = new DiadicASTNode(
@@ -412,20 +412,20 @@ export class Parser {
             }
         }
 
-        throw new Error("Invalid factor: " + (next ? next.toString() : "<EOF>"));
+        return this.error("Invalid factor: " + (next ? next.toString() : "<EOF>"));
     }
 
     private static parseToken(
         tokens: Token[], expected: ((tok: Token) => boolean) | string | TokenType, errStr?: string
     ): Token {
-        if (tokens.length === 0) throw new Error("Expected " + expected + " but found <EOF>");
+        if (tokens.length === 0) return this.error("Expected " + expected + " but found <EOF>");
         let tok: Token = tokens.shift();
         let err: boolean = false;
         if (typeof(expected) === "string") err = tok.tokenValue !== expected;
         else if (typeof(expected) === "function") err = !expected(tok);
         else err = tok.tokenType !== expected;
         if (err) {
-            throw new Error("Expected "
+            return this.error("Expected "
                 + (typeof(expected) === "function" ? errStr : expected)
                 + " but found " + tok.toString());
         }
@@ -449,7 +449,11 @@ export class Parser {
             case TokenType.LogicalOR: return OperationType.LogicalOR;
             case TokenType.LogicalAND: return OperationType.LogicalAND;
             case TokenType.Assignment: return OperationType.Assignment;
-            default: throw new Error("Invalid operator: " + (tok ? tok.toString() : "<EOF>"));
+            default: return this.error("Invalid operator: " + (tok ? tok.toString() : "<EOF>"));
         }
+    }
+
+    private static error(message: string, tok?: Token): any {
+        throw new Error(message + (tok ? `\nAt line ${tok.row}, col ${tok.column}` : ""));
     }
 }
