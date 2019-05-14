@@ -7,9 +7,9 @@ The compiler is written entirely in TypeScript, and is run via `node bin/index.j
 ## Quickstart
 Quick commands to compile and run code:
 ```
-npm run build # Compile compiler
-node bin/index.js -i inFile.ns -o outFile.asm -a 64 # Compile NuStack source
-nasm -f elf64 -o objFile.o outFile.asm # Assemble asm output
-ld -e main -o bin objFile.o # Link obj file
-./bin # Run executable
+npm run build                                         # Compile compiler
+node bin/index.js -i inFile.ns -o outFile.asm -a 64   # Compile NuStack source
+nasm -f elf64 -o objFile.o outFile.asm                # Assemble asm output
+ld -e main -o bin objFile.o                           # Link obj file
+./bin                                                 # Run executable
 ```
