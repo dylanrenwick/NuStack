@@ -66,6 +66,8 @@ export enum TokenType {
     CloseParen,
     OpenBrace,
     CloseBrace,
+    OpenBrack,
+    CloseBrack,
     Semicolon,
     Comma,
     Integer,

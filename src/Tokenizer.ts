@@ -6,7 +6,7 @@ export class Tokenizer {
         "break", "continue", "string"
     ];
     private static readonly singletons: string[] = [
-        "(", ")", "{", "}", ";", ",", "#"
+        "(", ")", "{", "}", "[", "]", ";", ",", "#"
     ];
     private static readonly separators: string[] = [
         " ", "\t", "\n", "\r",
@@ -132,6 +132,8 @@ export class Tokenizer {
             case "}": return new Token(col, line, TokenType.CloseBrace);
             case "(": return new Token(col, line, TokenType.OpenParen);
             case ")": return new Token(col, line, TokenType.CloseParen);
+            case "[": return new Token(col, line, TokenType.OpenBrack);
+            case "]": return new Token(col, line, TokenType.CloseBrack);
             case ";": return new Token(col, line, TokenType.Semicolon);
             case ",": return new Token(col, line, TokenType.Comma);
             case "-": return new Token(col, line, TokenType.Negation);
