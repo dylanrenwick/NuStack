@@ -1,4 +1,5 @@
 import { AbstractSyntaxTree } from "../AST/AbstractSyntaxTree";
+import { ArrayASTNode } from "../AST/ArrayASTNode";
 import { AssemblyMacroASTNode } from "../AST/AssemblyMacroASTNode";
 import { AssignmentASTNode } from "../AST/AssignmentASTNode";
 import { ConstantASTNode } from "../AST/ConstantASTNode";
@@ -152,13 +153,14 @@ export class AssemblyGenerator {
 
         if (stat && stat.expression) {
             sb = this.generateExpression(sb, stat.expression);
-        } else {
+        } else if (!dec.isArray) {
             sb.appendLine(`mov ${this.ax}, 0d`);
         }
 
-        sb.appendLine("push " + this.ax);
-
-        this.stackOffset += this.platformController.wordSize;
+        if (!dec.isArray) {
+            sb.appendLine("push " + this.ax);
+            this.stackOffset += this.platformController.wordSize;
+        }
         this.stackMap.Add(dec.variableName, this.stackOffset);
 
         return sb;
@@ -269,9 +271,22 @@ export class AssemblyGenerator {
             return this.generateReference(sb, expr);
         } else if (expr instanceof FunctionCallASTNode) {
             return this.generateFunctionCall(sb, expr);
+        } else if (expr instanceof ArrayASTNode) {
+            return this.generateArray(sb, expr);
         }
 
         throw new Error("Unknown AST node: " + JSON.stringify(expr));
+    }
+
+    private static generateArray(sb: StringBuilder, expr: ArrayASTNode): StringBuilder {
+        for (let i = 0; i < expr.arraySize; i++) {
+            sb.appendLine(`mov ${this.ax}, 0d`);
+            sb.appendLine("push " + this.ax);
+        }
+
+        this.stackOffset += this.platformController.wordSize * expr.arraySize;
+
+        return sb;
     }
 
     private static generateConstant(sb: StringBuilder, expr: ConstantASTNode): StringBuilder {
@@ -387,6 +402,9 @@ export class AssemblyGenerator {
 
     private static generateReference(sb: StringBuilder, expr: VariableASTNode): StringBuilder {
         let offset = this.stackMap.Get(expr.declaration.variableName);
+        if (expr.isArray) {
+            offset -= expr.arrayIndex * this.platformController.wordSize;
+        }
         let stackPos = `[${this.bp}${offset >= 0 ? "-" : "+"}${Math.abs(offset)}]`;
         sb.appendLine(`mov ${this.ax}, ${stackPos}`);
         return sb;

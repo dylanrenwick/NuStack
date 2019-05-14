@@ -1,4 +1,5 @@
 import { ArrayValue } from "../ArrayValue";
+import { StringBuilder } from "../StringBuilder";
 import { ExpressionASTNode, ValueType } from "./ExpressionASTNode";
 
 export class ArrayASTNode extends ExpressionASTNode {
@@ -12,5 +13,10 @@ export class ArrayASTNode extends ExpressionASTNode {
     public constructor(array: ArrayValue) {
         super();
         this.arr = array;
+    }
+
+    public toString(sb: StringBuilder): StringBuilder {
+        sb.appendLine(`Array [Type: ${this.expressionType}, Size: ${this.arraySize}]`);
+        return sb;
     }
 }

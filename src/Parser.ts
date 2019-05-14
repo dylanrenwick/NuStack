@@ -416,7 +416,14 @@ export class Parser {
             if (tokens.length && tokens[0].tokenType === TokenType.OpenParen) {
                 return this.parseFuncCall(tokens, next);
             } else if (this.variables.Has(next.tokenValue)) {
-                return new VariableASTNode(this.variables.Get(next.tokenValue));
+                let dec: Declaration = this.variables.Get(next.tokenValue);
+                let index: number;
+                if (dec.isArray && tokens[0].tokenType === TokenType.OpenBrack) {
+                    this.parseToken(tokens, TokenType.OpenBrack);
+                    index = this.parseToken(tokens, TokenType.Integer).tokenValue;
+                    this.parseToken(tokens, TokenType.CloseBrack);
+                }
+                return new VariableASTNode(dec, index);
             }
         } else if (next.tokenType === TokenType.Keyword
             && ExpressionASTNode.getTypeFromString(next.tokenValue) !== null) {
