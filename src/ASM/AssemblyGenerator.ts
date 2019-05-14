@@ -100,9 +100,9 @@ export class AssemblyGenerator {
         return sb;
     }
 
-    private static generateLabel(sb: StringBuilder, label: string): StringBuilder {
+    private static generateLabel(sb: StringBuilder, label: string, comment?: string): StringBuilder {
         sb.indent--;
-        sb.appendLine(label + ":");
+        sb.appendLine(label + ":" + (comment ? ` ; ${comment}` : ""));
         sb.indent++;
 
         return sb;
@@ -158,7 +158,7 @@ export class AssemblyGenerator {
         }
 
         if (!dec.isArray) {
-            sb.appendLine("push " + this.ax);
+            sb.appendLine(`push ${this.ax} ; assignment of ${dec.variableName}`);
             this.stackOffset += this.platformController.wordSize;
         }
         this.stackMap.Add(dec.variableName, this.stackOffset);
@@ -231,10 +231,10 @@ export class AssemblyGenerator {
         for (let statement of loopNode.beforeNodes) {
             sb = this.generateStatement(sb, statement);
         }
-        sb = this.generateLabel(sb, startLabel);
+        sb = this.generateLabel(sb, startLabel, `start of while loop (ends at ${endLabel})`);
         sb = this.generateExpression(sb, loopNode.condition);
         sb.appendLine(`cmp ${this.ax}, 0d`);
-        sb.appendLine("je " + endLabel);
+        sb.appendLine("je " + endLabel + " ; end of while loop condition");
 
         let oldLoop: string[] = this.lastLoop;
         this.lastLoop = [startLabel, endLabel];
@@ -243,7 +243,7 @@ export class AssemblyGenerator {
         }
         this.lastLoop = oldLoop;
         sb.appendLine("jmp " + startLabel);
-        sb = this.generateLabel(sb, endLabel);
+        sb = this.generateLabel(sb, endLabel, `end of while loop (starts at ${startLabel})`);
 
         return sb;
     }
@@ -282,10 +282,9 @@ export class AssemblyGenerator {
     }
 
     private static generateArray(sb: StringBuilder, expr: ArrayASTNode): StringBuilder {
-
         for (let i = 0; i < expr.arraySize; i++) {
             sb.appendLine(`mov ${this.ax}, 0d`);
-            sb.appendLine("push " + this.ax);
+            sb.appendLine(`push ${this.ax} ; assignment of array[${i}]`);
         }
 
         this.stackOffset += this.platformController.wordSize * expr.arraySize;
@@ -407,10 +406,19 @@ export class AssemblyGenerator {
     private static generateReference(sb: StringBuilder, expr: VariableASTNode): StringBuilder {
         let offset = this.stackMap.Get(expr.declaration.variableName);
         if (expr.isArray) {
-            offset -= expr.arrayIndex * this.platformController.wordSize;
+            sb = this.generateExpression(sb, expr.arrayIndex);
+            sb.appendLine(`mov ${this.bx}, ${this.platformController.wordSize}d`);
+            sb.appendLine(`mul ${this.bx}`);
+            sb.appendLine(`mov ${this.cx}, ${this.ax}`);
+            sb.appendLine(`mov ${this.ax}, ${this.bp}`);
+            sb.appendLine(`sub ${this.ax}, ${offset}`);
+            sb.appendLine(`sub ${this.ax}, ${this.cx}`);
+            sb.appendLine(`mov ${this.ax}, [${this.ax}]`
+                + ` ; reference to ${expr.declaration.variableName}[]`);
+        } else {
+            let stackPos = `[${this.bp}${offset >= 0 ? "-" : "+"}${Math.abs(offset)}]`;
+            sb.appendLine(`mov ${this.ax}, ${stackPos} ; reference to ${expr.declaration.variableName}`);
         }
-        let stackPos = `[${this.bp}${offset >= 0 ? "-" : "+"}${Math.abs(offset)}]`;
-        sb.appendLine(`mov ${this.ax}, ${stackPos}`);
         return sb;
     }
 }

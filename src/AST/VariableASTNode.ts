@@ -4,25 +4,28 @@ import { ExpressionASTNode, ValueType } from "./ExpressionASTNode";
 
 export class VariableASTNode extends ExpressionASTNode {
     private dec: Declaration;
-    private index: number;
+    private index: ExpressionASTNode;
 
     public get declaration(): Declaration { return this.dec; }
     public get expressionValue(): any { return this.dec.currentValue; }
     public get expressionType(): ValueType { return this.dec.variableType; }
     public get isArray(): boolean { return this.dec.isArray; }
-    public get arrayIndex(): number { return this.index; }
+    public get arrayIndex(): ExpressionASTNode { return this.index; }
 
-    public constructor(dec: Declaration, index?: number) {
+    public constructor(dec: Declaration, index?: ExpressionASTNode) {
         super();
         this.dec = dec;
         this.index = index;
     }
 
     public toString(sb: StringBuilder): StringBuilder {
-        sb.appendLine("Variable: '"
-            + `${this.dec.variableName}${this.isArray ? `:${this.index}` : ""}`
-            + `' [${this.dec.variableType}]`
-        );
+        if (this.isArray) {
+            sb.startBlock("Variable: '" + `${this.dec.variableName}' [${this.dec.variableType}]`);
+            sb = this.index.toString(sb);
+            sb.endBlock();
+        } else {
+            sb.appendLine("Variable: '" + `${this.dec.variableName}' [${this.dec.variableType}]`);
+        }
         return sb;
     }
 }

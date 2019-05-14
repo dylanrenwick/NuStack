@@ -12,7 +12,11 @@ export class AssignmentASTNode extends DiadicASTNode {
         return this.childNodes[1];
     }
 
-    public constructor(dec: Declaration, expr: ExpressionASTNode) {
-        super(OperationType.Assignment, new VariableASTNode(dec), expr);
+    public constructor(dec: Declaration, expr: ExpressionASTNode, index?: ExpressionASTNode) {
+        super(
+            OperationType.Assignment,
+            new VariableASTNode(dec, index),
+            expr
+        );
     }
 }

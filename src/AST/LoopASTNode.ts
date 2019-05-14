@@ -12,7 +12,7 @@ export class LoopASTNode extends StatementASTNode {
     public get beforeNodes(): StatementASTNode[] { return this.before; }
     public get afterNodes(): StatementASTNode[] { return this.after; }
     public get childNodes(): StatementASTNode[] {
-        return this.children.concat(this.after !== undefined ? this.after : []);
+        return this.children.concat(this.after);
     }
 
     public constructor(cond: ExpressionASTNode, children: StatementASTNode[],
@@ -21,8 +21,8 @@ export class LoopASTNode extends StatementASTNode {
         super();
         this.cond = cond;
         this.children = children;
-        this.before = before;
-        this.after = after;
+        this.before = before || [];
+        this.after = after || [];
     }
 
     public toString(sb: StringBuilder): StringBuilder {
