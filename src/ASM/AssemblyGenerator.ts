@@ -398,8 +398,20 @@ export class AssemblyGenerator {
 
     private static generateAssignment(sb: StringBuilder, expr: AssignmentASTNode): StringBuilder {
         let offset = this.stackMap.Get(expr.declaration.variableName);
+        if (expr.declaration.isArray) {
+            sb = this.generateExpression(sb, (expr.childNodes[0] as VariableASTNode).arrayIndex);
+            sb.appendLine(`mov ${this.bx}, ${this.platformController.wordSize}d`);
+            sb.appendLine(`mul ${this.bx} ; multiply index by wordSize`);
+            sb.appendLine(`mov ${this.cx}, ${this.bp} ; start at base of stack`);
+            sb.appendLine(`sub ${this.cx}, ${offset} ; move to start of array`);
+            sb.appendLine(`add ${this.cx}, ${this.ax} ; move to correct index`);
+        }
         sb = this.generateExpression(sb, expr.expression);
-        sb.appendLine("mov [rbp-" + offset + "], " + this.ax);
+        if (expr.declaration.isArray) {
+            sb.appendLine("mov [" + this.cx + "], " + this.ax + " ; assignment of " + expr.declaration.variableName);
+        } else {
+            sb.appendLine(`mov [${this.bp}-${offset}], ${this.ax} ; assignment of ` + expr.declaration.variableName);
+        }
         return sb;
     }
 
@@ -408,11 +420,11 @@ export class AssemblyGenerator {
         if (expr.isArray) {
             sb = this.generateExpression(sb, expr.arrayIndex);
             sb.appendLine(`mov ${this.bx}, ${this.platformController.wordSize}d`);
-            sb.appendLine(`mul ${this.bx}`);
+            sb.appendLine(`mul ${this.bx} ; multiply index by wordSize`);
             sb.appendLine(`mov ${this.cx}, ${this.ax}`);
-            sb.appendLine(`mov ${this.ax}, ${this.bp}`);
-            sb.appendLine(`sub ${this.ax}, ${offset}`);
-            sb.appendLine(`sub ${this.ax}, ${this.cx}`);
+            sb.appendLine(`mov ${this.ax}, ${this.bp} ; start at base of stack`);
+            sb.appendLine(`sub ${this.ax}, ${offset} ; move to start of array`);
+            sb.appendLine(`add ${this.ax}, ${this.cx} ; move to correct index`);
             sb.appendLine(`mov ${this.ax}, [${this.ax}]`
                 + ` ; reference to ${expr.declaration.variableName}[]`);
         } else {

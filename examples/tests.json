@@ -74,5 +74,13 @@
     {
         "fileName": "putchar",
         "answer": 65
+    },
+    {
+        "fileName": "array",
+        "answer": 0
+    },
+    {
+        "fileName": "array_loop",
+        "answer": 6
     }
 ]

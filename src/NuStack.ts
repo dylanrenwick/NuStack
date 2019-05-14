@@ -23,7 +23,8 @@ export class NuStack {
         let platformController: PlatformController;
         if (platform === "32") platformController = new PlatformController32();
         else if (platform === "64") platformController = new PlatformController64();
-        let asm: string = AssemblyGenerator.generate(ast, platformController);
+        let asm: string = AssemblyGenerator.generate(ast, platformController)
+            .replace(/^(.*?) ?(;.*)$/gm,  debug ? "$1\t$2" : "$1");
         this.log("\nNASM:");
         this.log(asm);
 
