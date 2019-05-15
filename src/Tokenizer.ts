@@ -15,7 +15,7 @@ export class Tokenizer {
         "~", "!", "+", "-", "/", "*", ">", "<", "=",
     ];
     private static readonly twoCharOperators: string[] = [
-        "==", "!=", "<=", ">=", "&&", "||",
+        "==", "!=", "<=", ">=", "&&", "||", ">-", "-<",
     ];
 
     public static tokenize(code: string): Token[] {
@@ -174,6 +174,8 @@ export class Tokenizer {
             case "<=": return new Token(col, line, TokenType.LessThanEqual);
             case "||": return new Token(col, line, TokenType.LogicalOR);
             case "&&": return new Token(col, line, TokenType.LogicalAND);
+            case ">-": return new Token(col, line, TokenType.Dereference);
+            case "-<": return new Token(col, line, TokenType.Reference);
         }
 
         if (/^[0-9]+$/.test(token)) {

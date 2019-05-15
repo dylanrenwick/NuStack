@@ -6,7 +6,7 @@ export class ConstantASTNode extends ExpressionASTNode {
     private type: ValueType;
 
     public get expressionValue(): any { return this.value; }
-    public get expressionType(): ITypeDef { return { isArray: false, type: this.type }; }
+    public get expressionType(): ITypeDef { return { isArray: false, isPtr: false, type: this.type }; }
 
     public constructor(value: any, type: string | ValueType) {
         super();

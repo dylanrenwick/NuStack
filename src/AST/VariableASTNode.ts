@@ -10,7 +10,7 @@ export class VariableASTNode extends ExpressionASTNode {
     public get expressionValue(): any { return this.dec.currentValue; }
     public get expressionType(): ITypeDef {
         return this.index !== null && this.index !== undefined
-            ? { isArray: false, type: this.dec.variableType.type }
+            ? { isArray: false, isPtr: false, type: this.dec.variableType.type }
             : this.dec.variableType;
     }
     public get isArray(): boolean { return this.dec.isArray; }

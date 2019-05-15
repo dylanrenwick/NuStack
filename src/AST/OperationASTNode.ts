@@ -61,6 +61,7 @@ export abstract class OperationASTNode extends ExpressionASTNode {
             case OperationType.LogicalAND:
                 return {
                     isArray: false,
+                    isPtr: false,
                     type: ValueType.bool
                 };
             case OperationType.Negation:

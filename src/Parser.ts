@@ -299,6 +299,7 @@ export class Parser {
         if (index !== null) {
             type = {
                 isArray: false,
+                isPtr: false,
                 type: type.type
             };
         }
@@ -470,6 +471,7 @@ export class Parser {
 
         return isArray ? {
             isArray,
+            isPtr: false,
             type: ExpressionASTNode.getTypeFromString(typeTok.tokenValue).type
         } : ExpressionASTNode.getTypeFromString(typeTok.tokenValue);
     }

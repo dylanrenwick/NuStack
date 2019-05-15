@@ -6,7 +6,7 @@ export class ArrayASTNode extends ExpressionASTNode {
     private arr: ArrayValue;
 
     public get expressionValue(): any { return null; }
-    public get expressionType(): ITypeDef { return { isArray: true, type: this.arr.type }; }
+    public get expressionType(): ITypeDef { return { isArray: true, isPtr: false, type: this.arr.type }; }
     public get arraySize(): number { return this.arr.size; }
     public get array(): ArrayValue { return this.arr; }
 

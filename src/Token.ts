@@ -57,6 +57,8 @@ export class Token  {
             case TokenType.LogicalOR: return "||";
             case TokenType.LogicalAND: return "&&";
             case TokenType.Assignment: return "=";
+            case TokenType.Dereference: return ">-";
+            case TokenType.Reference: return "-<";
             default: return "";
         }
     }
@@ -91,5 +93,7 @@ export enum TokenType {
     LessThanEqual,
     LogicalOR,
     LogicalAND,
-    Assignment
+    Assignment,
+    Dereference,
+    Reference
 }

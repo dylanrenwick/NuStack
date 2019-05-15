@@ -5,6 +5,7 @@ import { StatementASTNode } from "./StatementASTNode";
 export interface ITypeDef {
     type: ValueType;
     isArray: boolean;
+    isPtr: boolean;
 }
 
 export abstract class ExpressionASTNode extends StatementASTNode {
@@ -30,22 +31,26 @@ export abstract class ExpressionASTNode extends StatementASTNode {
             case "integer":
                 return {
                     isArray: false,
+                    isPtr: false,
                     type: ValueType.int
                 };
             case "bool":
             case "boolean":
                 return {
                     isArray: false,
+                    isPtr: false,
                     type: ValueType.bool
                 };
             case "char":
                 return {
                     isArray: false,
+                    isPtr: false,
                     type: ValueType.char
                 };
             case "string":
                 return {
                     isArray: true,
+                    isPtr: false,
                     type: ValueType.char
                 };
             default: return null;
