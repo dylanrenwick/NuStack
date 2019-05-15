@@ -43,7 +43,7 @@ export class Tokenizer {
             col++;
 
             if (str) {
-                if (char === "\"" && !curToken.endsWith("\\")) {
+                if (char === "\"" && !/\\$/.test(curToken.replace(/\\\\/g, ""))) {
                     str = false;
                     tokens.push(new Token(col - curToken.length, line, TokenType.String, curToken));
                     curToken = "";
