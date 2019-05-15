@@ -8,10 +8,12 @@ describe("FunctionASTNode", () => {
         it("should correctly assign name and returnType", () => {
             let node = new FunctionASTNode("name", "int", []);
             expect(node["funcName"]).to.equal("name");
-            expect(node["return"]).to.equal(ValueType.int);
+            expect(node["return"].type).to.equal(ValueType.int);
+            expect(node["return"].isArray).to.be.false;
             node = new FunctionASTNode("hello", "string", []);
             expect(node["funcName"]).to.equal("hello");
-            expect(node["return"]).to.equal(ValueType.string);
+            expect(node["return"].type).to.equal(ValueType.char);
+            expect(node["return"].isArray).to.be.true;
             node = new FunctionASTNode("", "", []);
             expect(node["funcName"]).to.equal("");
             expect(node["return"]).to.equal(null);
@@ -54,9 +56,9 @@ describe("FunctionASTNode", () => {
     describe("FunctionASTNode.returnType", () => {
         it("should return the subroutine's returnType", () => {
             let node = new FunctionASTNode("", "bool", []);
-            expect(node.returnType).to.equal(ValueType.bool);
+            expect(node.returnType.type).to.equal(ValueType.bool);
             node = new FunctionASTNode("", "int", []);
-            expect(node.returnType).to.equal(ValueType.int);
+            expect(node.returnType.type).to.equal(ValueType.int);
             node = new FunctionASTNode("", "", []);
             expect(node.returnType).to.equal(null);
         });

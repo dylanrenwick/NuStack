@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { ConstantASTNode } from "../../src/AST/ConstantASTNode";
 import { DiadicASTNode } from "../../src/AST/DiadicASTNode";
-import { ExpressionASTNode, ValueType } from "../../src/AST/ExpressionASTNode";
+import { ExpressionASTNode, ITypeDef } from "../../src/AST/ExpressionASTNode";
 import { OperationASTNode, OperationType } from "../../src/AST/OperationASTNode";
 
 function forOpTypes(callback: (type: OperationType, ...params: any[]) => void, ...params: any[] ) {
@@ -72,7 +72,7 @@ describe("DiadicASTNode", () => {
         it("should return null with a non-constant, null-expressionValue child", () => {
             class TestNode extends ExpressionASTNode {
                 get expressionValue(): any { return null; }
-                get expressionType(): ValueType { return null; }
+                get expressionType(): ITypeDef { return null; }
             }
 
             forOpTypes((type: OperationType) => {
