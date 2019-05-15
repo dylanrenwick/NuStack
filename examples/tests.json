@@ -82,5 +82,9 @@
     {
         "fileName": "array_loop",
         "answer": 6
+    },
+    {
+        "fileName": "char",
+        "answer": 65
     }
 ]

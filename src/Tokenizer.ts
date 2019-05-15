@@ -2,8 +2,8 @@ import { Token, TokenType } from "./Token";
 
 export class Tokenizer {
     private static readonly keywords: string[] = [
-        "int", "return", "if", "else", "while",
-        "break", "continue", "string"
+        "int", "char", "return", "if", "else",
+        "while", "break", "continue", "string"
     ];
     private static readonly singletons: string[] = [
         "(", ")", "{", "}", "[", "]", ";", ",", "#"
@@ -27,6 +27,7 @@ export class Tokenizer {
         let col = 1;
 
         let str = false;
+        let isChar = false;
         let newline = false;
 
         for (let char of code) {
@@ -57,6 +58,27 @@ export class Tokenizer {
                     curToken = "";
                 }
                 str = true;
+                continue;
+            }
+
+            if (isChar) {
+                if (char === "'") {
+                    tokens.push(new Token(col - 3, line, TokenType.Char, curToken));
+                    curToken = "";
+                    isChar = false;
+                } else if (curToken.length > 1) {
+                    throw new Error("Char literal must be length 1: " + curToken);
+                } else {
+                    curToken += char;
+                }
+                continue;
+            } else if (char === "'") {
+                if (curToken.length > 0) {
+                    tokens.push(this.tokenFromString(line, col - curToken.length, curToken));
+                    curToken = "";
+                }
+
+                isChar = true;
                 continue;
             }
 

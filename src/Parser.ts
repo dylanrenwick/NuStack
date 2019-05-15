@@ -417,6 +417,8 @@ export class Parser {
             return new MonadicASTNode(op, factor);
         } else if (next.tokenType === TokenType.Integer) {
             return new ConstantASTNode(next.tokenValue, ValueType.int);
+        } else if (next.tokenType === TokenType.Char) {
+            return new ConstantASTNode(next.tokenValue.charCodeAt(0), ValueType.char);
         } else if (next.tokenType === TokenType.String) {
             return new ConstantASTNode(next.tokenValue, ValueType.string);
         } else if (next.tokenType === TokenType.Identifier) {

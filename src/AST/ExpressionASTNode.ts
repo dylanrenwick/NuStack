@@ -20,6 +20,8 @@ export abstract class ExpressionASTNode extends StatementASTNode {
             case "bool":
             case "boolean":
                 return ValueType.bool;
+            case "char":
+                return ValueType.char;
             case "string":
                 return ValueType.string;
             default: return null;
