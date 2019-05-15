@@ -86,10 +86,7 @@ export class Parser {
         if (tokens.length === 0) return null;
 
         let end = start + 1;
-        let type = this.parseToken(tokens,
-            x => (x.tokenType === TokenType.Keyword && ExpressionASTNode.getTypeFromString(x.tokenValue) !== null),
-            "type"
-        );
+        let type = this.parseType(tokens);
 
         end++;
         let name = this.parseToken(tokens, TokenType.Identifier);
@@ -103,10 +100,7 @@ export class Parser {
                 this.parseToken(tokens, TokenType.Comma);
                 end++;
             }
-            let argType = this.parseToken(tokens,
-                x => (x.tokenType === TokenType.Keyword && ExpressionASTNode.getTypeFromString(x.tokenValue) !== null),
-                "type"
-            );
+            let argType = this.parseType(tokens);
 
             let argName = this.parseToken(tokens, TokenType.Identifier);
 
@@ -145,10 +139,7 @@ export class Parser {
     }
 
     private static parseFunction(tokens: Token[]): FunctionASTNode {
-        let returnTypeTok: Token = this.parseToken(tokens,
-            x => (x.tokenType === TokenType.Keyword && ExpressionASTNode.getTypeFromString(x.tokenValue) !== null),
-            "type"
-        );
+        let returnTypeTok: Token = this.parseType(tokens);
 
         let subNameTok: Token = this.parseToken(tokens, TokenType.Identifier);
 
@@ -159,10 +150,7 @@ export class Parser {
             if (funcArgs.length > 0) {
                 this.parseToken(tokens, TokenType.Comma);
             }
-            let argType = this.parseToken(tokens,
-                x => (x.tokenType === TokenType.Keyword && ExpressionASTNode.getTypeFromString(x.tokenValue) !== null),
-                "type"
-            );
+            let argType = this.parseType(tokens);
 
             let argName = this.parseToken(tokens, TokenType.Identifier);
 
@@ -269,7 +257,7 @@ export class Parser {
     }
 
     private static parseDeclaration(tokens: Token[], tok: Token): DeclarationASTNode {
-        let type: string = tok.tokenValue;
+        let type: string = this.parseType(tok).tokenValue;
         let isArray: boolean = false;
         if (tokens[0].tokenType === TokenType.OpenBrack) {
             this.parseToken(tokens, TokenType.OpenBrack);
@@ -446,11 +434,20 @@ export class Parser {
         return this.error("Invalid factor: " + (next ? next.toString() : "<EOF>"));
     }
 
+    private static parseType(tok: Token[] | Token): Token {
+        return this.parseToken(tok,
+            x => (x.tokenType === TokenType.Keyword && ExpressionASTNode.getTypeFromString(x.tokenValue) !== null),
+            "type"
+        );
+    }
+
     private static parseToken(
-        tokens: Token[], expected: ((tok: Token) => boolean) | string | TokenType, errStr?: string
+        tok: Token[] | Token, expected: ((tok: Token) => boolean) | string | TokenType, errStr?: string
     ): Token {
-        if (tokens.length === 0) return this.error("Expected " + expected + " but found <EOF>");
-        let tok: Token = tokens.shift();
+        if (Array.isArray(tok)) {
+            if (tok.length === 0) return this.error("Expected " + expected + " but found <EOF>");
+            tok = tok.shift();
+        }
         let err: boolean = false;
         if (typeof(expected) === "string") err = tok.tokenValue !== expected;
         else if (typeof(expected) === "function") err = !expected(tok);
