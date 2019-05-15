@@ -1,4 +1,5 @@
 int main() {
     char[] a = "Hello, World!";
+    string b = "Hello, World!";
     return a[4];
 }

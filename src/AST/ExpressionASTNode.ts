@@ -45,7 +45,7 @@ export abstract class ExpressionASTNode extends StatementASTNode {
                 };
             case "string":
                 return {
-                    isArray: false,
+                    isArray: true,
                     type: ValueType.char
                 };
             default: return null;

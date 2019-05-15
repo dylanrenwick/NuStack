@@ -468,10 +468,10 @@ export class Parser {
             isArray = true;
         }
 
-        return {
+        return isArray ? {
             isArray,
             type: ExpressionASTNode.getTypeFromString(typeTok.tokenValue).type
-        };
+        } : ExpressionASTNode.getTypeFromString(typeTok.tokenValue);
     }
 
     private static parseToken(
