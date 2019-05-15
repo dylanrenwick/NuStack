@@ -1,23 +1,26 @@
 import { Declaration } from "../Declaration";
 import { StringBuilder } from "../StringBuilder";
-import { ExpressionASTNode, ValueType } from "./ExpressionASTNode";
+import { ExpressionASTNode, ITypeDef } from "./ExpressionASTNode";
 import { IASTNode } from "./IASTNode";
 import { StatementASTNode } from "./StatementASTNode";
 
 export class FunctionASTNode implements IASTNode {
     private funcName: string;
-    private return: ValueType;
+    private return: ITypeDef;
     private children: StatementASTNode[];
     private args: Declaration[];
 
     public get childNodes(): StatementASTNode[] { return this.children; }
     public get name(): string { return this.funcName; }
-    public get returnType(): ValueType { return this.return; }
+    public get returnType(): ITypeDef { return this.return; }
     public get arguments(): Declaration[] { return this.args; }
 
-    public constructor(name: string, returnType: string, children: StatementASTNode[], args: Declaration[] = []) {
+    public constructor(
+        name: string, returnType: string | ITypeDef, children: StatementASTNode[], args: Declaration[] = []
+    ) {
         this.funcName = name;
-        this.return = ExpressionASTNode.getTypeFromString(returnType);
+        if (typeof(returnType) !== "string") this.return = returnType;
+        else this.return = ExpressionASTNode.getTypeFromString(returnType);
         this.children = children;
         this.args = args;
     }

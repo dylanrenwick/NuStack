@@ -1,4 +1,4 @@
-int putchar(int c) {
+int putchar(char c) {
     #asm "mov %si, %bp"
     #asm "mov %cx, *c"
     #asm "add %si, %cx"
@@ -10,19 +10,12 @@ int putchar(int c) {
 }
 
 int main() {
-    putchar(72);
-    putchar(101);
-    putchar(108);
-    putchar(108);
-    putchar(111);
-    putchar(44);
-    putchar(32);
-    putchar(87);
-    putchar(111);
-    putchar(114);
-    putchar(108);
-    putchar(100);
-    putchar(33);
-    putchar(10);
+    int len = 13;
+    char[] str = "Hello, World!";
+    int i = 0;
+    while (i < len) {
+        putchar(str[i]);
+        i = i + 1;
+    }
     return 0;
 }

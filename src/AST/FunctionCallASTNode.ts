@@ -1,13 +1,13 @@
 import { IFootprint } from "../Parser";
 import { StringBuilder } from "../StringBuilder";
-import { ExpressionASTNode, ValueType } from "./ExpressionASTNode";
+import { ExpressionASTNode, ITypeDef } from "./ExpressionASTNode";
 
 export class FunctionCallASTNode extends ExpressionASTNode {
     private footprint: IFootprint;
     private args: ExpressionASTNode[];
 
     public get expressionValue(): any { return null; }
-    public get expressionType(): ValueType { return this.footprint.type; }
+    public get expressionType(): ITypeDef { return this.footprint.type; }
     public get functionName(): string { return this.footprint.name; }
     public get arguments(): ExpressionASTNode[] { return this.args; }
     public get argDefinitions(): any[] { return this.footprint.args; }

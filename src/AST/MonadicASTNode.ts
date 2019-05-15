@@ -1,4 +1,4 @@
-import { ExpressionASTNode, ValueType } from "./ExpressionASTNode";
+import { ExpressionASTNode, ITypeDef } from "./ExpressionASTNode";
 import { OperationASTNode, OperationType } from "./OperationASTNode";
 
 export class MonadicASTNode extends OperationASTNode {
@@ -21,7 +21,7 @@ export class MonadicASTNode extends OperationASTNode {
 
         return null;
     }
-    public get expressionType(): ValueType {
+    public get expressionType(): ITypeDef {
         return this.operand.expressionType;
     }
 

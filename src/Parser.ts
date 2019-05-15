@@ -7,7 +7,7 @@ import { CompilerMacroASTNode, MacroType } from "./AST/CompilerMacroASTNode";
 import { ConstantASTNode } from "./AST/ConstantASTNode";
 import { DeclarationASTNode } from "./AST/DeclarationASTNode";
 import { DiadicASTNode } from "./AST/DiadicASTNode";
-import { ExpressionASTNode, ValueType } from "./AST/ExpressionASTNode";
+import { ExpressionASTNode, ITypeDef, ValueType } from "./AST/ExpressionASTNode";
 import { FunctionASTNode } from "./AST/FunctionASTNode";
 import { FunctionCallASTNode } from "./AST/FunctionCallASTNode";
 import { IfASTNode } from "./AST/IfASTNode";
@@ -25,7 +25,7 @@ import { Token, TokenType } from "./Token";
 
 export interface IFootprint {
     name: string;
-    type: ValueType;
+    type: ITypeDef;
     args: IArg[];
     tokenStart: number;
     tokenEnd: number;
@@ -33,7 +33,7 @@ export interface IFootprint {
 
 interface IArg {
     name: string;
-    type: ValueType;
+    type: ITypeDef;
 }
 export class Parser {
     private static readonly INT_MAX_VALUE: number = 2 ** 31;
@@ -44,6 +44,7 @@ export class Parser {
     private static diadicOperators: TokenType[] = [
         TokenType.Addition, TokenType.Negation, TokenType.Multiplication, TokenType.Division
     ];
+
     private static variables: HashMap<string, Declaration> = new HashMap<string, Declaration>();
     private static functions: HashMap<string, IFootprint> = new HashMap<string, IFootprint>();
 
@@ -106,7 +107,7 @@ export class Parser {
 
             funcArgs.push({
                 name: argName.tokenValue,
-                type: ExpressionASTNode.getTypeFromString(argType.tokenValue)
+                type: argType
             });
 
             end += 2;
@@ -120,12 +121,12 @@ export class Parser {
 
         let level: number = 1;
         while (level) {
-            if (tokens[0].tokenType === TokenType.OpenBrace) {
+            let tok: Token = tokens.shift();
+            if (tok.tokenType === TokenType.OpenBrace) {
                 level++;
-            } else if (tokens[0].tokenType === TokenType.CloseBrace) {
+            } else if (tok.tokenType === TokenType.CloseBrace) {
                 level--;
             }
-            tokens.shift();
             end++;
         }
 
@@ -134,12 +135,12 @@ export class Parser {
             name: name.tokenValue,
             tokenEnd: end,
             tokenStart: start,
-            type: ExpressionASTNode.getTypeFromString(type.tokenValue)
+            type
         };
     }
 
     private static parseFunction(tokens: Token[]): FunctionASTNode {
-        let returnTypeTok: Token = this.parseType(tokens);
+        let returnType: ITypeDef = this.parseType(tokens);
 
         let subNameTok: Token = this.parseToken(tokens, TokenType.Identifier);
 
@@ -154,7 +155,7 @@ export class Parser {
 
             let argName = this.parseToken(tokens, TokenType.Identifier);
 
-            let dec: Declaration = new Declaration(argName.tokenValue, argType.tokenValue);
+            let dec: Declaration = new Declaration(argName.tokenValue, argType);
             funcArgs.push(dec);
             this.variables.Add(argName.tokenValue, dec);
         }
@@ -165,7 +166,7 @@ export class Parser {
 
         return new FunctionASTNode(
             subNameTok.tokenValue,
-            returnTypeTok.tokenValue,
+            returnType,
             statements,
             funcArgs
         );
@@ -257,16 +258,11 @@ export class Parser {
     }
 
     private static parseDeclaration(tokens: Token[], tok: Token): DeclarationASTNode {
-        let type: string = this.parseType(tok).tokenValue;
-        let isArray: boolean = false;
-        if (tokens[0].tokenType === TokenType.OpenBrack) {
-            this.parseToken(tokens, TokenType.OpenBrack);
-            this.parseToken(tokens, TokenType.CloseBrack);
-            isArray = true;
-        }
+        tokens.unshift(tok);
+        let type: ITypeDef = this.parseType(tokens);
         tok = this.parseToken(tokens, TokenType.Identifier);
         let name = tok.tokenValue;
-        let declaration = new Declaration(name, type, isArray);
+        let declaration = new Declaration(name, type);
         this.variables.Add(name, declaration);
 
         let expr: ExpressionASTNode = null;
@@ -274,9 +270,12 @@ export class Parser {
         if (tokens[0].tokenType === TokenType.Assignment) {
             tokens.shift();
             expr = this.parseExpression(tokens);
-            if (expr.expressionType !== declaration.variableType) {
-                return this.error("Type " + expr.expressionType
-                    + " is not assignable to type " + declaration.variableType);
+            if (!expr.isCompatibleWithType(declaration.variableType)) {
+                return this.error("Type "
+                    + expr.expressionType.type + (expr.expressionType.isArray ? "[]" : "")
+                    + " is not assignable to type "
+                    + declaration.variableType.type + (declaration.variableType.isArray ? "[]" : "")
+                );
             }
         }
 
@@ -296,13 +295,24 @@ export class Parser {
             this.parseToken(tokens, TokenType.CloseBrack);
         }
 
+        let type = dec.variableType;
+        if (index !== null) {
+            type = {
+                isArray: false,
+                type: type.type
+            };
+        }
+
         tok = this.parseToken(tokens, TokenType.Assignment);
 
         let expr: ExpressionASTNode = this.parseExpression(tokens);
 
-        if (expr.expressionType !== dec.variableType) {
-            return this.error("Type " + expr.expressionType
-                + " is not assignable to type " + dec.variableType);
+        if (!expr.isCompatibleWithType(type)) {
+            return this.error("Type "
+                    + expr.expressionType.type + (expr.expressionType.isArray ? "[]" : "")
+                    + " is not assignable to type "
+                    + type.type + (type.isArray ? "[]" : "")
+                );
         }
 
         return new AssignmentASTNode(dec, expr, index);
@@ -319,8 +329,12 @@ export class Parser {
         let argExprs: ExpressionASTNode[] = [];
         for (let i = 0; i < func.args.length; i++) {
             let arg: ExpressionASTNode = this.parseExpression(tokens);
-            if (arg.expressionType !== null && arg.expressionType !== func.args[i].type) {
-                return this.error("Type " + arg.expressionType + " is not assignable to type " + func.args[i].type);
+            if (!arg.isCompatibleWithType(func.args[i].type)) {
+                return this.error("Type "
+                    + arg.expressionType.type + (arg.expressionType.isArray ? "[]" : "")
+                    + " is not assignable to type "
+                    + func.args[i].type.type + (func.args[i].type.isArray ? "[]" : "")
+                );
             }
             argExprs.push(arg);
             if (i + 1 < func.args.length) this.parseToken(tokens, TokenType.Comma);
@@ -335,7 +349,7 @@ export class Parser {
         let tok: Token = this.parseToken(tokens, TokenType.OpenParen);
 
         let condition: ExpressionASTNode = this.parseExpression(tokens);
-        if (condition.expressionType !== ValueType.bool) {
+        if (condition.expressionType.type !== ValueType.bool) {
             return this.error("Type " + condition.expressionType + " is not bool");
         }
 
@@ -357,7 +371,7 @@ export class Parser {
         let tok: Token = this.parseToken(tokens, TokenType.OpenParen);
 
         let condition: ExpressionASTNode = this.parseExpression(tokens);
-        if (condition.expressionType !== ValueType.bool) {
+        if (condition.expressionType.type !== ValueType.bool) {
             return this.error("Type " + condition.expressionType + " is not bool");
         }
 
@@ -378,9 +392,11 @@ export class Parser {
             let nextTerm: ExpressionASTNode = operatorsIndex === this.exprOperators.length - 1
                 ? this.parseFactor(tokens)
                 : this.parseExpression(tokens, operatorsIndex + 1);
-            if (term.expressionType !== nextTerm.expressionType) {
+            if (!term.isCompatibleWithType(nextTerm.expressionType)) {
                 return this.error("Operator " + op + " is not valid for types "
-                    + term.expressionType + " and " + nextTerm.expressionType);
+                    + term.expressionType.type + (term.expressionType.isArray ? "[]" : "")
+                    + " and " + nextTerm.expressionType.type + (nextTerm.expressionType.isArray ? "[]" : "")
+                );
             }
             term = new DiadicASTNode(
                 op, term, nextTerm
@@ -403,42 +419,59 @@ export class Parser {
             let op: OperationType = this.parseOpType(next);
             let factor: ExpressionASTNode = this.parseFactor(tokens);
             return new MonadicASTNode(op, factor);
-        } else if (next.tokenType === TokenType.Integer) {
-            return new ConstantASTNode(next.tokenValue, ValueType.int);
-        } else if (next.tokenType === TokenType.Char) {
-            return new ConstantASTNode(next.tokenValue.charCodeAt(0), ValueType.char);
-        } else if (next.tokenType === TokenType.String) {
-            return new ConstantASTNode(next.tokenValue, ValueType.string);
-        } else if (next.tokenType === TokenType.Identifier) {
-            if (tokens.length && tokens[0].tokenType === TokenType.OpenParen) {
-                return this.parseFuncCall(tokens, next);
-            } else if (this.variables.Has(next.tokenValue)) {
-                let dec: Declaration = this.variables.Get(next.tokenValue);
-                let index: ExpressionASTNode;
-                if (dec.isArray && tokens[0].tokenType === TokenType.OpenBrack) {
-                    this.parseToken(tokens, TokenType.OpenBrack);
-                    index = this.parseExpression(tokens);
-                    this.parseToken(tokens, TokenType.CloseBrack);
-                }
-                return new VariableASTNode(dec, index);
+        } else {
+            switch (next.tokenType) {
+                case TokenType.Integer: return new ConstantASTNode(next.tokenValue, ValueType.int);
+                case TokenType.Char: return new ConstantASTNode(next.tokenValue.charCodeAt(0), ValueType.char);
+                case TokenType.String:
+                    return new ArrayASTNode(
+                        new ArrayValue(ValueType.char, next.tokenValue.length, next.tokenValue)
+                    );
+                case TokenType.Identifier:
+                    if (tokens.length && tokens[0].tokenType === TokenType.OpenParen) {
+                        return this.parseFuncCall(tokens, next);
+                    } else if (this.variables.Has(next.tokenValue)) {
+                        let dec: Declaration = this.variables.Get(next.tokenValue);
+                        let index: ExpressionASTNode;
+                        if (dec.isArray && tokens[0].tokenType === TokenType.OpenBrack) {
+                            this.parseToken(tokens, TokenType.OpenBrack);
+                            index = this.parseExpression(tokens);
+                            this.parseToken(tokens, TokenType.CloseBrack);
+                        }
+                        return new VariableASTNode(dec, index);
+                    }
+                    break;
+                case TokenType.Keyword:
+                    let type = ExpressionASTNode.getTypeFromString(next.tokenValue);
+                    if (type !== null) {
+                        this.parseToken(tokens, TokenType.OpenBrack);
+                        let size = this.parseToken(tokens, TokenType.Integer).tokenValue;
+                        this.parseToken(tokens, TokenType.CloseBrack);
+                        return new ArrayASTNode(new ArrayValue(type.type, size));
+                    }
+                    break;
             }
-        } else if (next.tokenType === TokenType.Keyword
-            && ExpressionASTNode.getTypeFromString(next.tokenValue) !== null) {
-            this.parseToken(tokens, TokenType.OpenBrack);
-            let size = this.parseToken(tokens, TokenType.Integer).tokenValue;
-            this.parseToken(tokens, TokenType.CloseBrack);
-            let type = ExpressionASTNode.getTypeFromString(next.tokenValue);
-            return new ArrayASTNode(new ArrayValue(type, size));
         }
 
         return this.error("Invalid factor: " + (next ? next.toString() : "<EOF>"));
     }
 
-    private static parseType(tok: Token[] | Token): Token {
-        return this.parseToken(tok,
+    private static parseType(tok: Token[] | Token): ITypeDef {
+        let typeTok: Token = this.parseToken(tok,
             x => (x.tokenType === TokenType.Keyword && ExpressionASTNode.getTypeFromString(x.tokenValue) !== null),
             "type"
         );
+        let isArray: boolean = false;
+        if (Array.isArray(tok) && tok[0].tokenType === TokenType.OpenBrack) {
+            this.parseToken(tok, TokenType.OpenBrack);
+            this.parseToken(tok, TokenType.CloseBrack);
+            isArray = true;
+        }
+
+        return {
+            isArray,
+            type: ExpressionASTNode.getTypeFromString(typeTok.tokenValue).type
+        };
     }
 
     private static parseToken(

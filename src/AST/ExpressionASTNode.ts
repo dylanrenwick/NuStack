@@ -2,9 +2,14 @@ import { StringBuilder } from "../StringBuilder";
 import { IASTNode } from "./IASTNode";
 import { StatementASTNode } from "./StatementASTNode";
 
+export interface ITypeDef {
+    type: ValueType;
+    isArray: boolean;
+}
+
 export abstract class ExpressionASTNode extends StatementASTNode {
     public abstract get expressionValue(): any;
-    public abstract get expressionType(): ValueType;
+    public abstract get expressionType(): ITypeDef;
 
     public get childNodes(): IASTNode[] | IASTNode { return null; }
     public toString(sb: StringBuilder): StringBuilder {
@@ -12,18 +17,37 @@ export abstract class ExpressionASTNode extends StatementASTNode {
         return sb;
     }
 
-    public static getTypeFromString(type: string): ValueType {
+    public isCompatibleWithType(type: ITypeDef): boolean {
+        if (this.expressionType === null) return true;
+
+        return type.type === this.expressionType.type
+            && type.isArray === this.expressionType.isArray;
+    }
+
+    public static getTypeFromString(type: string): ITypeDef {
         switch (type) {
             case "int":
             case "integer":
-                return ValueType.int;
+                return {
+                    isArray: false,
+                    type: ValueType.int
+                };
             case "bool":
             case "boolean":
-                return ValueType.bool;
+                return {
+                    isArray: false,
+                    type: ValueType.bool
+                };
             case "char":
-                return ValueType.char;
+                return {
+                    isArray: false,
+                    type: ValueType.char
+                };
             case "string":
-                return ValueType.string;
+                return {
+                    isArray: false,
+                    type: ValueType.char
+                };
             default: return null;
         }
     }

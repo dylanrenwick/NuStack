@@ -86,5 +86,9 @@
     {
         "fileName": "char",
         "answer": 65
+    },
+    {
+        "fileName": "string",
+        "answer": 111
     }
 ]

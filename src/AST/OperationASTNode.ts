@@ -1,5 +1,5 @@
 import { StringBuilder } from "../StringBuilder";
-import { ExpressionASTNode, ValueType } from "./ExpressionASTNode";
+import { ExpressionASTNode, ITypeDef, ValueType } from "./ExpressionASTNode";
 
 export abstract class OperationASTNode extends ExpressionASTNode {
     protected opType: OperationType;
@@ -49,7 +49,7 @@ export abstract class OperationASTNode extends ExpressionASTNode {
         return ret;
     }
 
-    public static getOperatorType(op: OperationType, on: ValueType): ValueType {
+    public static getOperatorType(op: OperationType, on: ITypeDef): ITypeDef {
         switch (op) {
             case OperationType.LessThan:
             case OperationType.MoreThan:
@@ -59,7 +59,10 @@ export abstract class OperationASTNode extends ExpressionASTNode {
             case OperationType.LessThanEqual:
             case OperationType.LogicalOR:
             case OperationType.LogicalAND:
-                return ValueType.bool;
+                return {
+                    isArray: false,
+                    type: ValueType.bool
+                };
             case OperationType.Negation:
             case OperationType.BitwiseNOT:
             case OperationType.LogicalNOT:

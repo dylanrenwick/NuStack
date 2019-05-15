@@ -12,7 +12,9 @@ export class ProgramASTNode implements IASTNode {
 
     public constructor(functions: FunctionASTNode[]) {
         this.funcs = functions;
-        let entryPoints = this.funcs.filter(x => x.name === "main" && x.returnType === ValueType.int);
+        let entryPoints = this.funcs.filter(
+            x => x.name === "main" && x.returnType.type === ValueType.int && !x.returnType.isArray
+        );
         if (entryPoints.length === 0) {
             throw new Error("No function of signature 'int main()' found. Could not get entry point");
         }

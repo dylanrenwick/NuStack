@@ -1,6 +1,6 @@
 import { Declaration } from "../Declaration";
 import { StringBuilder } from "../StringBuilder";
-import { ExpressionASTNode, ValueType } from "./ExpressionASTNode";
+import { ExpressionASTNode, ITypeDef } from "./ExpressionASTNode";
 
 export class VariableASTNode extends ExpressionASTNode {
     private dec: Declaration;
@@ -8,7 +8,11 @@ export class VariableASTNode extends ExpressionASTNode {
 
     public get declaration(): Declaration { return this.dec; }
     public get expressionValue(): any { return this.dec.currentValue; }
-    public get expressionType(): ValueType { return this.dec.variableType; }
+    public get expressionType(): ITypeDef {
+        return this.index !== null && this.index !== undefined
+            ? { isArray: false, type: this.dec.variableType.type }
+            : this.dec.variableType;
+    }
     public get isArray(): boolean { return this.dec.isArray; }
     public get arrayIndex(): ExpressionASTNode { return this.index; }
 

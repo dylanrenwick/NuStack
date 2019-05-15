@@ -282,8 +282,11 @@ export class AssemblyGenerator {
     }
 
     private static generateArray(sb: StringBuilder, expr: ArrayASTNode): StringBuilder {
-        for (let i = 0; i < expr.arraySize; i++) {
-            sb.appendLine(`mov ${this.ax}, 0d`);
+        for (let i = expr.arraySize - 1; i >= 0; i--) {
+            let value: string = "0";
+            if (expr.array.value) value = expr.array.value[i];
+            if (Number.isNaN(parseInt(value))) value = value.charCodeAt(0).toString();
+            sb.appendLine(`mov ${this.ax}, ${value}d`);
             sb.appendLine(`push ${this.ax} ; assignment of array[${i}]`);
         }
 
