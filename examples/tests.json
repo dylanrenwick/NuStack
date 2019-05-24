@@ -90,5 +90,9 @@
     {
         "fileName": "string",
         "answer": 111
+    },
+    {
+        "fileName": "reg",
+        "answer": 7
     }
 ]

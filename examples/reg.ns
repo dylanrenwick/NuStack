@@ -1,0 +1,4 @@
+int main() {
+    #asm "mov %ax, 7"
+    return reg "ax";
+}

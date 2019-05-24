@@ -18,6 +18,7 @@ import { Declaration } from "../Declaration";
 import { HashMap } from "../HashMap";
 import { StringBuilder } from "../StringBuilder";
 import { PlatformController } from "./PlatformController";
+import { RegASTNode } from "../AST/RegASTNode";
 
 export class AssemblyGenerator {
     private static complexOps: OperationType[] = [
@@ -58,6 +59,21 @@ export class AssemblyGenerator {
 
     private static get si(): string { return this.platformController.si; }
     private static get di(): string { return this.platformController.di; }
+
+    private static get registers(): { [key: string]: string } {
+        return {
+            'ax': this.ax,
+            'bx': this.bx,
+            'cx': this.cx,
+            'dx': this.dx,
+
+            'bp': this.bp,
+            'sp': this.sp,
+
+            'si': this.si,
+            'di': this.di
+        };
+    }
 
     private static get label(): string { return "_util_label" + this.labelCount++; }
 
@@ -276,6 +292,8 @@ export class AssemblyGenerator {
             return this.generateFunctionCall(sb, expr);
         } else if (expr instanceof ArrayASTNode) {
             return this.generateArray(sb, expr);
+        } else if (expr instanceof RegASTNode) {
+            return this.generateRegReference(sb, expr);
         }
 
         throw new Error("Unknown AST node: " + JSON.stringify(expr));
@@ -396,6 +414,17 @@ export class AssemblyGenerator {
             }
         }
 
+        return sb;
+    }
+
+    private static generateRegReference(sb: StringBuilder, expr: RegASTNode): StringBuilder {
+        let asm: string = `mov ${this.ax}, `;
+        if (this.registers[expr.registerName]) {
+            asm += this.registers[expr.registerName];
+        } else {
+            asm += expr.registerName;
+        }
+        sb.appendLine(asm);
         return sb;
     }
 

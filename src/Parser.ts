@@ -22,6 +22,7 @@ import { VariableASTNode } from "./AST/VariableASTNode";
 import { Declaration } from "./Declaration";
 import { HashMap } from "./HashMap";
 import { Token, TokenType } from "./Token";
+import { RegASTNode } from "./AST/RegASTNode";
 
 export interface IFootprint {
     name: string;
@@ -449,6 +450,9 @@ export class Parser {
                         let size = this.parseToken(tokens, TokenType.Integer).tokenValue;
                         this.parseToken(tokens, TokenType.CloseBrack);
                         return new ArrayASTNode(new ArrayValue(type.type, size));
+                    } else if (next.tokenValue === "reg") {
+                        let regName = this.parseToken(tokens, TokenType.String);
+                        return new RegASTNode(regName.tokenValue);
                     }
                     break;
             }
