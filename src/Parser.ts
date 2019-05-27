@@ -40,7 +40,8 @@ export class Parser {
     private static readonly INT_MAX_VALUE: number = 2 ** 31;
 
     private static monadicOperators: TokenType[] = [
-        TokenType.Negation, TokenType.BitwiseNOT, TokenType.LogicalNOT,
+        TokenType.Negation, TokenType.BitwiseNOT, TokenType.LogicalNOT, TokenType.Reference,
+        TokenType.Dereference
     ];
     private static diadicOperators: TokenType[] = [
         TokenType.Addition, TokenType.Negation, TokenType.Multiplication, TokenType.Division
@@ -55,7 +56,8 @@ export class Parser {
         [TokenType.LessThan, TokenType.LessThanEqual,
          TokenType.MoreThan, TokenType.MoreThanEqual],
         [TokenType.Addition, TokenType.Negation],
-        [TokenType.Multiplication, TokenType.Division]
+        [TokenType.Multiplication, TokenType.Division],
+        [TokenType.Reference, TokenType.Dereference]
     ];
 
     public static parse(tokens: Token[]): AbstractSyntaxTree {
@@ -530,6 +532,8 @@ export class Parser {
             case TokenType.LogicalOR: return OperationType.LogicalOR;
             case TokenType.LogicalAND: return OperationType.LogicalAND;
             case TokenType.Assignment: return OperationType.Assignment;
+            case TokenType.Reference: return OperationType.Reference;
+            case TokenType.Dereference: return OperationType.Dereference;
             default: return this.error("Invalid operator: " + (tok ? tok.toString() : "<EOF>"));
         }
     }

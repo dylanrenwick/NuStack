@@ -20,6 +20,8 @@ export abstract class ExpressionASTNode extends StatementASTNode {
 
     public isCompatibleWithType(type: ITypeDef): boolean {
         if (this.expressionType === null) return true;
+        if (type.isPtr !== this.expressionType.isPtr) return false;
+        if (type.type === ValueType.any || this.expressionType.type === ValueType.any) return true;
 
         return type.type === this.expressionType.type
             && type.isArray === this.expressionType.isArray;
@@ -59,6 +61,7 @@ export abstract class ExpressionASTNode extends StatementASTNode {
 }
 
 export enum ValueType {
+    any,
     int,
     bool,
     char

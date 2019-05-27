@@ -51,6 +51,18 @@ export abstract class OperationASTNode extends ExpressionASTNode {
 
     public static getOperatorType(op: OperationType, on: ITypeDef): ITypeDef {
         switch (op) {
+            case OperationType.Dereference:
+                return {
+                    isArray: false,
+                    isPtr: false,
+                    type: ValueType.any
+                };
+            case OperationType.Reference:
+                return {
+                    isArray: false,
+                    isPtr: true,
+                    type: ValueType.int
+                };
             case OperationType.LessThan:
             case OperationType.MoreThan:
             case OperationType.Equal:
@@ -93,5 +105,7 @@ export enum OperationType {
     LessThanEqual,
     LogicalOR,
     LogicalAND,
-    Assignment
+    Assignment,
+    Reference,
+    Dereference
 }
