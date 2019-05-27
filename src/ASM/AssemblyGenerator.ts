@@ -188,7 +188,7 @@ export class AssemblyGenerator {
             sb = this.generateExpression(sb, call.arguments[i]);
             sb.appendLine("push " + this.ax);
         }
-        sb.appendLine("call call.functionName);
+        sb.appendLine("call " + call.functionName);
 
         return sb;
     }
