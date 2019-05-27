@@ -195,13 +195,13 @@ export class AssemblyGenerator {
     private static generateAssemblyMacro(sb: StringBuilder, macro: AssemblyMacroASTNode): StringBuilder {
         let process: (x: string) => string = (line => {
             return line.replace(/%([a-z]{2})/g, (_, p1) => this.platformController.getRegisterName(p1))
-                .replace(/\$([a-zA-Z_]+)/g, (_, p1) => {
+                .replace(/>-([a-zA-Z_]+)/g, (_, p1) => {
                     let offset = this.stackMap.Get(p1);
                     return `[${this.bp}${offset >= 0 ? "-" : "+"}${Math.abs(offset)}]`;
                 })
-                .replace(/\*([a-zA-Z_]+)/g, (_, p1) => {
+                .replace(/-<([a-zA-Z_]+)/g, (_, p1) => {
                     let offset = this.stackMap.Get(p1);
-                    return `${-offset}d`;
+                    return `${-offset}`;
                 });
         });
 

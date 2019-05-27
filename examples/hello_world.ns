@@ -1,6 +1,6 @@
 int putchar(char c) {
     #asm "mov %si, %bp"
-    #asm "mov %cx, *c"
+    #asm "mov %cx, -<c"
     #asm "add %si, %cx"
     #asm "mov %ax, 1"
     #asm "mov %di, 1"
