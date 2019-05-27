@@ -99,6 +99,7 @@ export class AssemblyGenerator {
 
     private static generateFunction(sb: StringBuilder, func: FunctionASTNode): StringBuilder {
         this.funcMapping.Add(func.name, func.name);
+        sb.appendLine("global " + func.name);
         sb = this.generateLabel(sb, func.name);
         sb = this.platformController.makeStackFrame(sb);
 
