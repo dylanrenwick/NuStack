@@ -34,7 +34,7 @@ for (let test of tests) {
     exec("node bin/index.js -i examples/" + testName + ".ns -o examples/" + testName + ".asm -a 64"
         + (process.argv.includes("-d") ? " -d" : "")
         + " && nasm -f elf64 -o examples/" + testName + ".o examples/" + testName + ".asm"
-        + " && ld -e main -o examples/" + testName + " examples/" + testName + ".o",
+        + " && ld -e _start -o examples/" + testName + " examples/" + testName + ".o",
     (err, stdout, stderr) => {
         if (err) {
             output += (`\t - ${colors.red}COMPILE FAIL${colors.reset}`) + "\n";
