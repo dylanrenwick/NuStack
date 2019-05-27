@@ -18,6 +18,9 @@ export class Tokenizer {
     private static readonly twoCharOperators: string[] = [
         "==", "!=", "<=", ">=", "&&", "||", ">-", "-<",
     ];
+    private static readonly sigils: string[] = [
+        "@"
+    ];
 
     public static tokenize(code: string): Token[] {
         let tokens: Token[] = [];
@@ -100,7 +103,7 @@ export class Tokenizer {
                 continue;
             }
 
-            if (this.singletons.includes(char) || this.operators.includes(char)) {
+            if (this.singletons.includes(char) || this.operators.includes(char) || this.sigils.includes(char)) {
                 if (curToken.length > 0) {
                     tokens.push(this.tokenFromString(line, col - curToken.length - 1, curToken));
                     curToken = "";
@@ -185,6 +188,10 @@ export class Tokenizer {
 
         if (this.keywords.includes(token)) {
             return new Token(col, line, TokenType.Keyword, token);
+        }
+
+        if (this.sigils.includes(token)) {
+            return new Token(col, line, TokenType.Sigil, token);
         }
 
         if (/^[a-zA-Z_]+$/.test(token)) {

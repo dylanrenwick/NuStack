@@ -29,6 +29,7 @@ export class Token  {
         switch (this.tokenType) {
             case TokenType.Keyword:
             case TokenType.Identifier:
+            case TokenType.Sigil:
             case TokenType.Integer:
             case TokenType.Char:
             case TokenType.String:
@@ -67,6 +68,7 @@ export class Token  {
 export enum TokenType {
     Keyword,
     Identifier,
+    Sigil,
     OpenParen,
     CloseParen,
     OpenBrace,

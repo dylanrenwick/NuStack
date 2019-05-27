@@ -16,13 +16,13 @@ import { LoopASTNode } from "./AST/LoopASTNode";
 import { MonadicASTNode } from "./AST/MonadicASTNode";
 import { OperationType } from "./AST/OperationASTNode";
 import { ProgramASTNode } from "./AST/ProgramASTNode";
+import { RegASTNode } from "./AST/RegASTNode";
 import { ReturnStatementASTNode } from "./AST/ReturnStatementASTNode";
 import { StatementASTNode } from "./AST/StatementASTNode";
 import { VariableASTNode } from "./AST/VariableASTNode";
 import { Declaration } from "./Declaration";
 import { HashMap } from "./HashMap";
 import { Token, TokenType } from "./Token";
-import { RegASTNode } from "./AST/RegASTNode";
 
 export interface IFootprint {
     name: string;
@@ -261,8 +261,22 @@ export class Parser {
     private static parseDeclaration(tokens: Token[], tok: Token): DeclarationASTNode {
         tokens.unshift(tok);
         let type: ITypeDef = this.parseType(tokens);
-        tok = this.parseToken(tokens, TokenType.Identifier);
-        let name = tok.tokenValue;
+        let name: string = null;
+        let sigils: string[] = [];
+        while (name === null) {
+            tok = this.parseToken(tokens, t =>
+                t.tokenType === TokenType.Identifier || t.tokenType === TokenType.Sigil
+            );
+            if (tok.tokenType === TokenType.Sigil) {
+                switch (tok.tokenValue) {
+                    case "@":
+                        type.isPtr = true;
+                }
+                sigils.push(tok.tokenValue);
+            } else {
+                name = sigils.join("") + tok.tokenValue;
+            }
+        }
         let declaration = new Declaration(name, type);
         this.variables.Add(name, declaration);
 
