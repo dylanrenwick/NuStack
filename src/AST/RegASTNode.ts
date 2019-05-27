@@ -5,7 +5,7 @@ export class RegASTNode extends ExpressionASTNode {
 
     public get registerName(): string { return this.regName; }
     public get expressionValue(): any { return null; }
-    public get expressionType(): ITypeDef { return { type: ValueType.int, isArray: false, isPtr: false }}
+    public get expressionType(): ITypeDef { return { type: ValueType.int, isArray: false, isPtr: false }; }
 
     public constructor(regName: string) {
         super();
