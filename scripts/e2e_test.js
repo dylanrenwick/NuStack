@@ -22,9 +22,9 @@ const colors = {
 
 console.log(tests.length + " tests to run");
 
-String.prototype.rPad = (l) => this.padEnd(l, " ");
+const rPad = (s, l) => s + " ".repeat(l - s.length);
 
-const maxLen = tests.reduce((a, b) => Math.max(a.fileName, b.fileName));
+const maxLen = tests.map(x => x.fileName.length).reduce((a, b) => Math.max(a, b)) + 2;
 
 for (let test of tests) {
     let output = "";
@@ -34,7 +34,7 @@ for (let test of tests) {
 
     finishedTests[testName] = false;
 
-    output += ("Running " + testName) + "\n";
+    output += rPad(testName + ":", maxLen);
 
     exec("node bin/index.js -i examples/" + testName + ".ns -o examples/" + testName + ".asm -a 64"
         + (process.argv.includes("-d") ? " -d" : "")
@@ -42,7 +42,7 @@ for (let test of tests) {
         + " && ld -e _start -o examples/" + testName + " examples/" + testName + ".o",
     (err, stdout, stderr) => {
         if (err) {
-            output += (`\t - ${colors.red}COMPILE FAIL${colors.reset}`) + "\n";
+            output += (`${colors.red}COMPILE FAIL${colors.reset}`) + "\n";
             errs += stdout + "\n";
             errs += stderr + "\n";
             result = 1;
@@ -59,16 +59,16 @@ for (let test of tests) {
                 if (expecOut !== undefined) pass = pass && stdout.includes(expecOut);
     
                 if (!pass) {
-                    output += (`\t - ${colors.red}FAIL${colors.reset}:`) + "\n";
-                    if (expected !== undefined) output += (`\t    - Expected ${expected} but got ${outCode}`) + "\n";
-                    if (expecOut !== undefined) output += (`\t    - Expected '${expecOut}' but got '${stdout}'`) + "\n"
+                    output += (`${colors.red}FAIL${colors.reset}:`) + "\n";
+                    if (expected !== undefined) output += (`\t\t - Expected ${expected} but got ${outCode}`) + "\n";
+                    if (expecOut !== undefined) output += (`\t\t - Expected '${expecOut}' but got '${stdout}'`) + "\n"
                     errs += stdout + "\n";
                     errs += stderr + "\n";
                     result = 1;
                 } else {
-                    output += (`\t - ${colors.green}PASS${colors.reset}:`) + "\n";
-                    if (expected !== undefined) output += (`\t    - Expected ${expected} and got ${outCode}`) + "\n";
-                    if (expecOut !== undefined) output += (`\t    - Expected '${expecOut}' and got '${stdout}'`) + "\n"
+                    output += (`${colors.green}PASS${colors.reset}:`) + "\n";
+                    if (expected !== undefined) output += (`\t\t - Expected ${expected} and got ${outCode}`) + "\n";
+                    if (expecOut !== undefined) output += (`\t\t - Expected '${expecOut}' and got '${stdout}'`) + "\n"
                 }
 
                 finishedTests[testName] = true;
