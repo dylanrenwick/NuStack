@@ -83,6 +83,9 @@ export class AssemblyGenerator {
 
         sb.appendLine("section .text");
         sb.appendLine("global _start");
+        for (let func of ast.root.childNodes) {
+            sb.appendLine("global " + func.name);
+        }
         sb.appendLine("");
         sb.appendLine("_start:");
         sb.indent++;
@@ -99,7 +102,6 @@ export class AssemblyGenerator {
 
     private static generateFunction(sb: StringBuilder, func: FunctionASTNode): StringBuilder {
         this.funcMapping.Add(func.name, func.name);
-        sb.appendLine("global " + func.name);
         sb = this.generateLabel(sb, func.name);
         sb = this.platformController.makeStackFrame(sb);
 
@@ -303,24 +305,23 @@ export class AssemblyGenerator {
     private static generateArray(sb: StringBuilder, expr: ArrayASTNode): StringBuilder {
         let typeSize: number = this.getTypeSize(expr.expressionType.type);
         let sizeName: string = this.getNasmSize(typeSize);
-        let moveAmt: number = 0;
+        let moveAmt: number = expr.arraySize % this.platformController.wordSize;
+        moveAmt = this.platformController.wordSize - moveAmt;
+        if (moveAmt > 0) {
+            sb.appendLine(`sub ${this.sp}, ${moveAmt} ; stack should be 8-byte aligned`);
+        }
         for (let i = expr.arraySize - 1; i >= 0; i--) {
             let value: number = 0;
             if (expr.array.value) {
                 let strValue: string = expr.array.value[i];
                 if (Number.isNaN(parseInt(strValue))) value = strValue.charCodeAt(0);
             }
-            moveAmt += typeSize;
             sb.appendLine(`sub ${this.sp}, ${typeSize}`);
-            sb.appendLine(`mov [${this.sp}], ${sizeName} 0x${value.toString(16)}`
+            sb.appendLine(`mov ${sizeName} [${this.sp}], 0x${value.toString(16)}`
              + ` ; assignment of array[${i}], val is ${value} (${String.fromCharCode(value)})`);
         }
-        moveAmt %= this.platformController.wordSize;
-        if (moveAmt > 0) {
-            sb.appendLine(`sub ${this.sp}, ${moveAmt} ; stack should be 8-byte aligned`);
-        }
 
-        this.stackOffset += this.platformController.wordSize * expr.arraySize;
+        this.stackOffset += (typeSize * expr.arraySize) + moveAmt;
 
         return sb;
     }
@@ -346,6 +347,18 @@ export class AssemblyGenerator {
                 sb.appendLine(`mov ${this.ax}, 0`);
                 sb.appendLine("setz al");
                 break;
+            case OperationType.Reference:
+                if (!(op.childNodes[0] instanceof VariableASTNode)) {
+                    throw new Error("Can only reference a variable name");
+                }
+                sb = this.generateReference(sb, op.childNodes[0] as VariableASTNode);
+                break;
+            case OperationType.Dereference:
+                if (!op.childNodes[0].expressionType.isPtr) {
+                    throw new Error("Can only dereference a pointer");
+                }
+                sb = this.generateExpression(sb, op.childNodes[0]);
+                sb.appendLine(`mov ${this.ax}, [${this.ax}]`);
         }
 
         if (this.diadicOps.includes(op.operation)) {
@@ -460,29 +473,35 @@ export class AssemblyGenerator {
         return sb;
     }
 
-    private static generateReference(sb: StringBuilder, expr: VariableASTNode): StringBuilder {
+    private static generateAddress(sb: StringBuilder, expr: VariableASTNode): StringBuilder {
         let offset = this.stackMap.Get(expr.declaration.variableName);
-        if (expr.arrayIndex !== null && expr.arrayIndex !== undefined) {
-            sb = this.generateExpression(sb, expr.arrayIndex);
-            let typeSize = this.getTypeSize(expr.declaration.variableType.type);
-            sb.appendLine(`mov ${this.bx}, ${typeSize}d`);
-            sb.appendLine(`mul ${this.bx} ; multiply index by wordSize`);
-            sb.appendLine(`mov ${this.cx}, ${this.ax}`);
+        if (expr.isArray) {
+            let typeSize = this.platformController.wordSize;
+            if (expr.arrayIndex !== null && expr.arrayIndex !== undefined) {
+                sb = this.generateExpression(sb, expr.arrayIndex);
+                typeSize = this.getTypeSize(expr.declaration.variableType.type);
+                sb.appendLine(`mov ${this.bx}, ${typeSize}d`);
+                sb.appendLine(`mul ${this.bx} ; multiply index by typeSize`);
+                sb.appendLine(`mov ${this.cx}, ${this.ax}`);
+            }
             sb.appendLine(`mov ${this.ax}, ${this.bp} ; start at base of stack`);
             sb.appendLine(`sub ${this.ax}, ${offset} ; move to start of array`);
-            sb.appendLine(`add ${this.ax}, ${this.cx} ; move to correct index`);
-            sb.appendLine(`mov ${this.ax}, [${this.ax}]`
-                + ` ; reference to ${expr.declaration.variableName}[]`);
-        } else if (expr.isArray) {
-            sb.appendLine(`mov ${this.bx}, ${this.platformController.wordSize}d`);
-            sb.appendLine(`mul ${this.bx} ; multiply index by wordSize`);
-            sb.appendLine(`mov ${this.ax}, ${this.bp} ; start at base of stack`);
-            sb.appendLine(`sub ${this.ax}, ${offset} ; move to start of array`);
-            sb.appendLine(`\t\t` + ` ; reference to ${expr.declaration.variableName}`);
+            if (expr.arrayIndex !== null && expr.arrayIndex !== undefined) {
+                sb.appendLine(`add ${this.ax}, ${this.cx} ; move to correct index`);
+                sb.appendLine(`\t\t` + ` ; reference to ${expr.declaration.variableName}`);
+            }
         } else {
-            let stackPos = `[${this.bp}${offset >= 0 ? "-" : "+"}${Math.abs(offset)}]`;
-            sb.appendLine(`mov ${this.ax}, ${stackPos} ; reference to ${expr.declaration.variableName}`);
+            sb.appendLine(`mov ${this.ax}, ${this.bp}`);
+            let op: string = offset >= 0 ? "sub" : "add";
+            sb.appendLine(`${op} ${this.ax}, ${Math.abs(offset)} ; reference to ${expr.declaration.variableName}`);
         }
+
+        return sb;
+    }
+
+    private static generateReference(sb: StringBuilder, expr: VariableASTNode): StringBuilder {
+        sb = this.generateAddress(sb, expr);
+        sb.appendLine(`mov ${this.ax}, [${this.ax}]`);
         return sb;
     }
 
@@ -490,7 +509,7 @@ export class AssemblyGenerator {
         switch (type) {
             case ValueType.bool: return 1;
             case ValueType.char: return 1;
-            case ValueType.int: return 8;
+            default: return this.platformController.wordSize;
         }
     }
 
