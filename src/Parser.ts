@@ -427,7 +427,7 @@ export class Parser {
                 case TokenType.Char: return new ConstantASTNode(next.tokenValue.charCodeAt(0), ValueType.char);
                 case TokenType.String:
                     return new ArrayASTNode(
-                        new ArrayValue(ValueType.char, next.tokenValue.length, next.tokenValue)
+                        new ArrayValue(ValueType.char, next.tokenValue.length, next.tokenValue + String.fromCharCode(0))
                     );
                 case TokenType.Identifier:
                     if (tokens.length && tokens[0].tokenType === TokenType.OpenParen) {
