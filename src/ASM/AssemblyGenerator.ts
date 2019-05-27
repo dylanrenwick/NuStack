@@ -4,7 +4,7 @@ import { AssemblyMacroASTNode } from "../AST/AssemblyMacroASTNode";
 import { AssignmentASTNode } from "../AST/AssignmentASTNode";
 import { ConstantASTNode } from "../AST/ConstantASTNode";
 import { DeclarationASTNode } from "../AST/DeclarationASTNode";
-import { ExpressionASTNode } from "../AST/ExpressionASTNode";
+import { ExpressionASTNode, ValueType } from "../AST/ExpressionASTNode";
 import { FunctionASTNode } from "../AST/FunctionASTNode";
 import { FunctionCallASTNode } from "../AST/FunctionCallASTNode";
 import { IfASTNode } from "../AST/IfASTNode";
@@ -300,12 +300,23 @@ export class AssemblyGenerator {
     }
 
     private static generateArray(sb: StringBuilder, expr: ArrayASTNode): StringBuilder {
+        let typeSize: number = this.getTypeSize(expr.expressionType.type);
+        let sizeName: string = this.getNasmSize(typeSize);
+        let moveAmt: number = 0;
         for (let i = expr.arraySize - 1; i >= 0; i--) {
-            let value: string = "0";
-            if (expr.array.value) value = expr.array.value[i];
-            if (Number.isNaN(parseInt(value))) value = value.charCodeAt(0).toString();
-            sb.appendLine(`mov ${this.ax}, ${value}d`);
-            sb.appendLine(`push ${this.ax} ; assignment of array[${i}]`);
+            let value: number = 0;
+            if (expr.array.value) {
+                let strValue: string = expr.array.value[i];
+                if (Number.isNaN(parseInt(strValue))) value = strValue.charCodeAt(0);
+            }
+            moveAmt += typeSize;
+            sb.appendLine(`sub ${this.sp}, ${typeSize}`);
+            sb.appendLine(`mov [${this.sp}], ${sizeName} 0x${value.toString(16)}`
+             + ` ; assignment of array[${i}], val is ${value} (${String.fromCharCode(value)})`);
+        }
+        moveAmt %= this.platformController.wordSize;
+        if (moveAmt > 0) {
+            sb.appendLine(`sub ${this.sp}, ${moveAmt} ; stack should be 8-byte aligned`);
         }
 
         this.stackOffset += this.platformController.wordSize * expr.arraySize;
@@ -432,8 +443,9 @@ export class AssemblyGenerator {
         let offset = this.stackMap.Get(expr.declaration.variableName);
         if (expr.declaration.isArray) {
             sb = this.generateExpression(sb, (expr.childNodes[0] as VariableASTNode).arrayIndex);
-            sb.appendLine(`mov ${this.bx}, ${this.platformController.wordSize}d`);
-            sb.appendLine(`mul ${this.bx} ; multiply index by wordSize`);
+            let typeSize = this.getTypeSize(expr.declaration.variableType.type);
+            sb.appendLine(`mov ${this.bx}, ${typeSize}d`);
+            sb.appendLine(`mul ${this.bx} ; multiply index by typeSize`);
             sb.appendLine(`mov ${this.cx}, ${this.bp} ; start at base of stack`);
             sb.appendLine(`sub ${this.cx}, ${offset} ; move to start of array`);
             sb.appendLine(`add ${this.cx}, ${this.ax} ; move to correct index`);
@@ -449,9 +461,10 @@ export class AssemblyGenerator {
 
     private static generateReference(sb: StringBuilder, expr: VariableASTNode): StringBuilder {
         let offset = this.stackMap.Get(expr.declaration.variableName);
-        if (expr.isArray) {
+        if (expr.arrayIndex !== null && expr.arrayIndex !== undefined) {
             sb = this.generateExpression(sb, expr.arrayIndex);
-            sb.appendLine(`mov ${this.bx}, ${this.platformController.wordSize}d`);
+            let typeSize = this.getTypeSize(expr.declaration.variableType.type);
+            sb.appendLine(`mov ${this.bx}, ${typeSize}d`);
             sb.appendLine(`mul ${this.bx} ; multiply index by wordSize`);
             sb.appendLine(`mov ${this.cx}, ${this.ax}`);
             sb.appendLine(`mov ${this.ax}, ${this.bp} ; start at base of stack`);
@@ -459,10 +472,34 @@ export class AssemblyGenerator {
             sb.appendLine(`add ${this.ax}, ${this.cx} ; move to correct index`);
             sb.appendLine(`mov ${this.ax}, [${this.ax}]`
                 + ` ; reference to ${expr.declaration.variableName}[]`);
+        } else if (expr.isArray) {
+            sb.appendLine(`mov ${this.bx}, ${this.platformController.wordSize}d`);
+            sb.appendLine(`mul ${this.bx} ; multiply index by wordSize`);
+            sb.appendLine(`mov ${this.ax}, ${this.bp} ; start at base of stack`);
+            sb.appendLine(`sub ${this.ax}, ${offset} ; move to start of array`);
+            sb.appendLine(`\t\t` + ` ; reference to ${expr.declaration.variableName}`);
         } else {
             let stackPos = `[${this.bp}${offset >= 0 ? "-" : "+"}${Math.abs(offset)}]`;
             sb.appendLine(`mov ${this.ax}, ${stackPos} ; reference to ${expr.declaration.variableName}`);
         }
         return sb;
+    }
+
+    private static getTypeSize(type: ValueType): number {
+        switch (type) {
+            case ValueType.bool: return 1;
+            case ValueType.char: return 1;
+            case ValueType.int: return 8;
+        }
+    }
+
+    private static getNasmSize(size: number, short: boolean = false): string {
+        switch (size) {
+            case 1: return short ? "db" : "byte";
+            case 2: return short ? "dw" : "word";
+            case 4: return short ? "dd" : "dword";
+            case 8: return short ? "qd" : "qword";
+            default: return "";
+        }
     }
 }
