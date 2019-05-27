@@ -86,7 +86,7 @@ export class AssemblyGenerator {
         sb.appendLine("");
         sb.appendLine("_start:");
         sb.indent++;
-        sb.appendLine("call __func_main");
+        sb.appendLine("call main");
         sb = this.platformController.makeExit(sb, this.ax);
         sb.appendLine("");
 
@@ -98,8 +98,8 @@ export class AssemblyGenerator {
     }
 
     private static generateFunction(sb: StringBuilder, func: FunctionASTNode): StringBuilder {
-        this.funcMapping.Add(func.name, "__func_" + func.name);
-        sb = this.generateLabel(sb, "__func_" + func.name);
+        this.funcMapping.Add(func.name, func.name);
+        sb = this.generateLabel(sb, func.name);
         sb = this.platformController.makeStackFrame(sb);
 
         this.stackMap = new HashMap<string, number>();
@@ -187,7 +187,7 @@ export class AssemblyGenerator {
             sb = this.generateExpression(sb, call.arguments[i]);
             sb.appendLine("push " + this.ax);
         }
-        sb.appendLine("call __func_" + call.functionName);
+        sb.appendLine("call call.functionName);
 
         return sb;
     }
