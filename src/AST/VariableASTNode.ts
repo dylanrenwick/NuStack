@@ -23,7 +23,7 @@ export class VariableASTNode extends ExpressionASTNode {
     }
 
     public toString(sb: StringBuilder): StringBuilder {
-        if (this.isArray) {
+        if (this.index !== null && this.index !== undefined) {
             sb.startBlock("Variable: '" + `${this.dec.variableName}' [${this.dec.variableType}]`);
             sb = this.index.toString(sb);
             sb.endBlock();
