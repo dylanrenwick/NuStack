@@ -61,6 +61,5 @@ export abstract class ExpressionASTNode extends StatementASTNode {
 export enum ValueType {
     int,
     bool,
-    string,
     char
 }
