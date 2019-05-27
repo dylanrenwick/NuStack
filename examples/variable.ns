@@ -1,4 +1,4 @@
-int main() {
-    int a = 4;
+main(): int{
+    a: int = 4;
     return a * 2;
 }

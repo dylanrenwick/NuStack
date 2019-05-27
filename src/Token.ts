@@ -41,6 +41,7 @@ export class Token  {
             case TokenType.OpenBrack: return "[";
             case TokenType.CloseBrack: return "]";
             case TokenType.Semicolon: return ";";
+            case TokenType.Colon: return ":";
             case TokenType.Comma: return ",";
             case TokenType.Negation: return "-";
             case TokenType.BitwiseNOT: return "~";
@@ -76,6 +77,7 @@ export enum TokenType {
     OpenBrack,
     CloseBrack,
     Semicolon,
+    Colon,
     Comma,
     Integer,
     Char,

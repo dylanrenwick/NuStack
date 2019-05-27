@@ -1,4 +1,4 @@
-int main() {
-    char a = 'A';
+main(): int{
+    a: char = 'A';
     return a;
 }

@@ -90,9 +90,6 @@ export class Parser {
         if (tokens.length === 0) return null;
 
         let end = start + 1;
-        let type = this.parseType(tokens);
-
-        end++;
         let name = this.parseToken(tokens, TokenType.Identifier);
 
         end++;
@@ -104,20 +101,25 @@ export class Parser {
                 this.parseToken(tokens, TokenType.Comma);
                 end++;
             }
-            let argType = this.parseType(tokens);
-
             let argName = this.parseToken(tokens, TokenType.Identifier);
+            this.parseToken(tokens, TokenType.Colon);
+
+            let argType = this.parseType(tokens);
 
             funcArgs.push({
                 name: argName.tokenValue,
                 type: argType
             });
 
-            end += 2;
+            end += 3;
         }
 
         end++;
         this.parseToken(tokens, TokenType.CloseParen);
+        end++;
+        this.parseToken(tokens, TokenType.Colon);
+        end++;
+        let type = this.parseType(tokens);
 
         end++;
         this.parseToken(tokens, TokenType.OpenBrace);
@@ -143,8 +145,6 @@ export class Parser {
     }
 
     private static parseFunction(tokens: Token[]): FunctionASTNode {
-        let returnType: ITypeDef = this.parseType(tokens);
-
         let subNameTok: Token = this.parseToken(tokens, TokenType.Identifier);
 
         this.parseToken(tokens, TokenType.OpenParen);
@@ -154,16 +154,20 @@ export class Parser {
             if (funcArgs.length > 0) {
                 this.parseToken(tokens, TokenType.Comma);
             }
-            let argType = this.parseType(tokens);
-
             let argName = this.parseToken(tokens, TokenType.Identifier);
+            this.parseToken(tokens, TokenType.Colon);
+
+            let argType = this.parseType(tokens);
 
             let dec: Declaration = new Declaration(argName.tokenValue, argType);
             funcArgs.push(dec);
             this.variables.Add(argName.tokenValue, dec);
         }
 
-        let closeParenTok: Token = this.parseToken(tokens, TokenType.CloseParen);
+        this.parseToken(tokens, TokenType.CloseParen);
+        this.parseToken(tokens, TokenType.Colon);
+
+        let returnType: ITypeDef = this.parseType(tokens);
 
         let statements: StatementASTNode[] = this.parseBlock(tokens, true);
 
@@ -202,6 +206,7 @@ export class Parser {
         let tok: Token = this.parseToken(tokens,
             x => (x.tokenType === TokenType.Keyword
                 || x.tokenType === TokenType.Identifier
+                || x.tokenType === TokenType.Sigil
                 || x.tokenType === TokenType.Macro),
             "statement"
         );
@@ -231,15 +236,17 @@ export class Parser {
                 case "continue":
                     statement = new KeywordASTNode(KeywordType.continue);
                     break;
-                default:
-                    statement = this.parseDeclaration(tokens, tok);
             }
         } else if (tok.tokenType === TokenType.Identifier) {
-            if (tokens[0].tokenType === TokenType.Assignment || tokens[0].tokenType === TokenType.OpenBrack) {
+            if (tokens[0].tokenType === TokenType.Colon) {
+                statement = this.parseDeclaration(tokens, tok);
+            } else if (tokens[0].tokenType === TokenType.Assignment || tokens[0].tokenType === TokenType.OpenBrack) {
                 statement = this.parseAssignment(tokens, tok);
             } else if (tokens[0].tokenType === TokenType.OpenParen) {
                 statement = this.parseFuncCall(tokens, tok);
             }
+        } else if (tok.tokenType === TokenType.Sigil) {
+            statement = this.parseDeclaration(tokens, tok);
         } else if (tok.tokenType === TokenType.Macro) {
             statement = this.parseMacro(tokens);
             needSemicolon = false;
@@ -262,7 +269,6 @@ export class Parser {
 
     private static parseDeclaration(tokens: Token[], tok: Token): DeclarationASTNode {
         tokens.unshift(tok);
-        let type: ITypeDef = this.parseType(tokens);
         let name: string = null;
         let sigils: string[] = [];
         while (name === null) {
@@ -270,15 +276,17 @@ export class Parser {
                 t.tokenType === TokenType.Identifier || t.tokenType === TokenType.Sigil
             );
             if (tok.tokenType === TokenType.Sigil) {
-                switch (tok.tokenValue) {
-                    case "@":
-                        type.isPtr = true;
-                }
                 sigils.push(tok.tokenValue);
             } else {
                 name = sigils.join("") + tok.tokenValue;
             }
         }
+
+        this.parseToken(tokens, TokenType.Colon);
+        let type: ITypeDef = this.parseType(tokens);
+
+        if (sigils.includes("@")) type.isPtr = true;
+
         let declaration = new Declaration(name, type);
         this.variables.Add(name, declaration);
 

@@ -1,4 +1,4 @@
-int putchar(char c) {
+putchar(c: char): int {
     #asm "mov %si, %bp"
     #asm "mov %cx, >-c"
     #asm "add %si, %cx"
@@ -9,10 +9,10 @@ int putchar(char c) {
     return c;
 }
 
-int main() {
-    int len = 13;
-    char[] str = "Hello, World!";
-    int i = 0;
+main(): int{
+    len: int = 13;
+    str: char[] = "Hello, World!";
+    i: int = 0;
     while (i < len) {
         putchar(str[i]);
         i = i + 1;

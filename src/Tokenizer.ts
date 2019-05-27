@@ -7,7 +7,7 @@ export class Tokenizer {
         "reg"
     ];
     private static readonly singletons: string[] = [
-        "(", ")", "{", "}", "[", "]", ";", ",", "#"
+        "(", ")", "{", "}", "[", "]", ";", ":", ",", "#"
     ];
     private static readonly separators: string[] = [
         " ", "\t", "\n", "\r",
@@ -161,6 +161,7 @@ export class Tokenizer {
             case "[": return new Token(col, line, TokenType.OpenBrack);
             case "]": return new Token(col, line, TokenType.CloseBrack);
             case ";": return new Token(col, line, TokenType.Semicolon);
+            case ":": return new Token(col, line, TokenType.Colon);
             case ",": return new Token(col, line, TokenType.Comma);
             case "-": return new Token(col, line, TokenType.Negation);
             case "~": return new Token(col, line, TokenType.BitwiseNOT);
