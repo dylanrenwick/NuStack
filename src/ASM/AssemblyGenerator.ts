@@ -11,6 +11,7 @@ import { IfASTNode } from "../AST/IfASTNode";
 import { KeywordASTNode, KeywordType } from "../AST/KeywordASTNode";
 import { LoopASTNode } from "../AST/LoopASTNode";
 import { OperationASTNode, OperationType } from "../AST/OperationASTNode";
+import { RegASTNode } from "../AST/RegASTNode";
 import { ReturnStatementASTNode } from "../AST/ReturnStatementASTNode";
 import { StatementASTNode } from "../AST/StatementASTNode";
 import { VariableASTNode } from "../AST/VariableASTNode";
@@ -18,7 +19,6 @@ import { Declaration } from "../Declaration";
 import { HashMap } from "../HashMap";
 import { StringBuilder } from "../StringBuilder";
 import { PlatformController } from "./PlatformController";
-import { RegASTNode } from "../AST/RegASTNode";
 
 export class AssemblyGenerator {
     private static complexOps: OperationType[] = [
@@ -62,16 +62,16 @@ export class AssemblyGenerator {
 
     private static get registers(): { [key: string]: string } {
         return {
-            'ax': this.ax,
-            'bx': this.bx,
-            'cx': this.cx,
-            'dx': this.dx,
+            ax: this.ax,
+            bx: this.bx,
+            cx: this.cx,
+            dx: this.dx,
 
-            'bp': this.bp,
-            'sp': this.sp,
+            bp: this.bp,
+            sp: this.sp,
 
-            'si': this.si,
-            'di': this.di
+            si: this.si,
+            di: this.di
         };
     }
 
