@@ -3,7 +3,7 @@ import { Token, TokenType } from "../src/Token";
 
 function forTokenTypes(callback: (type: TokenType) => void, exceptValueTypes: boolean = false) {
     let valueTypes = [
-        TokenType.Keyword, TokenType.Identifier, TokenType.Integer, TokenType.String, TokenType.Char
+        TokenType.Keyword, TokenType.Identifier, TokenType.Sigil, TokenType.Integer, TokenType.String, TokenType.Char
     ];
 
     for (let type in TokenType) {
