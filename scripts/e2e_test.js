@@ -14,6 +14,12 @@ let errs = "";
 
 let result = 0;
 
+const colors = {
+    red: "\u001b[31m",
+    green: "\u001b[32m",
+    reset: "\u001b[0m"
+};
+
 console.log(tests.length + " tests to run");
 
 for (let test of tests) {
@@ -31,7 +37,7 @@ for (let test of tests) {
         + " && ld -e main -o examples/" + testName + " examples/" + testName + ".o",
     (err, stdout, stderr) => {
         if (err) {
-            output += ("\t - COMPILE FAIL") + "\n";
+            output += (`\t - ${colors.red}COMPILE FAIL${colors.reset}`) + "\n";
             errs += stdout + "\n";
             errs += stderr + "\n";
             result = 1;
@@ -44,12 +50,12 @@ for (let test of tests) {
                 if (err) outCode = err.code;
     
                 if (outCode !== expected) {
-                    output += ("\t - FAIL: Expected " + expected + " but got " + outCode) + "\n";
+                    output += (`\t - ${colors.red}FAIL${colors.reset}: Expected ${expected} but got ${outCode}`) + "\n";
                     errs += stdout + "\n";
                     errs += stderr + "\n";
                     result = 1;
                 } else {
-                    output += ("\t - PASS: Expected " + expected + " and got " + outCode) + "\n";
+                    output += (`\t - ${colors.green}PASS${colors.reset}: Expected ${expected} and got ${outCode}`) + "\n";
                 }
 
                 finishedTests[testName] = true;
