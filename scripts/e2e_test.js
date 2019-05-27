@@ -22,10 +22,15 @@ const colors = {
 
 console.log(tests.length + " tests to run");
 
+String.prototype.rPad = (l) => this.padEnd(l, " ");
+
+const maxLen = tests.reduce((a, b) => Math.max(a.fileName, b.fileName));
+
 for (let test of tests) {
     let output = "";
     let testName = test.fileName;
     let expected = test.answer;
+    let expecOut = test.output;
 
     finishedTests[testName] = false;
 
@@ -48,14 +53,22 @@ for (let test of tests) {
             exec("./examples/" + testName, (err, stdout, stderr) => {
                 let outCode = 0;
                 if (err) outCode = err.code;
+
+                let pass = true;
+                if (expected !== undefined) pass = pass && outCode === expected;
+                if (expecOut !== undefined) pass = pass && stdout.includes(expecOut);
     
-                if (outCode !== expected) {
-                    output += (`\t - ${colors.red}FAIL${colors.reset}: Expected ${expected} but got ${outCode}`) + "\n";
+                if (!pass) {
+                    output += (`\t - ${colors.red}FAIL${colors.reset}:`) + "\n";
+                    if (expected !== undefined) output += (`\t    - Expected ${expected} but got ${outCode}`) + "\n";
+                    if (expecOut !== undefined) output += (`\t    - Expected '${expecOut}' but got '${stdout}'`) + "\n"
                     errs += stdout + "\n";
                     errs += stderr + "\n";
                     result = 1;
                 } else {
-                    output += (`\t - ${colors.green}PASS${colors.reset}: Expected ${expected} and got ${outCode}`) + "\n";
+                    output += (`\t - ${colors.green}PASS${colors.reset}:`) + "\n";
+                    if (expected !== undefined) output += (`\t    - Expected ${expected} and got ${outCode}`) + "\n";
+                    if (expecOut !== undefined) output += (`\t    - Expected '${expecOut}' and got '${stdout}'`) + "\n"
                 }
 
                 finishedTests[testName] = true;

@@ -73,7 +73,8 @@
     },
     {
         "fileName": "putchar",
-        "answer": 65
+        "answer": 65,
+        "output": "A"
     },
     {
         "fileName": "array",
