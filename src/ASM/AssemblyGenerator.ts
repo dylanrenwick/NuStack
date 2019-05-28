@@ -95,7 +95,9 @@ export class AssemblyGenerator {
             sb.indent++;
             sb.appendLine("call main");
             sb = this.platformController.makeExit(sb, this.ax);
+            sb.indent--;
         }
+        sb.indent++;
         sb.appendLine("");
 
         for (let func of ast.root.childNodes) {
