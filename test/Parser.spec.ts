@@ -4,10 +4,9 @@ import { DiadicASTNode } from "../src/AST/DiadicASTNode";
 import { ExpressionASTNode } from "../src/AST/ExpressionASTNode";
 import { MonadicASTNode } from "../src/AST/MonadicASTNode";
 import { OperationType } from "../src/AST/OperationASTNode";
+import { ReturnStatementASTNode } from "../src/AST/ReturnStatementASTNode";
 import { Parser } from "../src/Parser";
 import { Token, TokenType } from "../src/Token";
-import { StatementASTNode } from "../src/AST/StatementASTNode";
-import { ReturnStatementASTNode } from "../src/AST/ReturnStatementASTNode";
 
 function parenWrap(toks: Token[]): Token[] {
     return [new Token(1, 1, TokenType.OpenParen)]
