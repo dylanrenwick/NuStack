@@ -87,7 +87,6 @@ export class Parser {
                 this.externalFunctions.push(func);
                 continue;
             }
-            console.log(tokens.slice(func.tokenStart, func.tokenEnd).toString());
             funcs.push(this.parseFunction(tokens.slice(func.tokenStart, func.tokenEnd)));
         }
 
