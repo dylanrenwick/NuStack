@@ -30,6 +30,7 @@ export interface IFootprint {
     args: IArg[];
     tokenStart: number;
     tokenEnd: number;
+    isPrototype: boolean;
 }
 
 interface IArg {
@@ -49,6 +50,7 @@ export class Parser {
 
     private static variables: HashMap<string, Declaration> = new HashMap<string, Declaration>();
     private static functions: HashMap<string, IFootprint> = new HashMap<string, IFootprint>();
+    private static externalFunctions: IFootprint[] = [];
 
     private static exprOperators: TokenType[][] = [
         [TokenType.LogicalOR], [TokenType.LogicalAND],
@@ -61,9 +63,11 @@ export class Parser {
     ];
 
     public static parse(tokens: Token[]): AbstractSyntaxTree {
+        let funcs: FunctionASTNode[] = this.parseAllFunctions(tokens);
+
         return new AbstractSyntaxTree(
             new ProgramASTNode(
-                this.parseAllFunctions(tokens)
+                funcs, this.externalFunctions
             )
         );
     }
@@ -79,6 +83,10 @@ export class Parser {
 
         let funcs: FunctionASTNode[] = [];
         for (let func of this.functions.GetValues()) {
+            if (func.isPrototype) {
+                this.externalFunctions.push(func);
+                continue;
+            }
             console.log(tokens.slice(func.tokenStart, func.tokenEnd).toString());
             funcs.push(this.parseFunction(tokens.slice(func.tokenStart, func.tokenEnd)));
         }
@@ -122,17 +130,23 @@ export class Parser {
         let type = this.parseType(tokens);
 
         end++;
-        this.parseToken(tokens, TokenType.OpenBrace);
-
-        let level: number = 1;
-        while (level) {
-            let tok: Token = tokens.shift();
-            if (tok.tokenType === TokenType.OpenBrace) {
-                level++;
-            } else if (tok.tokenType === TokenType.CloseBrace) {
-                level--;
+        let isProto: boolean = false;
+        let tok: Token = this.parseToken(
+            tokens, t => t.tokenType === TokenType.OpenBrace || t.tokenType === TokenType.Semicolon
+        );
+        if (tok.tokenType === TokenType.OpenBrace) {
+            let level: number = 1;
+            while (level) {
+                tok = tokens.shift();
+                if (tok.tokenType === TokenType.OpenBrace) {
+                    level++;
+                } else if (tok.tokenType === TokenType.CloseBrace) {
+                    level--;
+                }
+                end++;
             }
-            end++;
+        } else if (tok.tokenType === TokenType.Semicolon) {
+            isProto = true;
         }
 
         return {
@@ -140,6 +154,7 @@ export class Parser {
             name: name.tokenValue,
             tokenEnd: end,
             tokenStart: start,
+            isPrototype: isProto,
             type
         };
     }

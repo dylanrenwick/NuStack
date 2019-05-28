@@ -82,15 +82,20 @@ export class AssemblyGenerator {
         let sb: StringBuilder = new StringBuilder();
 
         sb.appendLine("section .text");
-        sb.appendLine("global _start");
         for (let func of ast.root.childNodes) {
             sb.appendLine("global " + func.name);
         }
-        sb.appendLine("");
-        sb.appendLine("_start:");
-        sb.indent++;
-        sb.appendLine("call main");
-        sb = this.platformController.makeExit(sb, this.ax);
+        for (let func of ast.root.importFuncs) {
+            sb.appendLine("extern " + func.name);
+        }
+        if (ast.root.mainFunc !== undefined) {
+            sb.appendLine("global _start");
+            sb.appendLine("");
+            sb.appendLine("_start:");
+            sb.indent++;
+            sb.appendLine("call main");
+            sb = this.platformController.makeExit(sb, this.ax);
+        }
         sb.appendLine("");
 
         for (let func of ast.root.childNodes) {
