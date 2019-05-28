@@ -1,0 +1,9 @@
+main(): int {
+    f: int = 5;
+    r: int = f;
+    while(f > 1) {
+        f = f - 1;
+        r = r * f;
+    }
+    return r;
+}
