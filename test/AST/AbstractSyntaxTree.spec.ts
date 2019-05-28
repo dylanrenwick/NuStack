@@ -6,7 +6,7 @@ import { ProgramASTNode } from "../../src/AST/ProgramASTNode";
 describe("AbstractSyntaxTree:", () => {
     describe("AbstractSyntaxTree.constructor()", () => {
         it("should correctly assign the root node", () => {
-            let rootNode = new ProgramASTNode([new FunctionASTNode("main", "int", [])]);
+            let rootNode = new ProgramASTNode([new FunctionASTNode("main", "int", [])], []);
 
             expect(new AbstractSyntaxTree(rootNode).root).to.equal(rootNode);
         });
