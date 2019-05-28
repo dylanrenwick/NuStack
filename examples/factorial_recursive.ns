@@ -1,0 +1,9 @@
+main(): int {
+    return factorial(5);
+}
+
+factorial(n: int): int {
+    if(n > 1)
+        return (n + 1) * factorial(n);
+    return 1;
+}
