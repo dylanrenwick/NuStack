@@ -99,5 +99,9 @@
     {
         "fileName": "factorial",
         "answer": 120
+    },
+    {
+        "fileName": "comment",
+        "answer": 3
     }
 ]

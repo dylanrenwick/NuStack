@@ -34,17 +34,26 @@ export class Tokenizer {
         let isChar = false;
         let newline = false;
 
-        for (let char of code) {
+        let lineComment = false;
+
+        for (let i = 0; i < code.length; i++) {
+            let char = code[i];
             if (newline) {
                 col = 1;
                 line++;
                 newline = false;
+                if (lineComment) {
+                    curToken = "";
+                    lineComment = false;
+                }
             }
             if (char === "\n") {
                 newline = true;
             }
 
             col++;
+            if (char + code[i + 1] === "//") lineComment = true;
+            if (lineComment) continue;
 
             if (str) {
                 if (char === "\"" && !/\\$/.test(curToken.replace(/\\\\/g, ""))) {
