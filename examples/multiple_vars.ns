@@ -1,5 +1,0 @@
-main(): int{
-    a: int = 4;
-    b: int = 5;
-    return a + b;
-}

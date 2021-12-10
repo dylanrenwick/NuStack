@@ -1,5 +1,0 @@
-main(): int {
-	a: int = 3;
-	// This is a comment
-	return a;
-}

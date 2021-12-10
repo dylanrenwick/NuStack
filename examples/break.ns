@@ -1,8 +1,0 @@
-main(): int{
-    a: int = 1;
-    while (a < 25) {
-        if (a >= 10) break;
-        a = a + 1;
-    }
-    return a;
-}

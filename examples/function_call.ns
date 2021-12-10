@@ -1,7 +1,0 @@
-main(): int{
-    return myFunc(2);
-}
-
-myFunc(a: int): int {
-    return a + 1;
-}

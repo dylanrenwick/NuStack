@@ -1,4 +1,0 @@
-main(): int{
-    #asm "mov %ax, 7"
-    return reg "ax";
-}

@@ -1,9 +1,4 @@
-node_modules/
-bin/
-build/
-*.code-workspace
-.nyc_output/
-coverage/
-examples/*
-!examples/*.ns
-!examples/*.json
+**/obj
+**/bin
+.vs
+

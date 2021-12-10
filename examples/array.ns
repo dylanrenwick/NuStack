@@ -1,4 +1,0 @@
-main(): int{
-    a: int[] = int[3];
-    return a[1];
-}

@@ -1,6 +1,0 @@
-main(): int{
-    a: int = 0;
-    #asm "mov %ax, 3d"
-    #asm "mov -<a, %ax"
-    return a;
-}

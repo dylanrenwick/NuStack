@@ -1,4 +1,0 @@
-main(): int{
-    a: string = "Hello, World!";
-    return a[4];
-}
