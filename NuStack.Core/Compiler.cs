@@ -8,7 +8,7 @@ namespace NuStack.Core
         {
             var tokenizer = new Tokenizer();
 
-            Token[] tokens = tokenizer.Tokenize(sourceCode);
+            IEnumerable<Token> tokens = tokenizer.Tokenize(sourceCode);
 
             return string.Join(' ', tokens.Select(token => token.ToString()));
         }
