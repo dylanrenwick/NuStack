@@ -96,7 +96,7 @@ namespace NuStack.Core.Tokens
                 {
                     token = new Token(
                         currentLine, currentColumn, startPosition,
-                        staticTokens[possibleStaticToken]
+                        staticTokens[possibleStaticToken], possibleStaticToken
                     );
                     return true;
                 }
