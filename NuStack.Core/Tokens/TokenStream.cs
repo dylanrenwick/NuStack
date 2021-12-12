@@ -24,6 +24,11 @@ namespace NuStack.Core.Tokens
             current = -1;
         }
 
+        public List<Token> ToList()
+        {
+            return tokens;
+        }
+
         public TokenStream Each(Func<Token, bool> pred)
         {
             predicate = pred;
