@@ -25,7 +25,7 @@ namespace NuStack.CoreTest.Tokens
         {
             new object[] { "(", new Token(1, 0, 0, TokenType.OpenParen) },
             new object[] { ";", new Token(1, 0, 0, TokenType.Semicolon) },
-            new object[] { "->", new Token(1, 0, 0, TokenType.ReturnArrow) },
+            new object[] { "->", new Token(1, 0, 0, TokenType.ReturnArrow, "->") },
             new object[] { "int", new Token(1, 0, 0, TokenType.Keyword, "int") },
             new object[] { "main", new Token(1, 0, 0, TokenType.Identifier, "main") },
             new object[] { "43", new Token(1, 0, 0, TokenType.Integer, "43") },
@@ -116,7 +116,7 @@ namespace NuStack.CoreTest.Tokens
             TokenType type
         )
         {
-            var token = new Token(1, 0, 0, type);
+            var token = new Token(1, 0, 0, type, staticToken);
 
             IEnumerable<Token> tokens = tokenizer.Tokenize(staticToken);
             Assert.Equal(token, Assert.Single(tokens));
@@ -141,19 +141,20 @@ namespace NuStack.CoreTest.Tokens
 
         public static IEnumerable<object[]> FullProgram_Data => new List<object[]>
         {
-            new object[] { "fn int main() { return 0; }",
+            new object[] { "fn main() -> int { return 0; }",
                 new List<Token>
                 {
                     new Token(1, 0, 0, TokenType.Keyword, "fn"),
-                    new Token(1, 3, 3, TokenType.Keyword, "int"),
-                    new Token(1, 7, 7, TokenType.Identifier, "main"),
-                    new Token(1, 11, 11, TokenType.OpenParen),
-                    new Token(1, 12, 12, TokenType.CloseParen),
-                    new Token(1, 14, 14, TokenType.OpenBrace),
-                    new Token(1, 16, 16, TokenType.Keyword, "return"),
-                    new Token(1, 23, 23, TokenType.Integer, "0"),
-                    new Token(1, 24, 24, TokenType.Semicolon),
-                    new Token(1, 26, 26, TokenType.CloseBrace)
+                    new Token(1, 3, 3, TokenType.Identifier, "main"),
+                    new Token(1, 7, 7, TokenType.OpenParen),
+                    new Token(1, 8, 8, TokenType.CloseParen),
+                    new Token(1, 10, 10, TokenType.ReturnArrow, "->"),
+                    new Token(1, 13, 13, TokenType.Keyword, "int"),
+                    new Token(1, 17, 17, TokenType.OpenBrace),
+                    new Token(1, 19, 19, TokenType.Keyword, "return"),
+                    new Token(1, 26, 26, TokenType.Integer, "0"),
+                    new Token(1, 27, 27, TokenType.Semicolon),
+                    new Token(1, 29, 29, TokenType.CloseBrace)
                 }
             }
         };
