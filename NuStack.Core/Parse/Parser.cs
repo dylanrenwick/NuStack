@@ -24,6 +24,8 @@ namespace NuStack.Core.Parse
             if (!nameResolver.TryResolve("main", out entryPoint))
                 throw new ParserException("Could not find entry point method with name 'main'");
 
+            var rootNode = new ModuleASTNode();
+
             parseFuncBody(entryPoint);
 
             return null;
