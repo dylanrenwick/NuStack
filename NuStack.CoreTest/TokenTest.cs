@@ -16,13 +16,7 @@ namespace NuStack.CoreTest
             bool expected
         )
         {
-            var token = new Token
-            {
-                Start = 0,
-                End = 1,
-                Value = value,
-                Type = type
-            };
+            var token = new Token(1, 0, 0, type, value);
 
             Assert.Equal(expected, token.HasValue);
         }
@@ -30,13 +24,7 @@ namespace NuStack.CoreTest
         [Fact]
         public void Equals_SameToken_ReturnsTrue()
         {
-            var token = new Token
-            {
-                Start = 0,
-                End = 1,
-                Value = "",
-                Type = TokenType.OpenParen,
-            };
+            var token = new Token(1, 0, 0, TokenType.OpenParen);
 
             Assert.True(token.Equals(token));
         }
@@ -44,28 +32,49 @@ namespace NuStack.CoreTest
         public static IEnumerable<object[]> CompareToken_Data => new List<object[]>
         {
             new object[] {
-                new Token { Start = 0, End = 3, Value = "int", Type = TokenType.Keyword },
-                new Token { Start = 0, End = 3, Value = "int", Type = TokenType.Keyword },
+                new Token(1, 0, 0, TokenType.Keyword, "int"),
+                new Token(1, 0, 0, TokenType.Keyword, "int"),
                 true
             },
             new object[] {
-                new Token { Start = 0, End = 3, Value = "int", Type = TokenType.Keyword },
-                new Token { Start = 1, End = 3, Value = "int", Type = TokenType.Keyword },
+                new Token(1, 0, 0, TokenType.Keyword, "int"),
+                new Token {
+                    Line = 1,
+                    Column = 0,
+                    Start = 1,
+                    End = 3,
+                    Type = TokenType.Keyword,
+                    Value = "int"
+                },
                 false
             },
             new object[] {
-                new Token { Start = 0, End = 3, Value = "int", Type = TokenType.Keyword },
-                new Token { Start = 0, End = 2, Value = "int", Type = TokenType.Keyword },
+                new Token(1, 0, 0, TokenType.Keyword, "int"),
+                new Token {
+                    Line = 1,
+                    Column = 0,
+                    Start = 0,
+                    End = 2,
+                    Type = TokenType.Keyword,
+                    Value = "int"
+                },
                 false
             },
             new object[] {
-                new Token { Start = 0, End = 3, Value = "int", Type = TokenType.Keyword },
-                new Token { Start = 0, End = 3, Value = "in", Type = TokenType.Keyword },
+                new Token(1, 0, 0, TokenType.Keyword, "int"),
+                new Token {
+                    Line = 1,
+                    Column = 0,
+                    Start = 0,
+                    End = 3,
+                    Type = TokenType.Keyword,
+                    Value = "in"
+                },
                 false
             },
             new object[] {
-                new Token { Start = 0, End = 3, Value = "int", Type = TokenType.Keyword },
-                new Token { Start = 0, End = 3, Value = "int", Type = TokenType.Identifier },
+                new Token(1, 0, 0, TokenType.Keyword, "int"),
+                new Token(1, 0, 0, TokenType.Identifier, "int"),
                 false
             },
         };
@@ -73,7 +82,7 @@ namespace NuStack.CoreTest
         [Fact]
         public void Equals_WithNonToken_ReturlsFalse()
         {
-            var token = new Token(0, TokenType.Keyword, "int");
+            var token = new Token(1, 0, 0, TokenType.Keyword, "int");
 
             Assert.False(token.Equals(null));
             Assert.False(token.Equals("not a token"));
@@ -96,12 +105,12 @@ namespace NuStack.CoreTest
         public static IEnumerable<object[]> NonValueTypesWithValues_Data => new List<object[]>
         {
             new object[] {
-                new Token { Start = 0, End = 1, Value = null, Type = TokenType.OpenParen },
-                new Token { Start = 0, End = 1, Value = "(", Type = TokenType.OpenParen },
+                new Token(1, 0, 0, TokenType.OpenParen),
+                new Token(1, 0, 0, TokenType.OpenParen, "("),
             },
             new object[] {
-                new Token { Start = 0, End = 1, Value = ")", Type = TokenType.CloseParen },
-                new Token { Start = 0, End = 1, Value = "(", Type = TokenType.CloseParen },
+                new Token(1, 0, 0, TokenType.CloseParen, "("),
+                new Token(1, 0, 0, TokenType.CloseParen, ")"),
             },
         };
 
@@ -115,26 +124,6 @@ namespace NuStack.CoreTest
             Assert.Equal(first, second);
         }
 
-        public static IEnumerable<object[]> SingletonToken_Data => new List<object[]>
-        {
-            new object[] {
-                '(',
-                new Token { Start = 0, End = 1, Value = "(", Type = TokenType.OpenParen },
-            },
-            new object[] {
-                ')',
-                new Token { Start = 0, End = 1, Value = ")", Type = TokenType.CloseParen },
-            },
-            new object[] {
-                '{',
-                new Token { Start = 0, End = 1, Value = "{", Type = TokenType.OpenBrace },
-            },
-            new object[] {
-                '}',
-                new Token { Start = 0, End = 1, Value = "}", Type = TokenType.CloseBrace },
-            },
-        };
-
         [Theory]
         [InlineData(TokenType.Identifier, "val")]
         [InlineData(TokenType.Keyword, "keywd")]
@@ -144,13 +133,7 @@ namespace NuStack.CoreTest
             string value
         )
         {
-            var token = new Token
-            {
-                Start = 0,
-                End = 1,
-                Value = value,
-                Type = type
-            };
+            var token = new Token(1, 0, 0, type, value);
 
             Assert.Equal(value, token.ToString());
         }
@@ -164,13 +147,7 @@ namespace NuStack.CoreTest
            string expected
         )
         {
-            var token = new Token
-            {
-                Start = 0,
-                End = 1,
-                Value = null,
-                Type = type
-            };
+            var token = new Token(1, 0, 0, type);
 
             Assert.Equal(expected, token.ToString());
         }
@@ -185,13 +162,7 @@ namespace NuStack.CoreTest
            string expected
         )
         {
-            var token = new Token
-            {
-                Start = 0,
-                End = 1,
-                Value = null,
-                Type = type
-            };
+            var token = new Token(1, 0, 0, type);
 
             Assert.Equal(expected, token.ToString());
         }
