@@ -4,9 +4,17 @@ namespace NuStack.Core.Tokens
 {
     public class Tokenizer
     {
+        private static readonly Dictionary<string, TokenType> staticTokens = new Dictionary<string, TokenType>()
+        {
+            {"(", TokenType.OpenParen}, {")", TokenType.CloseParen},
+            {"{", TokenType.OpenBrace}, {"}", TokenType.CloseBrace},
+            {";", TokenType.Semicolon}, {"\n", TokenType.NewLine },
+            {"->", TokenType.ReturnArrow }
+        };
+
         private static readonly string[] keywords = new string[]
         {
-            "int", "return"
+            "fn", "int", "return"
         };
 
         private string sourceCode;
@@ -49,22 +57,46 @@ namespace NuStack.Core.Tokens
 
         private Token nextToken()
         {
-            if (tryGetSingleton(out Token singletonToken)) return singletonToken;
+            if (tryGetStaticToken(out Token staticToken)) return staticToken;
             else if (tryGetInteger(out Token integerToken)) return integerToken;
             else if (tryGetKeyword(out Token keywordToken)) return keywordToken;
             else if (tryGetIdentifier(out Token identifierToken)) return identifierToken;
-            else throw new InvalidTokenException(peek());
+            else throw new InvalidTokenException(peek(), currentLine, currentColumn);
         }
 
-        private bool tryGetSingleton(out Token token)
+        private bool tryGetStaticToken(
+            out Token token,
+            string part = "",
+            int startPosition = -1
+        )
         {
-            if (Token.CharIsSingleton(peek()))
+            token = null;
+            int prevPosition = sourcePosition;
+            if (startPosition < 0) startPosition = prevPosition;
+
+            string nextPart = part + consume();
+
+            string possibleStaticToken = staticTokens
+                .Keys.Where(key => key.StartsWith(nextPart))
+                .OrderByDescending(key => key.Length)
+                .FirstOrDefault(string.Empty);
+
+            if (!string.IsNullOrEmpty(possibleStaticToken))
             {
-                token = Token.Singleton(consume(), sourcePosition - 1);
-                return true;
+                if (possibleStaticToken.Length > nextPart.Length
+                    && tryGetStaticToken(out token, nextPart, startPosition))
+                    return true;
+                else if (possibleStaticToken.Length == nextPart.Length)
+                {
+                    token = new Token(
+                        startPosition,
+                        staticTokens[possibleStaticToken]
+                    );
+                    return true;
+                }
             }
 
-            token = null;
+            sourcePosition = prevPosition;
             return false;
         }
         private bool tryGetKeyword(out Token token)

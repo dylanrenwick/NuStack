@@ -33,44 +33,18 @@
 
         public override bool Equals(object obj)
         {
-            if (obj is Token other) return Equals(other);
+            if (obj is Token other)
+                return Equals(other);
             return false;
         }
         public bool Equals(Token other)
         {
-            return Start == other.Start
+            return other != null
+                && Start == other.Start
                 && End == other.End
                 && HasValue == other.HasValue
                 && (HasValue ? Value == other.Value : true)
                 && Type == other.Type;
-        }
-
-        private static readonly Dictionary<char, TokenType> singletonTypes = new Dictionary<char, TokenType>()
-        {
-            {'(', TokenType.OpenParen},
-            {')', TokenType.CloseParen},
-            {'{', TokenType.OpenBrace},
-            {'}', TokenType.CloseBrace},
-        };
-
-        public static bool CharIsSingleton(char tokenValue)
-        {
-            return singletonTypes.ContainsKey(tokenValue);
-        }
-
-        public static Token Singleton(char tokenValue, int start)
-        {
-            if (!singletonTypes.ContainsKey(tokenValue))
-                throw new Exception("Invalid singleton: " + tokenValue);
-
-            var token = new Token
-            {
-                Start = start,
-                End = start + 1,
-                Value = tokenValue.ToString(),
-                Type = singletonTypes[tokenValue]
-            };
-            return token;
         }
     }
 
@@ -83,6 +57,8 @@
         OpenBrace,
         CloseBrace,
         Semicolon,
-        Integer
+        NewLine,
+        Integer,
+        ReturnArrow
     }
 }
