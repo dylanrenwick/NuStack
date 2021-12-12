@@ -24,6 +24,8 @@ namespace NuStack.Core.Parse
             if (!nameResolver.TryResolve("main", out entryPoint))
                 throw new ParserException("Could not find entry point method with name 'main'");
 
+            parseFuncBody(entryPoint);
+
             return null;
         }
 
@@ -46,6 +48,27 @@ namespace NuStack.Core.Parse
             tokenStream.Expect(TokenType.CloseParen);
 
             return nameResolver.RegisterFunctionFingerprint(fnStart, fnStart + 3, funcName);
+        }
+
+        private void parseFuncBody(FuncFingerprint fingerprint)
+        {
+            tokenStream.Seek(fingerprint.TokenEnd);
+            if (tokenStream.Current.Type == TokenType.OpenBrace) parseExpressionBlock();
+            else parseExpression();
+        }
+
+        private void parseExpressionBlock()
+        {
+            tokenStream.Expect(TokenType.OpenBrace);
+
+            //TODO: Parse expression block
+
+            tokenStream.Expect(TokenType.CloseBrace);
+        }
+
+        private void parseExpression()
+        {
+            //TODO: Parse expression
         }
     }
 }
