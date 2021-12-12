@@ -42,6 +42,7 @@ namespace NuStack.CoreTest
         }
 
         [Theory]
+        [InlineData("fn")]
         [InlineData("int")]
         [InlineData("return")]
         public void Tokenize_Keyword_ReturnsToken(string keyword)
