@@ -53,6 +53,12 @@ namespace NuStack.Core.Tokens
             return !atEnd;
         }
 
+        public bool Seek(int to)
+        {
+            current = Math.Max(to, 0);
+            return !atEnd;
+        }
+
         public Token Expect(TokenType expectedType)
         {
             Token next = peek();
