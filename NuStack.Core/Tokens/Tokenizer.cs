@@ -34,7 +34,7 @@ namespace NuStack.Core.Tokens
         public IEnumerable<Token> Tokenize(string source)
         {
             initialize();
-            sourceCode = source.Trim();
+            sourceCode = source.Trim(' ');
 
             var tokens = new List<Token>();
 
@@ -42,6 +42,12 @@ namespace NuStack.Core.Tokens
             {
                 Token token = nextToken();
                 tokens.Add(token);
+                currentColumn += token.Length;
+                if (token.Type == TokenType.NewLine)
+                {
+                    currentColumn = 0;
+                    currentLine++;
+                }
                 skipWhitespace();
             }
 
@@ -50,7 +56,7 @@ namespace NuStack.Core.Tokens
 
         private void initialize()
         {
-            currentLine = 0;
+            currentLine = 1;
             currentColumn = 0;
             sourcePosition = 0;
         }
@@ -89,7 +95,7 @@ namespace NuStack.Core.Tokens
                 else if (possibleStaticToken.Length == nextPart.Length)
                 {
                     token = new Token(
-                        startPosition,
+                        currentLine, currentColumn, startPosition,
                         staticTokens[possibleStaticToken]
                     );
                     return true;
@@ -111,13 +117,13 @@ namespace NuStack.Core.Tokens
 
             if (string.IsNullOrEmpty(matchingKeyword)) return false;
 
-            token = new Token
-            {
-                Start = sourcePosition,
-                End = sourcePosition + matchingKeyword.Length,
-                Value = matchingKeyword,
-                Type = TokenType.Keyword
-            };
+            token = new Token(
+                currentLine,
+                currentColumn,
+                sourcePosition,
+                TokenType.Keyword,
+                matchingKeyword
+            );
             sourcePosition = token.End;
             return true;
         }
@@ -136,19 +142,23 @@ namespace NuStack.Core.Tokens
             string tokenValue = consumeWhile(predicate);
             if (tokenValue.Length == 0) return false;
 
-            token = new Token
-            {
-                Start = start,
-                End = sourcePosition,
-                Value = tokenValue,
-                Type = tokenType,
-            };
+            token = new Token(
+                currentLine,
+                currentColumn,
+                start,
+                tokenType,
+                tokenValue
+            );
             return true;
         }
 
         private void skipWhitespace()
         {
-            while (!endOfFile && nextIsWhitespace) sourcePosition++;
+            while (!endOfFile && nextIsWhitespace)
+            {
+                sourcePosition++;
+                currentColumn++;
+            }
         }
 
         private bool nextIsNumeric()

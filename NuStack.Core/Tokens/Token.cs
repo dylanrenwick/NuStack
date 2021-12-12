@@ -2,16 +2,23 @@
 {
     public class Token
     {
+        public int Column { get; set; }
+        public int Line { get; set; }
+
         public int Start { get; set; }
         public int End { get; set; }
 
         public string Value { get; set; }
         public TokenType Type { get; set; }
 
+        public int Length => End - Start;
+
         public Token() { }
 
-        public Token(int start, TokenType type, string value = null)
+        public Token(int line, int col, int start, TokenType type, string value = null)
         {
+            Line = line;
+            Column = col;
             Start = start;
             Type = type;
             Value = value;
@@ -28,7 +35,7 @@
 
         public override string ToString()
         {
-            return HasValue ? Value : Type.ToString();
+            return (HasValue ? Value : Type.ToString());
         }
 
         public override bool Equals(object obj)
@@ -40,6 +47,8 @@
         public bool Equals(Token other)
         {
             return other != null
+                && Line == other.Line
+                && Column == other.Column
                 && Start == other.Start
                 && End == other.End
                 && HasValue == other.HasValue
@@ -50,6 +59,7 @@
 
     public enum TokenType
     {
+        EOF,
         Keyword,
         Identifier,
         OpenParen,
