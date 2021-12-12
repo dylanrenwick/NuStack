@@ -4,7 +4,7 @@ namespace NuStack.Core.Tokens
 {
     public class TokenStream : IEnumerator<Token>
     {
-        public Token Current => tokens[current];
+        public Token Current => current < 0 ? null : IsAtEnd ? tokens.Last() : tokens[current];
         public int CurrentIndex => current;
 
         private static readonly Func<Token, bool> truePredicate = t => true;
@@ -14,7 +14,7 @@ namespace NuStack.Core.Tokens
 
         private Func<Token, bool> predicate = truePredicate;
 
-        private bool atEnd => current == tokens.Count;
+        public bool IsAtEnd => current >= tokens.Count;
 
         object IEnumerator.Current => tokens[current];
 
@@ -43,20 +43,20 @@ namespace NuStack.Core.Tokens
 
         public bool MoveNext()
         {
-            do current++; while (!atEnd && !predicate(Current));
-            return !atEnd;
+            do current++; while (!IsAtEnd && !predicate(Current));
+            return !IsAtEnd;
         }
 
         public bool Next()
         {
             current++;
-            return !atEnd;
+            return !IsAtEnd;
         }
 
         public bool Seek(int to)
         {
             current = Math.Max(to, 0);
-            return !atEnd;
+            return !IsAtEnd;
         }
 
         public Token Expect(TokenType expectedType)
@@ -66,8 +66,8 @@ namespace NuStack.Core.Tokens
                 throw new ExpectedTokenException(
                     expectedType,
                     next == null ? TokenType.EOF : next.Type,
-                    next == null ? Current.Line : next.Line,
-                    next == null ? Current.Column + Current.Length : next.Column
+                    next == null ? (Current?.Line ?? -1) : next.Line,
+                    next == null ? ((Current?.Column + Current?.Length) ?? -1) : next.Column
                 );
             current++;
             return next;
