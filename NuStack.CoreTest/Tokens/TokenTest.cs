@@ -1,6 +1,6 @@
 ﻿using NuStack.Core.Tokens;
 
-namespace NuStack.CoreTest
+namespace NuStack.CoreTest.Tokens
 {
     public class TokenTest
     {
