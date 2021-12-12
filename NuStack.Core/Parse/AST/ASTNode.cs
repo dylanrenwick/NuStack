@@ -1,6 +1,6 @@
 ﻿namespace NuStack.Core.Parse.AST
 {
-    internal abstract class ASTNode
+    public abstract class ASTNode
     {
         public abstract IEnumerable<ASTNode> Children { get; }
 
