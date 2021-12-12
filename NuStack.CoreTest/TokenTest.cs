@@ -70,6 +70,18 @@ namespace NuStack.CoreTest
             },
         };
 
+        [Fact]
+        public void Equals_WithNonToken_ReturlsFalse()
+        {
+            var token = new Token(0, TokenType.Keyword, "int");
+
+            Assert.False(token.Equals(null));
+            Assert.False(token.Equals("not a token"));
+            Assert.False(token.Equals(4743));
+            Assert.False(token.Equals(new List<string>()));
+            Assert.False(token.Equals(true));
+        }
+
         [Theory]
         [MemberData(nameof(CompareToken_Data))]
         public void Equals_ComparesTokens(
@@ -122,16 +134,6 @@ namespace NuStack.CoreTest
                 new Token { Start = 0, End = 1, Value = "}", Type = TokenType.CloseBrace },
             },
         };
-
-        [Theory]
-        [MemberData(nameof(SingletonToken_Data))]
-        public void Singleton_CreatesCorrectTokens(
-            char tokenChar,
-            Token expected
-        )
-        {
-            Assert.True(Token.Singleton(tokenChar, 0).Equals(expected));
-        }
 
         [Theory]
         [InlineData(TokenType.Identifier, "val")]
