@@ -4,7 +4,7 @@ namespace NuStack.Core.Parse.AST
 {
     public class ModuleASTNode : ASTNode
     {
-        public void AddFunction(FuncASTNode func)
+        public void AddNode(ASTNode func)
         {
             children.Add(func);
         }
@@ -16,13 +16,13 @@ namespace NuStack.Core.Parse.AST
             builder.AppendLine("}");
         }
 
-        public static ModuleASTNode ParseNode(TokenStream tokens, NameResolver nameResolver)
+        public new static ModuleASTNode ParseNode(TokenStream tokens, NameResolver nameResolver)
         {
             var node = new ModuleASTNode();
             while (!tokens.IsAtEnd)
             {
-                FuncASTNode nextFunc = FuncASTNode.ParseNode(tokens, nameResolver);
-                node.AddFunction(nextFunc);
+                ASTNode next = ASTNode.ParseNode(tokens, nameResolver);
+                node.AddNode(next);
             }
             return node;
         }
