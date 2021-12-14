@@ -14,7 +14,7 @@ namespace NuStack.Core.Tokens
 
         private Func<Token, bool> predicate = truePredicate;
 
-        public bool IsAtEnd => current >= tokens.Count;
+        public bool IsAtEnd => tokens.Count > 0 && current >= tokens.Count;
 
         object IEnumerator.Current => tokens[current];
 
