@@ -58,10 +58,14 @@ namespace NuStack.Core.Tokens
             return !IsAtEnd;
         }
 
-        public bool Seek(int to)
+        public bool SeekTo(int to)
         {
             current = Math.Max(to, 0);
             return !IsAtEnd;
+        }
+        public bool Seek(int by)
+        {
+            return SeekTo(current + by);
         }
 
         public Token Expect(TokenType expectedType)
@@ -89,6 +93,40 @@ namespace NuStack.Core.Tokens
                 );
             return next;
         }
+
+        public bool CurrentIs(TokenType expectedType)
+        {
+            return Current != null
+                && Current.Type == expectedType;
+        }
+        public bool CurrentIsPattern(params TokenType[] expectedTypes)
+        {
+            bool matches = true;
+            int i = 0;
+            for (; i < expectedTypes.Length; i++,Next())
+            {
+                if (Current == null || Current.Type != expectedTypes[i])
+                {
+                    matches = false;
+                    break;
+                }
+            }
+            Seek(-i);
+            return matches;
+        }
+        public bool NextIs(TokenType expectedType)
+        {
+            return Peek() != null
+                && Peek().Type == expectedType;
+        }
+        public bool NextIsPattern(params TokenType[] expectedTypes)
+        {
+            current++;
+            bool result = CurrentIsPattern(expectedTypes);
+            current--;
+            return result;
+        }
+
 
         public void Reset()
         {
