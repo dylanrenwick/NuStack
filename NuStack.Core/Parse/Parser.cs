@@ -22,6 +22,12 @@ namespace NuStack.Core.Parse
 
             var rootNode = new ModuleASTNode();
 
+            while (!tokenStream.IsAtEnd)
+            {
+                FuncASTNode nextFunc = parseFunc();
+                rootNode.AddFunction(nextFunc);
+            }
+
             return rootNode;
         }
 
@@ -32,6 +38,19 @@ namespace NuStack.Core.Parse
             {
                 parseFuncFingerprint();
             }
+            tokenStream.Reset();
+        }
+
+        private FuncASTNode parseFunc()
+        {
+            tokenStream.Expect(TokenType.Keyword, "fn");
+            FuncFingerprint fingerprint = parseFuncFingerprint();
+            ExpressionASTNode body;
+            if (tokenStream.Peek().Type == TokenType.OpenBrace)
+                body = parseExpressionBlock();
+            else body = parseExpression();
+
+            return new FuncASTNode(fingerprint, body);
         }
 
         private FuncFingerprint parseFuncFingerprint()
@@ -44,17 +63,6 @@ namespace NuStack.Core.Parse
             tokenStream.Expect(TokenType.CloseParen);
 
             return nameResolver.RegisterFunctionFingerprint(fnStart, fnStart + 3, funcName);
-        }
-
-        private FuncASTNode parseFuncBody(FuncFingerprint fingerprint)
-        {
-            tokenStream.Seek(fingerprint.TokenEnd);
-            ExpressionASTNode body;
-            if (tokenStream.Current.Type == TokenType.OpenBrace)
-                body = parseExpressionBlock();
-            else body = parseExpression();
-
-            return new FuncASTNode(fingerprint, body);
         }
 
         private ExpressionBlockASTNode parseExpressionBlock()
