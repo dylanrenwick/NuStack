@@ -8,8 +8,6 @@ namespace NuStack.Core.Parse
         private TokenStream tokenStream;
         private NameResolver nameResolver;
 
-        private FuncFingerprint entryPoint;
-
         public Parser()
         {
             nameResolver = new NameResolver();
