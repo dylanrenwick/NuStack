@@ -4,14 +4,14 @@
     {
         public FuncFingerprint Fingerprint { get; private set; }
 
-        public override IEnumerable<ASTNode> Children => children;
+        public override IEnumerable<ASTNode> Children => new ASTNode[] { expression };
 
-        private List<ASTNode> children;
+        private ExpressionASTNode expression;
 
-        public FuncASTNode(FuncFingerprint fingerprint, IEnumerable<ASTNode> nodes)
+        public FuncASTNode(FuncFingerprint fingerprint, ExpressionASTNode exprNode)
         {
             Fingerprint = fingerprint;
-            children = nodes.ToList();
+            expression = exprNode;
         }
 
         public override void WriteToStringBuilder(StringBuilder builder)
