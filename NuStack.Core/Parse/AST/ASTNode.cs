@@ -1,4 +1,6 @@
-﻿namespace NuStack.Core.Parse.AST
+﻿using NuStack.Core.Tokens;
+
+namespace NuStack.Core.Parse.AST
 {
     public abstract class ASTNode
     {

@@ -1,4 +1,6 @@
-﻿namespace NuStack.Core.Parse.AST
+﻿using NuStack.Core.Tokens;
+
+namespace NuStack.Core.Parse.AST
 {
     public class FuncASTNode : ASTNode
     {
@@ -21,6 +23,17 @@
         {
             return base.Equals(obj)
                 && Fingerprint.Equals(((FuncASTNode)obj).Fingerprint);
+        }
+
+        public static FuncASTNode ParseNode(TokenStream tokens, NameResolver nameResolver)
+        {
+            tokens.Expect(TokenType.Keyword, "fn");
+            FuncFingerprint fingerprint = FuncFingerprint.ParseFingerprint(tokens, nameResolver);
+            ExpressionASTNode funcBody;
+            if (tokens.Peek().Type == TokenType.OpenBrace)
+                funcBody = ExpressionBlockASTNode.ParseNode(tokens, nameResolver);
+            else funcBody = ExpressionASTNode.ParseNode(tokens, nameResolver);
+            return new FuncASTNode(fingerprint, funcBody);
         }
     }
 }

@@ -20,15 +20,7 @@ namespace NuStack.Core.Parse
 
             findFuncDefinitions();
 
-            var rootNode = new ModuleASTNode();
-
-            while (!tokenStream.IsAtEnd)
-            {
-                FuncASTNode nextFunc = parseFunc();
-                rootNode.AddFunction(nextFunc);
-            }
-
-            return rootNode;
+            return ModuleASTNode.ParseNode(tokenStream, nameResolver);
         }
 
         private void findFuncDefinitions()
@@ -36,51 +28,9 @@ namespace NuStack.Core.Parse
             tokenStream.EachToken(TokenType.Keyword, "fn");
             while (tokenStream.MoveNext())
             {
-                parseFuncFingerprint();
+                FuncFingerprint.ParseFingerprint(tokenStream, nameResolver);
             }
             tokenStream.Reset();
-        }
-
-        private FuncASTNode parseFunc()
-        {
-            tokenStream.Expect(TokenType.Keyword, "fn");
-            FuncFingerprint fingerprint = parseFuncFingerprint();
-            ExpressionASTNode body;
-            if (tokenStream.Peek().Type == TokenType.OpenBrace)
-                body = parseExpressionBlock();
-            else body = parseExpression();
-
-            return new FuncASTNode(fingerprint, body);
-        }
-
-        private FuncFingerprint parseFuncFingerprint()
-        {
-            int fnStart = tokenStream.CurrentIndex;
-            Token ident = tokenStream.Expect(TokenType.Identifier);
-            string funcName = ident.Value;
-
-            tokenStream.Expect(TokenType.OpenParen);
-            tokenStream.Expect(TokenType.CloseParen);
-
-            return nameResolver.RegisterFunctionFingerprint(fnStart, fnStart + 3, funcName);
-        }
-
-        private ExpressionBlockASTNode parseExpressionBlock()
-        {
-            tokenStream.Expect(TokenType.OpenBrace);
-
-            //TODO: Parse expression block
-
-            tokenStream.Expect(TokenType.CloseBrace);
-
-            return new ExpressionBlockASTNode();
-        }
-
-        private ExpressionASTNode parseExpression()
-        {
-            //TODO: Parse expression
-
-            return null;
         }
     }
 }
