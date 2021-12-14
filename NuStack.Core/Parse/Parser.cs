@@ -21,14 +21,10 @@ namespace NuStack.Core.Parse
             nameResolver.Clear();
 
             findFuncDefinitions();
-            if (!nameResolver.TryResolve("main", out entryPoint))
-                throw new ParserException("Could not find entry point method with name 'main'");
 
             var rootNode = new ModuleASTNode();
 
-            parseFuncBody(entryPoint);
-
-            return null;
+            return rootNode;
         }
 
         private void findFuncDefinitions()
