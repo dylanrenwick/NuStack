@@ -52,25 +52,33 @@ namespace NuStack.Core.Parse
             return nameResolver.RegisterFunctionFingerprint(fnStart, fnStart + 3, funcName);
         }
 
-        private void parseFuncBody(FuncFingerprint fingerprint)
+        private FuncASTNode parseFuncBody(FuncFingerprint fingerprint)
         {
             tokenStream.Seek(fingerprint.TokenEnd);
-            if (tokenStream.Current.Type == TokenType.OpenBrace) parseExpressionBlock();
-            else parseExpression();
+            ExpressionASTNode body;
+            if (tokenStream.Current.Type == TokenType.OpenBrace)
+                body = parseExpressionBlock();
+            else body = parseExpression();
+
+            return new FuncASTNode(fingerprint, body);
         }
 
-        private void parseExpressionBlock()
+        private ExpressionBlockASTNode parseExpressionBlock()
         {
             tokenStream.Expect(TokenType.OpenBrace);
 
             //TODO: Parse expression block
 
             tokenStream.Expect(TokenType.CloseBrace);
+
+            return new ExpressionBlockASTNode();
         }
 
-        private void parseExpression()
+        private ExpressionASTNode parseExpression()
         {
             //TODO: Parse expression
+
+            return null;
         }
     }
 }
