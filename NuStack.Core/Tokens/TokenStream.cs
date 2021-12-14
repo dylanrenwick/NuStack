@@ -70,28 +70,18 @@ namespace NuStack.Core.Tokens
 
         public Token Expect(TokenType expectedType)
         {
-            Token next = Peek();
-            if (next == null || next.Type != expectedType)
-                throw new ExpectedTokenException(
-                    expectedType,
-                    next == null ? TokenType.EOF : next.Type,
-                    next == null ? (Current?.Line ?? -1) : next.Line,
-                    next == null ? ((Current?.Column + Current?.Length) ?? -1) : next.Column
-                );
+            if (Current == null || Current.Type != expectedType)
+                throwExpectedTokenException(expectedType, Current);
+            Token tok = Current;
             current++;
-            return next;
+            return tok;
         }
         public Token Expect(TokenType expectedType, string expectedValue)
         {
-            Token next = Expect(expectedType);
-            if (!next.HasValue || !next.Value.Equals(expectedValue))
-                throw new ExpectedTokenException(
-                    expectedType,
-                    next == null ? TokenType.EOF : next.Type,
-                    next == null ? (Current?.Line ?? -1) : next.Line,
-                    next == null ? ((Current?.Column + Current?.Length) ?? -1) : next.Column
-                );
-            return next;
+            Token tok = Expect(expectedType);
+            if (!tok.HasValue || tok.Value != expectedValue)
+                throwExpectedTokenException(expectedType, tok);
+            return tok;
         }
 
         public bool CurrentIs(TokenType expectedType)
@@ -114,18 +104,6 @@ namespace NuStack.Core.Tokens
             Seek(-i);
             return matches;
         }
-        public bool NextIs(TokenType expectedType)
-        {
-            return Peek() != null
-                && Peek().Type == expectedType;
-        }
-        public bool NextIsPattern(params TokenType[] expectedTypes)
-        {
-            current++;
-            bool result = CurrentIsPattern(expectedTypes);
-            current--;
-            return result;
-        }
 
 
         public void Reset()
@@ -139,6 +117,16 @@ namespace NuStack.Core.Tokens
         {
             if (current + 1 < tokens.Count) return tokens[current + 1];
             return null;
+        }
+
+        private void throwExpectedTokenException(TokenType expectedType, Token tok)
+        {
+            throw new ExpectedTokenException(
+                expectedType,
+                tok == null ? TokenType.EOF : tok.Type,
+                tok == null ? -1 : tok.Line,
+                tok == null ? -1 : tok.Column
+            );
         }
     }
 }
