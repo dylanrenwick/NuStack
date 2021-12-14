@@ -66,7 +66,7 @@ namespace NuStack.Core.Tokens
 
         public Token Expect(TokenType expectedType)
         {
-            Token next = peek();
+            Token next = Peek();
             if (next == null || next.Type != expectedType)
                 throw new ExpectedTokenException(
                     expectedType,
@@ -77,6 +77,18 @@ namespace NuStack.Core.Tokens
             current++;
             return next;
         }
+        public Token Expect(TokenType expectedType, string expectedValue)
+        {
+            Token next = Expect(expectedType);
+            if (!next.HasValue || !next.Value.Equals(expectedValue))
+                throw new ExpectedTokenException(
+                    expectedType,
+                    next == null ? TokenType.EOF : next.Type,
+                    next == null ? (Current?.Line ?? -1) : next.Line,
+                    next == null ? ((Current?.Column + Current?.Length) ?? -1) : next.Column
+                );
+            return next;
+        }
 
         public void Reset()
         {
@@ -85,7 +97,7 @@ namespace NuStack.Core.Tokens
 
         public void Dispose() { }
 
-        private Token peek()
+        public Token Peek()
         {
             if (current + 1 < tokens.Count) return tokens[current + 1];
             return null;
