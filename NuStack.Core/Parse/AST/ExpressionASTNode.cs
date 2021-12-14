@@ -2,6 +2,5 @@
 {
     public abstract class ExpressionASTNode : ASTNode
     {
-        public override IEnumerable<ASTNode> Children => null;
     }
 }

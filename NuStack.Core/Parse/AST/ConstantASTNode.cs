@@ -9,5 +9,11 @@
         {
             throw new NotImplementedException();
         }
+
+        public override bool Equals(object obj)
+        {
+            return base.Equals(obj)
+                && Value == (obj as ConstantASTNode).Value;
+        }
     }
 }
