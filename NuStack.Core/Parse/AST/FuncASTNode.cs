@@ -25,12 +25,12 @@ namespace NuStack.Core.Parse.AST
                 && Fingerprint.Equals(((FuncASTNode)obj).Fingerprint);
         }
 
-        public static FuncASTNode ParseNode(TokenStream tokens, NameResolver nameResolver)
+        public new static FuncASTNode ParseNode(TokenStream tokens, NameResolver nameResolver)
         {
             tokens.Expect(TokenType.Keyword, "fn");
             FuncFingerprint fingerprint = FuncFingerprint.ParseFingerprint(tokens, nameResolver);
             ExpressionASTNode funcBody;
-            if (tokens.Peek().Type == TokenType.OpenBrace)
+            if (tokens.CurrentIs(TokenType.OpenBrace))
                 funcBody = ExpressionBlockASTNode.ParseNode(tokens, nameResolver);
             else funcBody = ExpressionASTNode.ParseNode(tokens, nameResolver);
             return new FuncASTNode(fingerprint, funcBody);
