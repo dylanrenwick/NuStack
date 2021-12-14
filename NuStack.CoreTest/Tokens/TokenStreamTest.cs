@@ -116,7 +116,7 @@ namespace NuStack.CoreTest.Tokens
         public void Seek_EmptyStream_ReturnsFalse()
         {
             var tokenStream = new TokenStream(new Token[0]);
-            Assert.False(tokenStream.Seek(0));
+            Assert.False(tokenStream.SeekTo(0));
         }
 
         [Theory]
@@ -126,7 +126,7 @@ namespace NuStack.CoreTest.Tokens
             Token expectedFirst
         )
         {
-            Assert.True(stream.Seek(0));
+            Assert.True(stream.SeekTo(0));
             Assert.Equal(expectedFirst, stream.Current);
         }
 
@@ -186,7 +186,7 @@ namespace NuStack.CoreTest.Tokens
             IEnumerable<Token> tokens
         )
         {
-            stream.Seek(tokens.Count());
+            stream.SeekTo(tokens.Count());
             Assert.Throws<ExpectedTokenException>(() => stream.Expect(TokenType.Semicolon));
         }
 
