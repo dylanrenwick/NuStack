@@ -25,5 +25,19 @@ namespace NuStack.Core.Parse.AST
             return this.GetType() == obj.GetType()
                 && Children.Equals(((ASTNode)obj).Children);
         }
+
+        public static ASTNode ParseNode(TokenStream tokens, NameResolver nameResolver)
+        {
+            if (tokens.CurrentIs(TokenType.Keyword))
+            {
+                string keywordValue = tokens.Current.Value;
+                switch(keywordValue)
+                {
+                    case "fn": return FuncASTNode.ParseNode(tokens, nameResolver);
+                }
+            }
+
+            return ExpressionASTNode.ParseNode(tokens, nameResolver);
+        }
     }
 }
