@@ -163,6 +163,7 @@ namespace NuStack.CoreTest.Tokens
             Token first
         )
         {
+            stream.Next();
             Assert.Equal(first, stream.Expect(first.Type));
         }
 
